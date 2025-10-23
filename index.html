@@ -121,7 +121,6 @@ Dana"></textarea>
   </div>
 
 <script>
-/* ---------- utilities ---------- */
 const storeKey = 'chalky.tourney.v0';
 const $ = sel => document.querySelector(sel);
 const el = (tag, cls, txt) => { const n=document.createElement(tag); if(cls) n.className=cls; if(txt!=null) n.textContent=txt; return n; };
@@ -138,165 +137,146 @@ function cleanNames(raw){
   return raw.split('\n')
     .map(s=>s.trim())
     .filter(Boolean)
-    .filter((v,i,a)=>a.indexOf(v)===i); // de-dupe
+    .filter((v,i,a)=>a.indexOf(v)===i);
 }
 
-/* ---------- state ---------- */
-let bracket = null; // { rounds: [ [ {p1, p2, winnerIndex}, ... ], ... ], players: [...] }
+let bracket = null;
 
+/* --- FIXED BUILD FUNCTION --- */
 function buildBracket(players){
   const names = [...players];
   const size = toNextPow2(names.length);
-  while(names.length < size) names.push('bye');
+  const neededByes = size - names.length;
+  const matchesCount = size / 2;
 
-  // Round 0 pairings
   const round0 = [];
-  for(let i=0;i<size;i+=2){
-    round0.push({ p1:names[i], p2:names[i+1], winnerIndex:null });
+
+  for (let i = 0; i < neededByes; i++) {
+    const p = names.pop();
+    round0.push({ p1: p ?? 'bye', p2: 'bye', winnerIndex: null });
   }
+
+  while (names.length >= 2) {
+    const p2 = names.pop();
+    const p1 = names.pop();
+    round0.push({ p1, p2, winnerIndex: null });
+  }
+
+  if (names.length === 1) {
+    round0.push({ p1: names.pop(), p2: 'bye', winnerIndex: null });
+  }
+
+  while (round0.length < matchesCount) {
+    round0.push({ p1: '', p2: '', winnerIndex: null });
+  }
+
   const rounds = [round0];
-
-  // Subsequent rounds – create empty slots
-  let matches = size/2;
-  while(matches > 1){
-    const r = new Array(matches/2).fill(0).map(_=>({p1:'', p2:'', winnerIndex:null}));
+  let m = matchesCount;
+  while (m > 1) {
+    const r = new Array(m / 2).fill(0).map(() => ({ p1: '', p2: '', winnerIndex: null }));
     rounds.push(r);
-    matches/=2;
+    m /= 2;
   }
-  return { players:names, rounds };
+  return { players, rounds };
 }
 
-function autosave(){
-  if(!bracket) return;
-  localStorage.setItem(storeKey, JSON.stringify(bracket));
-}
+function autosave(){ if(!bracket) return; localStorage.setItem(storeKey, JSON.stringify(bracket)); }
 function loadSaved(){
   const raw = localStorage.getItem(storeKey);
   if(!raw) return null;
   try { return JSON.parse(raw); } catch(_) { return null; }
 }
 
-/* ---------- rendering ---------- */
 function render(){
   const wrap = $('#bracketWrap');
   const grid = $('#grid');
   if(!bracket){ wrap.style.display='none'; grid.innerHTML=''; return; }
-  wrap.style.display='block';
-  grid.innerHTML='';
-
+  wrap.style.display='block'; grid.innerHTML='';
   const totalRounds = bracket.rounds.length;
 
   bracket.rounds.forEach((matches, rIndex)=>{
     const roundCol = el('div','round');
     roundCol.appendChild(el('div','round-title', titleForRound(rIndex,totalRounds)));
-
     matches.forEach((m, mIndex)=>{
       const card = el('div','match');
-
       const s1 = el('div','slot'+(m.p1 ? '' : ' empty'));
       s1.appendChild(el('span','', m.p1 || '—'));
       const b1 = el('button','win-btn'+(m.winnerIndex===0?' active':''),'Win');
       b1.addEventListener('click', ()=> setWinner(rIndex, mIndex, 0));
       s1.appendChild(b1);
-
       const vs = el('div','vs','VS');
-
       const s2 = el('div','slot'+(m.p2 ? '' : ' empty'));
       s2.appendChild(el('span','', m.p2 || '—'));
       const b2 = el('button','win-btn'+(m.winnerIndex===1?' active':''),'Win');
       b2.addEventListener('click', ()=> setWinner(rIndex, mIndex, 1));
       s2.appendChild(b2);
-
-      // bye handling hint
       if(m.p1==='bye' && m.p2!=='bye') b2.classList.add('active');
       if(m.p2==='bye' && m.p1!=='bye') b1.classList.add('active');
-
       card.appendChild(s1); card.appendChild(vs); card.appendChild(s2);
       roundCol.appendChild(card);
     });
-
     grid.appendChild(roundCol);
   });
 }
 
-function setWinner(rIndex, mIndex, winnerIdx){
-  const round = bracket.rounds[rIndex];
-  const match = round[mIndex];
-  if(!match) return;
-
-  match.winnerIndex = winnerIdx;
-
-  // Advance to next round if not the final
-  if(rIndex < bracket.rounds.length - 1){
-    const nextRound = bracket.rounds[rIndex+1];
-    const targetMatch = Math.floor(mIndex/2);
-    const targetSlot = mIndex % 2; // 0 -> left, 1 -> right
-
-    const winnerName = (winnerIdx===0) ? match.p1 : match.p2;
-
-    if(targetSlot===0) nextRound[targetMatch].p1 = winnerName;
-    else               nextRound[targetMatch].p2 = winnerName;
-
-    // Auto-advance if winner is a bye
+function setWinner(rIndex,mIndex,winnerIdx){
+  const round=bracket.rounds[rIndex];
+  const match=round[mIndex];
+  if(!match)return;
+  match.winnerIndex=winnerIdx;
+  if(rIndex<bracket.rounds.length-1){
+    const nextRound=bracket.rounds[rIndex+1];
+    const targetMatch=Math.floor(mIndex/2);
+    const targetSlot=mIndex%2;
+    const winnerName=(winnerIdx===0)?match.p1:match.p2;
+    if(targetSlot===0)nextRound[targetMatch].p1=winnerName;
+    else nextRound[targetMatch].p2=winnerName;
     if(winnerName==='bye'){
-      // choose other slot as automatic winner if present
-      const other = (winnerIdx===0)? match.p2 : match.p1;
-      const realWinner = other || 'bye';
-      if(targetSlot===0) nextRound[targetMatch].p1 = realWinner;
-      else               nextRound[targetMatch].p2 = realWinner;
+      const other=(winnerIdx===0)?match.p2:match.p1;
+      const realWinner=other||'bye';
+      if(targetSlot===0)nextRound[targetMatch].p1=realWinner;
+      else nextRound[targetMatch].p2=realWinner;
     }
   }
-  autosave();
-  render();
+  autosave(); render();
 }
 
-/* ---------- actions ---------- */
 function generateFromTextarea(){
-  const names = cleanNames($('#playersBox').value);
-  $('#countPill').textContent = `${names.length} players`;
-
-  if(names.length < 2){
-    alert('Add at least 2 players.'); return;
-  }
-  bracket = buildBracket(names);
-
-  // auto-advance any BYE in round 0
+  const names=cleanNames($('#playersBox').value);
+  $('#countPill').textContent=`${names.length} players`;
+  if(names.length<2){alert('Add at least 2 players.');return;}
+  bracket=buildBracket(names);
   bracket.rounds[0].forEach((m,i)=>{
-    if(m.p1==='bye' && m.p2!=='bye') setWinner(0,i,1);
-    else if(m.p2==='bye' && m.p1!=='bye') setWinner(0,i,0);
+    if(m.p1==='bye'&&m.p2!=='bye')setWinner(0,i,1);
+    else if(m.p2==='bye'&&m.p1!=='bye')setWinner(0,i,0);
   });
-
-  render();
-  autosave();
-  // scroll bracket into view
-  $('#bracketWrap').scrollIntoView({behavior:'smooth', block:'start'});
+  render(); autosave();
+  $('#bracketWrap').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function exportJSON(){
-  if(!bracket){ alert('Nothing to export yet.'); return; }
-  const blob = new Blob([JSON.stringify(bracket,null,2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'chalky_bracket.json';
+  if(!bracket){alert('Nothing to export yet.');return;}
+  const blob=new Blob([JSON.stringify(bracket,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='chalky_bracket.json';
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
 }
 
 function importJSON(){
-  const input = document.createElement('input');
+  const input=document.createElement('input');
   input.type='file'; input.accept='application/json';
-  input.onchange = e=>{
-    const file = e.target.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = ()=>{
+  input.onchange=e=>{
+    const file=e.target.files[0]; if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{
       try{
-        const data = JSON.parse(reader.result);
-        if(!data || !Array.isArray(data.rounds)) throw new Error('Bad format');
-        bracket = data; render(); autosave();
+        const data=JSON.parse(reader.result);
+        if(!data||!Array.isArray(data.rounds))throw new Error('Bad format');
+        bracket=data; render(); autosave();
         $('#bracketWrap').style.display='block';
-      }catch(err){
-        alert('Invalid JSON.');
-      }
+      }catch(err){alert('Invalid JSON.');}
     };
     reader.readAsText(file);
   };
@@ -305,18 +285,22 @@ function importJSON(){
 
 function resetAll(){
   if(confirm('Clear the current bracket and saved data?')){
-    bracket = null;
+    bracket=null;
     localStorage.removeItem(storeKey);
     render();
     $('#playersBox').value='';
-    $('#countPill').textContent = '0 players';
+    $('#countPill').textContent='0 players';
     $('#bracketWrap').style.display='none';
   }
 }
 
-/* ---------- wiring ---------- */
-$('#fillBtn').addEventListener('click', ()=>{
-  $('#playersBox').value = `Alice
+/* --- FIXED FAST COUNTER --- */
+function countUniqueLines(text){
+  return new Set(text.split('\n').map(s=>s.trim()).filter(Boolean)).size;
+}
+
+$('#fillBtn').addEventListener('click',()=>{
+  $('#playersBox').value=`Alice
 Bob
 Charlie
 Dana
@@ -324,22 +308,23 @@ Eddie
 Frank
 Georgia
 Hector`;
-  $('#countPill').textContent = '8 players';
+  $('#countPill').textContent='8 players';
 });
-$('#playersBox').addEventListener('input', ()=>{
-  const n = cleanNames($('#playersBox').value).length;
-  $('#countPill').textContent = `${n} players`;
-});
-$('#genBtn').addEventListener('click', generateFromTextarea);
-$('#saveBtn').addEventListener('click', autosave);
-$('#exportBtn').addEventListener('click', exportJSON);
-$('#importBtn').addEventListener('click', importJSON);
-$('#resetBtn').addEventListener('click', resetAll);
 
-/* load autosave on boot */
-const saved = loadSaved();
+$('#playersBox').addEventListener('input',()=>{
+  const n=countUniqueLines($('#playersBox').value);
+  $('#countPill').textContent=`${n} players`;
+});
+
+$('#genBtn').addEventListener('click',generateFromTextarea);
+$('#saveBtn').addEventListener('click',autosave);
+$('#exportBtn').addEventListener('click',exportJSON);
+$('#importBtn').addEventListener('click',importJSON);
+$('#resetBtn').addEventListener('click',resetAll);
+
+const saved=loadSaved();
 if(saved){
-  bracket = saved; render();
+  bracket=saved; render();
   $('#bracketWrap').style.display='block';
 }
 </script>
