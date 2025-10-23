@@ -3,333 +3,394 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Chalky Trousers – Tournament Builder</title>
+<title>Chalky Trousers • Tournament Builder</title>
 <style>
   :root{
-    --bg:#000; --panel:#141414; --chip:#1c1c1c; --soft:#101010;
-    --text:#f7f7f7; --muted:#b9b9b9; --accent:#23ff4f; --accent-d:#16d73a; --danger:#ff5f5f;
-    --colw:320px;
+    --bg:#000;
+    --panel:#121212;
+    --panel-2:#1b1b1b;
+    --text:#fff;
+    --muted:#bdbdbd;
+    --brand:#12ff5a;
+    --brand-dim:#0dbb41;
+    --chip:#242424;
+    --input:#0e0e0e;
+    --card:#1a1a1a;
   }
-  html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  .wrap{max-width:980px;margin:26px auto;padding:0 16px}
-  header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  header img{height:42px;width:auto}
-  h1{font-size:26px;margin:0}
-
-  .card{background:var(--panel);border-radius:14px;padding:16px;margin:14px 0;box-shadow:0 0 0 1px #0c0c0c inset}
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .row.end{justify-content:flex-end}
-  .split{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
-  .underline{border-bottom:2px solid var(--accent);display:inline-block;padding-bottom:2px}
-
-  textarea{width:100%;min-height:160px;border:0;border-radius:12px;background:var(--chip);color:var(--text);font-size:16px;padding:12px;outline:none}
-  select{background:var(--chip);color:var(--text);border:0;border-radius:10px;padding:10px 12px;font-size:15px}
-
-  .btn{appearance:none;border:0;background:#111;color:#fff;padding:12px 16px;border-radius:12px;font-weight:800;cursor:pointer}
-  .btn.primary{position:relative;box-shadow:0 0 22px 6px rgba(35,255,79,.22);animation:pulseBtn 1.6s ease-in-out infinite}
-  .btn.ghost{background:var(--chip);box-shadow:none}
-  .btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none;animation:none}
-  @keyframes pulseBtn{
-    0%{box-shadow:0 0 6px 2px rgba(35,255,79,.12)}
-    50%{box-shadow:0 0 28px 10px rgba(35,255,79,.38)}
-    100%{box-shadow:0 0 6px 2px rgba(35,255,79,.12)}
-  }
-  .btn.warnpulse{animation:warn 1.1s ease-in-out 2}
-  @keyframes warn{
-    0%{box-shadow:0 0 0 0 rgba(255,95,95,0)}
-    50%{box-shadow:0 0 24px 8px rgba(255,95,95,.45)}
-    100%{box-shadow:0 0 0 0 rgba(255,95,95,0)}
-  }
-
-  .tag{background:#0e0e0e;border:1px solid #1b1b1b;color:var(--muted);padding:6px 10px;border-radius:999px;font-weight:800}
-  .tag.warn{background:#2a1010;border-color:#3a1b1b;color:#ff9f9f}
-
-  .hint{color:var(--muted);font-size:14px;margin-top:10px}
-
-  /* Bracket layout */
-  .bracket{overflow-x:auto;overflow-y:hidden;padding-bottom:8px}
-  .cols{display:flex;gap:14px}
-  .round-col{flex:0 0 var(--colw);min-width:var(--colw)}
-  .round-title{font-weight:900;margin:4px 0 10px}
-
-  .match{background:var(--soft);border-radius:16px;padding:12px;margin-bottom:12px;box-shadow:0 0 0 1px #0e0e0e inset}
-  .match-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
-  .box{background:var(--chip);border-radius:12px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px}
-  .name{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .bye{font-style:italic;color:var(--muted);font-weight:600}
-  .score{display:flex;align-items:center;gap:6px;flex:0 0 auto}
-  .score input{width:50px;text-align:center;background:#0c0c0c;border:1px solid #222;border-radius:10px;color:#fff;padding:6px}
-  .vs{font-weight:900;color:var(--accent);text-shadow:0 0 6px var(--accent-d);animation:pulseVS 2.6s ease-in-out infinite}
-  @keyframes pulseVS{
-    0%{opacity:.65; text-shadow:0 0 2px var(--accent)}
-    50%{opacity:1; text-shadow:0 0 14px var(--accent)}
-    100%{opacity:.65; text-shadow:0 0 2px var(--accent)}
-  }
-
-  .logo-foot{margin-top:12px;text-align:center;opacity:.9}
-  .logo-foot img{height:40px;width:auto}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial}
+  img{display:block;max-width:100%}
+  .wrap{max-width:980px;margin:0 auto;padding:16px 16px 60px}
+  header{display:flex;align-items:center;gap:14px;margin:8px 0 18px}
+  header .brand{height:34px;opacity:.95}
+  h1{margin:0;font-size:clamp(22px,3.8vw,34px);letter-spacing:.4px}
+  .panel{background:var(--panel);border-radius:18px;padding:18px 16px;margin:16px 0;box-shadow:0 0 0 1px #0b0b0b inset}
+  .panel h2{margin:0 0 12px;font-size:clamp(20px,3.4vw,28px)}
+  .underline{height:4px;width:160px;background:linear-gradient(90deg,var(--brand),transparent);border-radius:3px;margin:6px 0 14px}
+  .hint{color:var(--muted);font-size:14px;line-height:1.5}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:720px){.grid-2{grid-template-columns:1fr}}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:var(--chip);padding:8px 12px;border-radius:999px;color:#ddd;font-weight:600}
+  .field{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+  label{font-weight:700}
+  textarea{width:100%;min-height:210px;background:var(--input);border:1px solid #151515;color:var(--text);border-radius:12px;padding:14px;font-size:16px;line-height:1.5;resize:vertical}
+  select{appearance:none;background:var(--input);border:1px solid #151515;color:var(--text);border-radius:12px;padding:12px 14px;font-size:16px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;font-size:16px;color:#fff;cursor:pointer;background:#2a2a2a}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:#141414;box-shadow:0 0 18px 4px var(--brand-dim);position:relative}
+  .btn-primary::after{content:"";position:absolute;inset:-2px;border-radius:12px;box-shadow:0 0 24px 6px var(--brand);opacity:.55;animation:pulse 1.8s ease-in-out infinite;z-index:-1}
+  @keyframes pulse{0%,100%{opacity:.35}50%{opacity:.85}}
+  .counter{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .tag{background:#0f0f0f;border:1px solid #151515;border-radius:999px;padding:8px 12px;color:#ddd;font-weight:700}
+  /* BRACKET */
+  .bracket-panel{background:var(--panel);border-radius:18px;padding:18px 12px}
+  .rounds{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:14px;overflow-x:auto;padding-bottom:6px}
+  .round{background:var(--panel-2);border-radius:16px;padding:14px;min-width:250px}
+  .round h3{margin:0 0 10px;font-size:18px}
+  .match{background:var(--card);border-radius:16px;padding:12px;margin:10px 0;border:1px solid #141414}
+  .row2{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}
+  .side{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#0f0f0f;border-radius:12px;padding:10px 12px;border:1px solid #161616}
+  .name{font-weight:700}
+  .score{width:54px;text-align:center;border-radius:10px;border:1px solid #242424;background:#0b0b0b;color:#fff;padding:8px 10px;font-weight:800;font-size:16px}
+  .vs{color:var(--brand);font-weight:900;letter-spacing:.6px;text-shadow:0 0 10px var(--brand-dim);animation:pulsevs 3s ease-in-out infinite}
+  @keyframes pulsevs{0%,100%{opacity:.75;text-shadow:0 0 6px var(--brand-dim)}50%{opacity:1;text-shadow:0 0 14px var(--brand)}}
+  /* highlight winner only when decided */
+  .side.win{box-shadow:0 0 0 2px var(--brand) inset}
+  /* footer logo */
+  footer{display:flex;justify-content:center;padding:28px 0 10px}
+  footer img{height:64px;opacity:.9}
+  /* file input visually hidden */
+  #fileInput{display:none}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <img src="./assets/Chalky%20Trousers%20Logo%20(Text)%20800x500%20HR_20250927_180240_0001.png" alt="Chalky Trousers" />
-    <h1>Tournament Builder</h1>
-  </header>
+  <div class="wrap">
+    <header>
+      <img class="brand" alt="Chalky Trousers"
+           src="./assets/Chalky%20Trousers%20Logo%20(Text)%20800x500%20HR_20250927_180240_0001.png" />
+      <h1>Tournament Builder</h1>
+    </header>
 
-  <!-- Player entry -->
-  <section class="card">
-    <div class="split">
-      <h2 class="underline">Add players (one per line)</h2>
-      <span class="tag">2–64 supported</span>
-    </div>
+    <section class="panel">
+      <h2>Add players (one per line)</h2>
+      <div class="underline"></div>
 
-    <textarea id="players" placeholder="Alice
+      <div class="chip">2–64 supported</div>
+
+      <div class="field">
+        <label class="sr-only" for="players">Players</label>
+        <textarea id="players" placeholder="One name per line…">Alice
 Bob
 Charlie
-Dana"></textarea>
-
-    <div class="row" style="margin-top:10px">
-      <div>
-        <label for="series"><strong>Match length</strong></label><br/>
-        <select id="series">
-          <option value="1">Single game (best-of-1)</option>
-          <option value="3" selected>Best-of-3</option>
-          <option value="5">Best-of-5</option>
-        </select>
+Dana
+Eddie
+Frank
+Georgia
+Hector</textarea>
       </div>
-      <div>
-        <label for="seed"><strong>Seeding</strong></label><br/>
-        <select id="seed">
-          <option value="random" selected>Random</option>
-          <option value="list">Use list order</option>
-        </select>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="bestOf">Match length</label>
+          <select id="bestOf">
+            <option value="1">Best-of-1</option>
+            <option value="3" selected>Best-of-3</option>
+            <option value="5">Best-of-5</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="seeding">Seeding</label>
+          <select id="seeding">
+            <option value="random" selected>Random</option>
+            <option value="alphabetical">Alphabetical</option>
+          </select>
+        </div>
       </div>
-    </div>
 
-    <div class="row" style="margin-top:12px">
-      <!-- order: Fill Test Names, then Generate -->
-      <button class="btn ghost" id="fillBtn">Fill Test Names</button>
-      <button class="btn primary" id="genBtn">Generate Bracket</button>
-      <button class="btn ghost" id="resetBtn">Reset</button>
-    </div>
-
-    <p class="hint">
-      Tip: paste a list — we’ll trim blanks & de-dupe. “Match length” sets required wins
-      (e.g., best-of-3 → first to 2). Winners auto-advance when a side reaches the target.
-    </p>
-  </section>
-
-  <!-- Save / Load -->
-  <section class="card">
-    <div class="split">
-      <div class="row">
-        <div class="tag" id="metaPlayers">0 entered (0 unique)</div>
-        <div class="tag warn" id="metaDupes" style="display:none"></div>
+      <div class="row" style="margin-top:6px">
+        <button id="fill" class="btn">Fill Test Names</button>
+        <button id="generate" class="btn btn-primary">Generate Bracket</button>
+        <button id="reset" class="btn">Reset</button>
       </div>
-      <div class="tag" id="metaFormat">Format: Single Elimination (Best-of-3)</div>
-    </div>
 
-    <div class="row" style="margin-top:12px">
-      <button class="btn" id="saveBtn">Save</button>
-      <button class="btn ghost" id="exportBtn">Export JSON</button>
-      <button class="btn ghost" id="importBtn">Import JSON</button>
-    </div>
-    <ol class="hint" style="margin-top:10px">
-      <li><strong>Autosave</strong> keeps your latest bracket in this browser.</li>
-      <li><strong>Export JSON</strong> downloads a backup file.</li>
-      <li><strong>Import JSON</strong> restores from a file (with paste fallback if needed).</li>
-    </ol>
-  </section>
+      <p class="hint" style="margin-top:12px">
+        Tip: paste a list — we’ll trim blanks &amp; de-dupe. “Match length” sets required wins
+        (e.g., best-of-3 → first to 2). Winners auto-advance as soon as both scores are entered and one side reaches the target.
+      </p>
 
-  <!-- Bracket -->
-  <section class="card">
-    <h2 class="underline">Bracket</h2>
-    <div class="bracket" id="bracket">
-      <div class="hint">Add players and tap <strong>Generate Bracket</strong> to begin.</div>
-    </div>
-    <div class="logo-foot">
-      <img src="./assets/Chalky%20Trousers%20Logo%20(Man)%20800x800%20HR_20250927_180303_0000.png" alt="Chalky Man" />
-    </div>
-  </section>
-</div>
+      <div class="counter" id="counterWrap" style="margin-top:10px">
+        <span class="tag" id="countTag">0 entered (0 unique)</span>
+        <span class="tag" id="formatTag">Format: —</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="row" style="gap:10px;margin-bottom:10px">
+        <button id="save" class="btn">Save</button>
+        <button id="export" class="btn">Export JSON</button>
+        <button id="import" class="btn">Import JSON</button>
+        <input type="file" id="fileInput" accept="application/json" />
+      </div>
+      <ol class="hint" style="margin:0 0 4px 18px">
+        <li><b>Autosave</b> keeps your latest bracket in this browser (no login needed).</li>
+        <li><b>Export JSON</b> downloads a backup file.</li>
+        <li><b>Import JSON</b> restores from a file (or paste if needed).</li>
+      </ol>
+    </section>
+
+    <section class="bracket-panel">
+      <h2 style="margin:0 0 6px">Bracket</h2>
+      <div class="underline"></div>
+      <div id="rounds" class="rounds" aria-live="polite"></div>
+    </section>
+
+    <footer>
+      <img alt="Chalky player"
+           src="./assets/Chalky%20Trousers%20Logo%20(Man)%20800x800%20HR_20250927_180303_0000.png" />
+    </footer>
+  </div>
 
 <script>
-/* ---------- State ---------- */
-const LS_KEY = 'chalky.tourney.v3';
-let state = { players:[], rounds:[], series:3, seed:'random' };
+/* -------------- Utilities -------------- */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
 
-const $ = s => document.querySelector(s);
+const stateKey = 'chalky.tourney.v0';
 
-/* ---------- Helpers ---------- */
-function uniqList(lines){
-  return [...new Set(lines.map(s=>s.trim()).filter(Boolean).map(v=>v.toLowerCase()))]
-    .map(lower => {
-      const srcIdx = lines.findIndex(x => x.trim().toLowerCase() === lower);
-      return lines[srcIdx].trim();
+function getNames(){
+  const raw = $('#players').value.split('\n')
+    .map(s => s.trim()).filter(Boolean);
+  // unique, case-insensitive – keep first seen
+  const seen = new Set();
+  const unique = [];
+  for (const n of raw){
+    const k = n.toLowerCase();
+    if (!seen.has(k)){ seen.add(k); unique.push(n); }
+  }
+  return {rawCount: raw.length, unique};
+}
+
+function updateCounters(){
+  const {rawCount, unique} = getNames();
+  $('#countTag').textContent = `${rawCount} entered (${unique.length} unique)`;
+  const best = parseInt($('#bestOf').value, 10);
+  $('#formatTag').textContent = `Format: Single Elimination (Best-of-${best})`;
+}
+
+$('#players').addEventListener('input', updateCounters);
+$('#bestOf').addEventListener('change', updateCounters);
+updateCounters();
+
+/* -------------- Bracket model -------------- */
+let bracket = null; // { rounds:[ round:{matches:[{a:{name,score,entered}, b:{...}, target, winner, decided}]} ] }
+
+function makePairs(list){
+  const names = list.slice();
+  if ($('#seeding').value === 'alphabetical'){
+    names.sort((a,b)=>a.localeCompare(b));
+  }else{
+    // Fisher-Yates shuffle
+    for (let i = names.length-1; i>0; i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [names[i],names[j]]=[names[j],names[i]];
+    }
+  }
+  // pad to next power of two with byes
+  const nextPow = 1<<Math.ceil(Math.log2(Math.max(2, names.length)));
+  while (names.length < nextPow) names.push({bye:true,name:'bye'});
+  return names.map(n => (typeof n==='string'? {name:n}:{...n}));
+}
+
+function buildBracket(){
+  const {unique} = getNames();
+  if (unique.length < 2){ alert('Need at least 2 unique players.'); return; }
+  const best = parseInt($('#bestOf').value,10);
+  const target = Math.floor(best/2)+1;
+
+  const entrants = makePairs(unique);
+  const rounds = [];
+  let current = [];
+
+  // first round pairings
+  for (let i=0;i<entrants.length;i+=2){
+    current.push({
+      a: entrants[i],
+      b: entrants[i+1],
+      target, winner:null, decided:false
     });
-}
-function parsePlayersText(txt){
-  const lines = txt.split('\n').map(s=>s.trim()).filter(Boolean);
-  const raw = lines.length;
-  const seen = new Set(); let dup=0;
-  for(const n of lines){ const k=n.toLowerCase(); if(seen.has(k)) dup++; else seen.add(k); }
-  return { rawCount:raw, uniqueCount:seen.size, dupCount:dup };
-}
-function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-function requiredWins(series){ return Math.floor(series/2)+1; }
-function nextPow2(n){ let p=1; while(p<n) p<<=1; return Math.max(2,p); }
-
-/* ---------- Round building ---------- */
-function buildFirstRound(players){
-  const n = players.length, size = nextPow2(n), byes = size - n;
-  const list = players.slice(); for(let i=0;i<byes;i++) list.push(null);
-  const matches=[];
-  for(let i=0;i<list.length;i+=2){
-    const m={a:list[i],b:list[i+1],scoreA:0,scoreB:0,winner:null};
-    if(m.a && !m.b) m.winner=m.a;
-    if(!m.a && m.b) m.winner=m.b;
-    matches.push(m);
   }
-  return matches;
-}
-function buildEmptyNextRound(prev){
-  const next=[]; for(let i=0;i<prev.length;i+=2)
-    next.push({a:null,b:null,scoreA:0,scoreB:0,winner:null});
-  return next;
-}
-function seedIntoNextRound(roundIdx){
-  if(roundIdx>=state.rounds.length-1) return;
-  const cur=state.rounds[roundIdx], nxt=state.rounds[roundIdx+1];
-  for(let i=0;i<nxt.length;i++){
-    const L=cur[2*i]?.winner ?? null, R=cur[2*i+1]?.winner ?? null;
-    nxt[i].a=L; nxt[i].b=R;
-    if(L && !R) nxt[i].winner=L;
-    else if(!L && R) nxt[i].winner=R;
-    else if(!L && !R) nxt[i].winner=null;
-  }
-}
-function roundTitles(count){
-  const names=[]; for(let i=0;i<count;i++){
-    const left=count-i;
-    if(left===1) names.push('Final');
-    else if(left===2) names.push('Semi-finals');
-    else if(left===3) names.push('Quarter-finals');
-    else names.push(`Round ${i+1}`);
-  } return names;
-}
+  rounds.push({title: roundTitle(0, roundsNeeded(entrants.length)), matches: current});
 
-/* ---------- Render ---------- */
-function render(){
-  $('#metaFormat').textContent=`Format: Single Elimination (Best-of-${state.series})`;
-  const host=$('#bracket'); host.innerHTML='';
-
-  if(state.rounds.length===0){
-    host.innerHTML='<div class="hint">Add players and tap <strong>Generate Bracket</strong> to begin.</div>';
-    return;
+  // subsequent rounds (empty placeholders)
+  let remaining = entrants.length/2;
+  while (remaining>=1){
+    const m = [];
+    for (let i=0;i<remaining/2;i++){
+      m.push({a:{name:''}, b:{name:''}, target, winner:null, decided:false});
+    }
+    if (remaining>=1) rounds.push({title: roundTitle(rounds.length, roundsNeeded(entrants.length)), matches:m});
+    remaining/=2;
   }
 
-  const cols=document.createElement('div'); cols.className='cols';
-  const titles=roundTitles(state.rounds.length);
+  bracket = {rounds, meta:{best,target}};
+  // resolve any immediate bye winners in R1
+  for (const match of rounds[0].matches){
+    setWinnerIfReached(match);
+  }
+  propagateAll();
+  renderBracket();
+  persist();
+}
 
-  state.rounds.forEach((round,rIdx)=>{
-    const col=document.createElement('div'); col.className='round-col';
+function roundsNeeded(n){ return Math.log2(1<<Math.ceil(Math.log2(n))); }
+function roundTitle(idx,total){
+  const fromEnd = total-idx;
+  if (fromEnd===1) return 'Final';
+  if (fromEnd===2) return 'Semi-finals';
+  if (fromEnd===3) return 'Quarter-finals';
+  return `Round ${idx+1}`;
+}
 
-    const rt=document.createElement('div'); rt.className='round-title'; rt.textContent=titles[rIdx];
-    col.appendChild(rt);
+/* -------------- Decide matches / advancement -------------- */
+function setWinnerIfReached(m){
+  // handle byes
+  if (m.a?.bye && !m.b?.bye){ m.winner=m.b; m.decided=true; return true; }
+  if (m.b?.bye && !m.a?.bye){ m.winner=m.a; m.decided=true; return true; }
+  if (m.a?.bye && m.b?.bye){ m.winner=m.a; m.decided=true; return true; }
 
-    round.forEach((m,mIdx)=>{
-      const card=document.createElement('div'); card.className='match';
-      const row=document.createElement('div'); row.className='match-row';
+  const a = m.a?.score ?? 0;
+  const b = m.b?.score ?? 0;
+  const bothEntered = !!m.a?.entered && !!m.b?.entered;
+  const target = m.target;
 
-      const boxA=document.createElement('div'); boxA.className='box';
-      boxA.innerHTML=`<span class="name">${m.a?m.a:'<span class="bye">bye</span>'}</span>`;
-      const scA=document.createElement('div'); scA.className='score';
-      const inA=document.createElement('input'); inA.type='number'; inA.min='0'; inA.step='1'; inA.value=m.scoreA||0;
-      inA.disabled=!(m.a && m.b); scA.appendChild(inA); boxA.appendChild(scA);
+  if (!bothEntered){ m.winner=null; m.decided=false; return false; }
 
-      const vs=document.createElement('div'); vs.className='vs'; vs.textContent='VS';
+  if (a >= target || b >= target){
+    m.winner = (a > b) ? m.a : m.b;
+    m.decided = true;
+    return true;
+  }
+  m.winner=null; m.decided=false; return false;
+}
 
-      const boxB=document.createElement('div'); boxB.className='box';
-      boxB.innerHTML=`<span class="name">${m.b?m.b:'<span class="bye">bye</span>'}</span>`;
-      const scB=document.createElement('div'); scB.className='score';
-      const inB=document.createElement('input'); inB.type='number'; inB.min='0'; inB.step='1'; inB.value=m.scoreB||0;
-      inB.disabled=!(m.a && m.b); scB.appendChild(inB); boxB.appendChild(scB);
+function propagateAll(){
+  if (!bracket) return;
+  for (let r=0; r<bracket.rounds.length-1; r++){
+    const cur = bracket.rounds[r].matches;
+    const nxt = bracket.rounds[r+1].matches;
+    for (let i=0;i<nxt.length;i++){
+      const left = cur[i*2], right = cur[i*2+1];
+      nxt[i].a = left?.winner ? {...left.winner} : {name:''};
+      nxt[i].b = right?.winner ? {...right.winner} : {name:''};
+      // reset scores/decision when participants change
+      nxt[i].a.score = 0; nxt[i].a.entered = false;
+      nxt[i].b.score = 0; nxt[i].b.entered = false;
+      nxt[i].winner=null; nxt[i].decided=false;
+    }
+  }
+}
 
-      if(m.winner){ if(m.winner===m.a) boxA.style.boxShadow='0 0 0 2px var(--accent) inset';
-                    if(m.winner===m.b) boxB.style.boxShadow='0 0 0 2px var(--accent) inset'; }
+/* -------------- Render -------------- */
+function renderBracket(){
+  const roundsEl = $('#rounds');
+  roundsEl.innerHTML = '';
+  if (!bracket){ return; }
 
-      if(m.a && m.b){
-        const onInput=()=>{
-          m.scoreA=parseInt(inA.value||'0',10);
-          m.scoreB=parseInt(inB.value||'0',10);
-          const need=requiredWins(state.series);
-          let w=null;
+  bracket.rounds.forEach((round,ri)=>{
+    const rEl = document.createElement('div');
+    rEl.className = 'round';
+    rEl.innerHTML = `<h3>${round.title}</h3>`;
+    round.matches.forEach((m,mi)=>{
+      const card = document.createElement('div');
+      card.className='match';
+      const aName = m.a?.name || '—';
+      const bName = m.b?.name || '—';
+      const aScore = m.a?.score ?? 0;
+      const bScore = m.b?.score ?? 0;
 
-          if(state.series===1){
-            if(inA.value!=='' && inB.value!==''){
-              if(m.scoreA>m.scoreB) w=m.a; else if(m.scoreB>m.scoreA) w=m.b;
-            }
-          }else{
-            if(m.scoreA>=need || m.scoreB>=need){
-              if(m.scoreA!==m.scoreB) w=(m.scoreA>m.scoreB)?m.a:m.b;
-            }
-          }
-          m.winner=w;
-          seedIntoNextRound(rIdx);
-          for(let i=rIdx+1;i<state.rounds.length;i++) seedIntoNextRound(i);
-          saveLS(); render();
-        };
-        inA.addEventListener('input',onInput);
-        inB.addEventListener('input',onInput);
+      card.innerHTML = `
+        <div class="row2">
+          <div class="side side-a"><span class="name">${escapeHtml(aName)}</span>
+            <input class="score" type="number" min="0" value="${aScore}">
+          </div>
+          <div class="vs">VS</div>
+          <div class="side side-b"><span class="name">${escapeHtml(bName)}</span>
+            <input class="score" type="number" min="0" value="${bScore}">
+          </div>
+        </div>
+      `;
+
+      // apply winner highlight only when decided
+      if (m.decided && m.winner){
+        const leftEl = card.querySelector('.side-a');
+        const rightEl = card.querySelector('.side-b');
+        if (m.winner === m.a) leftEl.classList.add('win');
+        if (m.winner === m.b) rightEl.classList.add('win');
       }
 
-      row.appendChild(boxA); row.appendChild(vs); row.appendChild(boxB);
-      card.appendChild(row); col.appendChild(card);
+      // input handlers
+      const aInput = card.querySelector('.side-a .score');
+      const bInput = card.querySelector('.side-b .score');
+      const onInput = () => {
+        // ensure objects
+        m.a = m.a || {name:aName};
+        m.b = m.b || {name:bName};
+        m.a.score = Math.max(0, parseInt(aInput.value||'0',10));
+        m.b.score = Math.max(0, parseInt(bInput.value||'0',10));
+        m.a.entered = true;
+        m.b.entered = true;
+
+        const decided = setWinnerIfReached(m);
+        if (decided){
+          // push winner forward
+          propagateAll();
+        }
+        renderBracket(); // re-render to reflect highlights and next rounds
+        persist();
+      };
+      aInput.addEventListener('input', onInput);
+      bInput.addEventListener('input', onInput);
+
+      rEl.appendChild(card);
     });
-
-    cols.appendChild(col);
+    roundsEl.appendChild(rEl);
   });
-
-  host.appendChild(cols);
 }
 
-/* ---------- Player meta + guards ---------- */
-function updatePlayerMeta(){
-  const {rawCount,uniqueCount,dupCount}=parsePlayersText($('#players').value);
-  $('#metaPlayers').textContent=`${rawCount} entered (${uniqueCount} unique)`;
-  const dupEl=$('#metaDupes'); const gen=$('#genBtn');
-  if(dupCount>0){ dupEl.style.display=''; dupEl.textContent=`${dupCount} duplicate${dupCount===1?'':'s'}`; }
-  else dupEl.style.display='none';
-  gen.disabled = !(uniqueCount>=2 && dupCount===0);
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
 }
 
-/* ---------- Actions ---------- */
-function generate(){
-  // if disabled, flash red so it’s obvious why
-  if($('#genBtn').disabled){
-    $('#genBtn').classList.remove('warnpulse'); void $('#genBtn').offsetWidth; $('#genBtn').classList.add('warnpulse');
-    return;
-  }
-  const lines=$('#players').value.split('\n').map(s=>s.trim());
-  let players=uniqList(lines);
-  if($('#seed').value==='random') shuffle(players);
-
-  state.players=players;
-  state.series=parseInt($('#series').value,10)||3;
-  state.seed=$('#seed').value;
-
-  const first=buildFirstRound(players);
-  const rounds=[first]; let cur=first;
-  while(cur.length>1){ const nxt=buildEmptyNextRound(cur); rounds.push(nxt); cur=nxt; }
-  state.rounds=rounds;
-
-  for(let i=0;i<state.rounds.length-1;i++) seedIntoNextRound(i);
-  saveLS(); render();
+/* -------------- Persistence -------------- */
+function persist(){
+  try{
+    localStorage.setItem(stateKey, JSON.stringify({
+      bracket, players: $('#players').value,
+      bestOf: $('#bestOf').value, seeding: $('#seeding').value
+    }));
+  }catch(e){}
 }
+function loadPersisted(){
+  try{
+    const raw = localStorage.getItem(stateKey);
+    if (!raw) return;
+    const obj = JSON.parse(raw);
+    if (obj.players) $('#players').value = obj.players;
+    if (obj.bestOf) $('#bestOf').value = obj.bestOf;
+    if (obj.seeding) $('#seeding').value = obj.seeding;
+    updateCounters();
+    if (obj.bracket){
+      bracket = obj.bracket;
+      renderBracket();
+    }
+  }catch(e){}
+}
+loadPersisted();
 
-function fillTest(){
-  $('#players').value=`Alice
+/* -------------- Controls -------------- */
+$('#fill').addEventListener('click', ()=>{
+  $('#players').value = `Alice
 Bob
 Charlie
 Dana
@@ -337,63 +398,73 @@ Eddie
 Frank
 Georgia
 Hector`;
-  updatePlayerMeta();
-}
-function resetAll(){
-  if(!confirm('Clear players and bracket?')) return;
-  state={players:[],rounds:[],series:3,seed:'random'};
-  saveLS();
+  updateCounters();
+});
+
+$('#generate').addEventListener('click', buildBracket);
+
+$('#reset').addEventListener('click', ()=>{
+  if (!confirm('Clear players and bracket?')) return;
   $('#players').value='';
-  $('#bracket').innerHTML='<div class="hint">Add players and tap <strong>Generate Bracket</strong> to begin.</div>';
-  updatePlayerMeta();
-}
+  updateCounters();
+  bracket=null;
+  renderBracket();
+  persist();
+});
 
-/* ---------- Persistence & JSON ---------- */
-function saveLS(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
-function loadLS(){
-  const raw=localStorage.getItem(LS_KEY); if(!raw) return false;
-  try{ const obj=JSON.parse(raw); if(!obj||!Array.isArray(obj.rounds)) return false; state=obj; return true; }
-  catch{ return false; }
-}
-function download(filename,text){
-  const blob=new Blob([text],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click();
-  setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},0);
-}
-function exportJSON(){ download('chalky-tournament.json', JSON.stringify(state,null,2)); }
-function importJSON(){
-  const input=document.createElement('input'); input.type='file'; input.accept='application/json';
-  input.onchange=e=>{
-    const file=e.target.files?.[0]; if(!file) return;
-    const r=new FileReader();
-    r.onload=()=>{
-      try{
-        const obj=JSON.parse(r.result);
-        if(!obj||!Array.isArray(obj.rounds)) throw 0;
-        state=obj; saveLS(); render(); updatePlayerMeta();
-      }catch{ alert('Invalid JSON file.'); }
-    };
-    r.readAsText(file);
+$('#save').addEventListener('click', persist);
+
+$('#export').addEventListener('click', ()=>{
+  const data = {
+    players: $('#players').value,
+    bestOf: $('#bestOf').value,
+    seeding: $('#seeding').value,
+    bracket
   };
-  input.click();
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'chalky-tournament.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+});
+
+$('#import').addEventListener('click', ()=>{
+  // try file chooser first
+  const finput = $('#fileInput');
+  finput.value = '';
+  finput.click();
+});
+
+$('#fileInput').addEventListener('change', async (e)=>{
+  const file = e.target.files?.[0];
+  if (!file) return;
+  try{
+    const text = await file.text();
+    applyImported(JSON.parse(text));
+  }catch(err){
+    // fallback to paste if file fails
+    const pasted = prompt('Paste JSON:');
+    if (!pasted) return;
+    try{
+      applyImported(JSON.parse(pasted));
+    }catch(e2){
+      alert('Invalid JSON.');
+    }
+  }
+});
+
+function applyImported(data){
+  if (typeof data !== 'object'){ alert('Invalid JSON'); return; }
+  if (typeof data.players === 'string') $('#players').value = data.players;
+  if (data.bestOf) $('#bestOf').value = data.bestOf;
+  if (data.seeding) $('#seeding').value = data.seeding;
+  bracket = data.bracket || null;
+  updateCounters();
+  renderBracket();
+  persist();
 }
-
-/* ---------- Wire up ---------- */
-$('#fillBtn').addEventListener('click', fillTest);
-$('#genBtn').addEventListener('click', generate);
-$('#resetBtn').addEventListener('click', resetAll);
-$('#saveBtn').addEventListener('click', saveLS);
-$('#exportBtn').addEventListener('click', exportJSON);
-$('#importBtn').addEventListener('click', importJSON);
-
-$('#players').addEventListener('input', updatePlayerMeta);
-$('#series').addEventListener('change', ()=>{ state.series=parseInt($('#series').value,10)||3; $('#metaFormat').textContent=`Format: Single Elimination (Best-of-${state.series})`; });
-$('#seed').addEventListener('change', ()=>{ state.seed=$('#seed').value; });
-
-/* ---------- Init ---------- */
-if(loadLS()){ render(); }
-updatePlayerMeta();
 </script>
 </body>
 </html>
