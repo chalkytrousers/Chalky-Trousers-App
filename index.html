@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chalky Trousers — Tournament Builder (SE v0)</title>
+<style>
+  :root{
+    --bg:#000; --fg:#fff; --muted:#bfbfbf; --card:#161616; --pill:#222;
+    --accent:#00ff66; --accent-soft:#00ff6633; --border:#333;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--fg);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif;
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:20px}
+  header{
+    display:flex;align-items:center;gap:14px;margin-bottom:14px
+  }
+  header img{height:40px;width:auto}
+  h1{font-size:28px;margin:8px 0 4px}
+  .sub{color:var(--muted);font-size:14px}
+  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0}
+  .btn{
+    background:#111;color:#fff;border:1px solid var(--border);border-radius:10px;
+    padding:10px 14px;cursor:pointer;transition: box-shadow .2s, transform .05s;
+  }
+  .btn.primary{
+    border-color:transparent;background:#111;
+    box-shadow:0 0 18px 6px var(--accent-soft);
+    position:relative;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn.primary.pulse{
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 6px 2px var(--accent-soft)}
+    50%{box-shadow:0 0 24px 10px var(--accent-soft)}
+    100%{box-shadow:0 0 6px 2px var(--accent-soft)}
+  }
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:16px;margin:12px 0;
+  }
+  .grid{
+    display:grid;gap:14px;
+  }
+  @media(min-width:800px){ .grid{grid-template-columns:1.1fr .9fr} }
+  label{font-weight:600;display:block;margin-bottom:8px}
+  textarea,input[type="text"]{
+    width:100%;background:#0d0d0d;color:#fff;border:1px solid var(--border);
+    border-radius:12px;padding:10px 12px;resize:vertical;min-height:120px;
+  }
+  .help{font-size:12px;color:var(--muted);margin-top:6px}
+  /* Bracket */
+  .bracket{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px}
+  .round{min-width:240px;flex:0 0 240px}
+  .round h3{margin:0 0 10px;font-size:16px;border-bottom:2px solid var(--accent);display:inline-block;padding-right:6px}
+  .match{
+    background:var(--pill);border:1px solid var(--border);border-radius:16px;
+    padding:10px 12px;margin:10px 0;display:flex;flex-direction:column;gap:8px;
+  }
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .name{
+    display:flex;align-items:center;gap:8px;min-height:28px;flex:1;
+    padding:6px 10px;border-radius:999px;background:#1a1a1a;border:1px solid #2a2a2a;
+  }
+  .bye{opacity:.6}
+  .vs{
+    font-weight:800;color:var(--accent);text-align:center;letter-spacing:.06em
+  }
+  .vs.pulse{animation:vsPulse 3s infinite}
+  @keyframes vsPulse{
+    0%{text-shadow:0 0 2px var(--accent);opacity:.7}
+    50%{text-shadow:0 0 10px var(--accent);opacity:1}
+    100%{text-shadow:0 0 2px var(--accent);opacity:.7}
+  }
+  .score{
+    width:52px;text-align:center;background:#0d0d0d;color:#fff;border:1px solid var(--border);
+    border-radius:10px;padding:6px 8px
+  }
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:999px;padding:8px 12px
+  }
+  .toast{
+    position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
+    background:#101010;border:1px solid var(--border);padding:10px 14px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s
+  }
+  .toast.show{opacity:1}
+  footer{margin:34px 0 16px;text-align:center}
+  footer img{width:200px;height:auto;opacity:.9}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img alt="Chalky" src="/assets/Chalky%20Trousers%20Logo%20(Man)%20800x800%20HR_20250927_180303_0000.png" />
+      <div>
+        <h1>Tournament Builder</h1>
+        <div class="sub">Single Elimination • Local only (saved to your browser)</div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Setup -->
+      <section class="card">
+        <label for="players">Add players (one per line). 2–64 supported.</label>
+        <textarea id="players" placeholder="e.g.
+Alice
+Bob
+Charlie
+Dana"></textarea>
+        <div class="help">Tip: Paste a list, we’ll trim blanks & de-dupe. Seeding will be random for v0.</div>
+        <div class="bar">
+          <button id="btnTest" class="btn">Fill Test Names</button>
+          <button id="btnGen" class="btn primary pulse">Generate Bracket</button>
+        </div>
+      </section>
+
+      <!-- Actions -->
+      <section class="card">
+        <div class="bar">
+          <button id="btnSave" class="btn">Save</button>
+          <button id="btnExport" class="btn">Export JSON</button>
+          <button id="btnImport" class="btn">Import JSON</button>
+          <button id="btnReset" class="btn">Reset</button>
+        </div>
+        <div class="help">All changes autosave too under <code>chalky.tourney.v0</code>.</div>
+      </section>
+    </div>
+
+    <!-- Bracket -->
+    <section id="bracketWrap" class="card" style="display:none">
+      <div class="bar">
+        <span class="pill"><strong id="tCount">0</strong> players</span>
+        <span class="pill">Format: Single Elimination</span>
+      </div>
+      <div id="bracket" class="bracket" aria-live="polite"></div>
+    </section>
+
+    <footer>
+      <img alt="Chalky Trousers" src="/assets/Chalky%20Trousers%20Logo%20(Text)%20800x500%20HR_20250927_180240_0001.png" />
+    </footer>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+/** ---------- Utilities ---------- **/
+const STORAGE_KEY = 'chalky.tourney.v0';
+
+const showToast = (msg)=>{ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1400); };
+const deepClone = (o)=> JSON.parse(JSON.stringify(o));
+const shuffle = (arr)=>{ for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]} return arr; };
+const nextPow2 = (n)=>{ let p=1; while(p<n) p<<=1; return p; };
+
+function parsePlayers(text){
+  return Array.from(new Set(
+    text.split(/\r?\n|,/).map(s=>s.trim()).filter(Boolean)
+  )).map((name,i)=>({id:String(i+1),name}));
+}
+
+/** ---------- Data Model ---------- **/
+/*
+state = {
+  id: string, players: Player[],
+  rounds: Match[][]  // rounds[0] = round1 list
+}
+Match = { id, round, index, a, b, aScore, bScore, winner, isBye }
+*/
+
+function blankState(){
+  return { id: String(Date.now()), players: [], rounds: [] };
+}
+
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  showToast('Saved');
+}
+
+function loadState(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+function resetAll(){
+  state = blankState();
+  localStorage.removeItem(STORAGE_KEY);
+  render();
+  showToast('Reset');
+}
+
+/** ---------- Bracket Generation (SE) ---------- **/
+function generateBracket(players){
+  const st = blankState();
+  st.players = players;
+
+  const n = players.length;
+  if(n < 2) throw new Error('Need at least 2 players');
+  if(n > 64) throw new Error('Max 64 players');
+
+  // Seed randomly for v0
+  const seeded = shuffle(players.map(p=>p.id));
+  // Size to power of two; pad with BYEs
+  const size = nextPow2(seeded.length);
+  while(seeded.length < size) seeded.push('BYE');
+
+  // Round 1 pairing: 0-1, 2-3, …
+  const round1 = [];
+  for(let i=0;i<seeded.length;i+=2){
+    const a = seeded[i], b = seeded[i+1];
+    const isBye = (a==='BYE' || b==='BYE');
+    round1.push({
+      id:`R1-M${i/2+1}`, round:1, index:i/2,
+      a, b, isBye, aScore:null, bScore:null, winner: isBye ? (a==='BYE'? b : a) : null
+    });
+  }
+  st.rounds.push(round1);
+
+  // Pre-create future rounds structure
+  let slots = round1.length;
+  let r=2;
+  while(slots>1){
+    const emptyRound=[];
+    for(let i=0;i<Math.floor(slots/2);i++){
+      emptyRound.push({
+        id:`R${r}-M${i+1}`, round:r, index:i,
+        a:null, b:null, isBye:false, aScore:null, bScore:null, winner:null
+      });
+    }
+    st.rounds.push(emptyRound);
+    slots = emptyRound.length;
+    r++;
+  }
+
+  // Auto-advance BYEs forward
+  propagateWinners(st);
+  return st;
+}
+
+function propagateWinners(st){
+  for(let r=0;r<st.rounds.length-1;r++){
+    const cur = st.rounds[r];
+    const nxt = st.rounds[r+1];
+    cur.forEach((m,i)=>{
+      const dest = nxt[Math.floor(i/2)];
+      if(i%2===0){ dest.a = m.winner || dest.a; }
+      else       { dest.b = m.winner || dest.b; }
+    });
+    // mark BYE autowin if present
+    nxt.forEach(m=>{
+      if(m.a==='BYE' && m.b && m.b!=='BYE'){ m.winner = m.b; }
+      if(m.b==='BYE' && m.a && m.a!=='BYE'){ m.winner = m.a; }
+    });
+  }
+}
+
+/** ---------- Rendering ---------- **/
+function playerName(id){
+  if(id==='BYE') return 'BYE';
+  const p = state.players.find(p=>p.id===id);
+  return p ? p.name : '';
+}
+
+function render(){
+  // textarea value
+  const ta = document.getElementById('players');
+  if(state.players?.length){
+    // reconstruct textarea from model (one per line)
+    ta.value = state.players.map(p=>p.name).join('\n');
+  }
+
+  const wrap = document.getElementById('bracketWrap');
+  const root = document.getElementById('bracket');
+  root.innerHTML = '';
+
+  if(!state.rounds?.length){ wrap.style.display='none'; return; }
+  wrap.style.display='block';
+
+  document.getElementById('tCount').textContent = state.players.length;
+
+  state.rounds.forEach((round,ri)=>{
+    const col = document.createElement('div');
+    col.className='round';
+    const title = document.createElement('h3');
+    title.textContent = roundName(ri, state.rounds.length);
+    col.appendChild(title);
+
+    round.forEach((m)=>{
+      const card = document.createElement('div');
+      card.className='match';
+
+      const aRow = document.createElement('div');
+      aRow.className='row';
+      const aName = document.createElement('div');
+      aName.className='name' + (m.a==='BYE' ? ' bye':'');
+      aName.textContent = playerName(m.a) || '—';
+      const aScore = document.createElement('input');
+      aScore.className='score'; aScore.type='number'; aScore.min=0;
+      aScore.value = m.aScore ?? '';
+      aScore.placeholder='0';
+      aScore.disabled = (m.a==='BYE' || m.b==='BYE' || !m.a || !m.b || !!m.winner);
+      aRow.append(aName,aScore);
+
+      const vs = document.createElement('div');
+      vs.className='vs pulse';
+      vs.textContent='VS';
+
+      const bRow = document.createElement('div');
+      bRow.className='row';
+      const bName = document.createElement('div');
+      bName.className='name' + (m.b==='BYE' ? ' bye':'');
+      bName.textContent = playerName(m.b) || '—';
+      const bScore = document.createElement('input');
+      bScore.className='score'; bScore.type='number'; bScore.min=0;
+      bScore.value = m.bScore ?? '';
+      bScore.placeholder='0';
+      bScore.disabled = (m.a==='BYE' || m.b==='BYE' || !m.a || !m.b || !!m.winner);
+      bRow.append(bName,bScore);
+
+      const saveBtn = document.createElement('button');
+      saveBtn.className='btn';
+      saveBtn.textContent = m.winner ? 'Saved' : 'Save Result';
+      if(m.winner) saveBtn.disabled = true;
+
+      saveBtn.onclick = ()=>{
+        if(aScore.value==='' || bScore.value===''){ showToast('Enter both scores'); return; }
+        const as = Number(aScore.value), bs = Number(bScore.value);
+        if(as===bs){ showToast('No draws — enter a winner.'); return; }
+        m.aScore=as; m.bScore=bs; m.winner = as>bs ? m.a : m.b;
+        advanceWinner(state, m);
+        saveState();
+        render();
+      };
+
+      // If BYE, mark and allow advance on first render pass
+      if(m.a==='BYE' || m.b==='BYE'){
+        if(!m.winner){
+          m.winner = (m.a==='BYE') ? m.b : m.a;
+          advanceWinner(state, m);
+        }
+      }
+
+      card.append(aRow,vs,bRow,saveBtn);
+      col.appendChild(card);
+    });
+
+    root.appendChild(col);
+  });
+
+  // Title if champion decided
+  const lastRound = state.rounds[state.rounds.length-1];
+  if(lastRound?.length===1 && lastRound[0].winner){
+    const champion = playerName(lastRound[0].winner);
+    const banner = document.createElement('div');
+    banner.className='bar';
+    const pill = document.createElement('div');
+    pill.className='pill';
+    pill.innerHTML = `🏆 <strong>Champion:</strong> ${champion}`;
+    root.appendChild(pill);
+  }
+}
+
+function advanceWinner(st, match){
+  const rIdx = match.round-1;
+  const nextRound = st.rounds[rIdx+1];
+  if(!nextRound) return; // final
+  const dest = nextRound[Math.floor(match.index/2)];
+  if(match.index%2===0) dest.a = match.winner;
+  else dest.b = match.winner;
+}
+
+/** ---------- Round Titles ---------- **/
+function roundName(ri,total){
+  const idx = ri+1;
+  if(idx===total) return 'Final';
+  if(idx===total-1) return 'Semi-finals';
+  if(idx===total-2) return 'Quarter-finals';
+  return `Round ${idx}`;
+}
+
+/** ---------- Global State & Events ---------- **/
+let state = loadState() || blankState();
+render();
+
+// Buttons
+document.getElementById('btnTest').onclick = ()=>{
+  document.getElementById('players').value = [
+    'Alice','Bob','Charlie','Dana','Eddie','Frank','Georgia','Hector'
+  ].join('\n');
+};
+
+document.getElementById('btnGen').onclick = ()=>{
+  try{
+    const players = parsePlayers(document.getElementById('players').value);
+    state = generateBracket(players);
+    saveState();
+    render();
+    document.getElementById('bracketWrap').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){ showToast(e.message || 'Problem generating bracket'); }
+};
+
+document.getElementById('btnSave').onclick = saveState;
+document.getElementById('btnReset').onclick = ()=>{
+  if(confirm('Reset tournament? This clears players and results.')) resetAll();
+};
+
+document.getElementById('btnExport').onclick = ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='chalky-tournament.json'; a.click();
+  URL.revokeObjectURL(url);
+};
+
+document.getElementById('btnImport').onclick = async ()=>{
+  const json = prompt('Paste JSON:');
+  if(!json) return;
+  try{
+    const data = JSON.parse(json);
+    if(!data.rounds || !data.players) throw new Error('Invalid file');
+    state = data;
+    saveState(); render(); showToast('Imported');
+  }catch(e){ showToast('Invalid JSON'); }
+};
+</script>
+</body>
+</html>
