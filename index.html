@@ -1,322 +1,419 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
+<meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Chalky Trousers — Knockout Bracket</title>
-<link rel="icon" href="assets/Chalky Trousers Logo (Man) 800x800 HR_20250927_180303_0000.png">
+<title>Chalky Trousers – Tournament Builder</title>
 <style>
   :root{
-    --bg:#0b0b0b; --card:#161616; --muted:#9aa3a7; --text:#fff;
-    --accent:#22ff6d; --accent-dim:#0d3;
+    --bg:#0b0b0b; --panel:#151515; --chip:#202020; --text:#f4f4f4; --muted:#b9b9b9;
+    --accent:#23ff4f; --accent-dim:#1adb42; --danger:#ff5f5f; --soft:#1a1a1a;
   }
-  *{box-sizing:border-box}
-  body{
-    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    background:#000; color:#fff;
+  html,body{margin:0;background:#000;color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  .wrap{max-width:980px;margin:28px auto;padding:0 16px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  header img{height:44px;width:auto}
+  h1{font-size:28px;margin:0}
+
+  .card{background:var(--panel);border-radius:14px;padding:18px;margin:16px 0;box-shadow:0 0 0 1px #101010 inset}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .row.split{justify-content:space-between}
+  .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+
+  textarea{width:100%;min-height:160px;border:0;border-radius:12px;background:var(--chip);color:var(--text);font-size:16px;padding:12px;outline:none}
+  label{font-weight:700}
+  select{background:var(--chip);color:var(--text);border:0;border-radius:10px;padding:10px 12px;font-size:15px}
+  .btn{appearance:none;border:0;background:#111;color:#fff;padding:12px 16px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:0 0 18px 4px rgba(35,255,79,.14)}
+  .btn.ghost{background:var(--chip);box-shadow:none}
+  .btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none}
+  .btn.warnpulse{animation:warn 1.2s ease-in-out 2}
+  @keyframes warn{
+    0%{box-shadow:0 0 0 0 rgba(255,95,95,.0)}
+    50%{box-shadow:0 0 26px 6px rgba(255,95,95,.35)}
+    100%{box-shadow:0 0 0 0 rgba(255,95,95,.0)}
   }
-  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
-  header{display:flex; align-items:center; gap:12px; margin-bottom:16px}
-  header img{height:42px; width:auto}
-  header h1{font-size:22px; margin:0; letter-spacing:.3px}
-  .lead{
-    background:var(--card); border-radius:14px; padding:18px;
-    display:grid; gap:16px; margin-bottom:18px;
-  }
-  .lead h2{margin:0 0 6px; font-size:18px}
-  textarea{
-    width:100%; min-height:160px; resize:vertical; border:0; outline:0;
-    border-radius:10px; padding:12px; background:#0f0f0f; color:#fff; font-size:15px;
-  }
-  .row{display:flex; gap:10px; flex-wrap:wrap}
-  button{
-    background:#1b1b1b; color:#fff; border:0; border-radius:10px; padding:12px 16px;
-    font-weight:600; cursor:pointer; transition:transform .05s ease, box-shadow .25s ease;
-    box-shadow:0 0 18px 0 rgba(34,255,109,0.0);
-  }
-  button.primary{
-    background:#111; box-shadow:0 0 24px 4px rgba(34,255,109,.15);
-  }
-  button:hover{transform:translateY(-1px)}
-  .pill{background:#0e0e0e; color:#cfd6d9; border:1px solid #1f1f1f; padding:8px 12px; border-radius:999px; font-size:13px}
+
+  .tag{background:#0e0e0e;border:1px solid #171717;color:var(--muted);padding:6px 10px;border-radius:999px;font-weight:700}
+  .tag.warn{background:#2a1010;border-color:#3a1b1b;color:#ff9f9f}
+
+  .underline{border-bottom:2px solid var(--accent);display:inline-block;padding-bottom:2px}
+  .hint{color:var(--muted);font-size:14px;margin-top:10px}
+  .spacer{height:10px}
 
   /* Bracket */
-  .bracket-wrap{
-    background:var(--card); border-radius:16px; padding:18px; margin-top:18px;
-  }
-  .bracket-head{display:flex; align-items:center; gap:10px; margin-bottom:12px}
-  .underline{height:3px; width:160px; background:var(--accent); border-radius:3px}
-  .scroller{
-    overflow-x:auto; padding-bottom:10px; margin:-6px; padding:6px;
-  }
-  .grid{
-    display:grid; grid-auto-flow:column; grid-auto-columns:minmax(250px, 1fr); gap:16px; min-height:180px
-  }
-  .round{display:flex; flex-direction:column; gap:16px}
-  .round-title{color:#bcd; font-weight:700; margin-bottom:2px}
-  .match{
-    background:#121212; border:1px solid #1f1f1f; border-radius:14px; padding:12px;
-  }
-  .slot{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    background:#0f0f0f; border:1px solid #1d1d1d; border-radius:12px; padding:10px 12px; margin-bottom:10px;
-  }
-  .slot.empty{opacity:.55; font-style:italic}
-  .vs{ text-align:center; color:var(--accent); font-weight:800; letter-spacing:1px; margin:6px 0}
-  .win-btn{
-    background:#0c1320; border:1px solid #1f2a3a; color:#d4e7ff; padding:6px 10px; border-radius:999px; font-size:13px;
-  }
-  .win-btn.active{background:#153a22; border-color:#1d5a36; color:#bff5d4}
-  .notice{color:#a8b2b8; font-size:13px}
-  .footer-actions{margin-top:14px; display:flex; flex-wrap:wrap; gap:10px}
-  @media (max-width:640px){
-    header h1{font-size:18px}
-    .grid{grid-auto-columns:minmax(220px, 1fr)}
+  .bracket{overflow-x:auto;padding-bottom:8px}
+  .cols{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:16px}
+  .round-title{font-weight:800;margin:4px 0 10px}
+  .match{background:var(--soft);border-radius:16px;padding:12px;margin-bottom:12px;box-shadow:0 0 0 1px #111 inset}
+  .match-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+  .box{background:var(--chip);border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .score{display:flex;align-items:center;gap:6px}
+  .score input{width:52px;text-align:center;background:#0c0c0c;border:1px solid #222;border-radius:10px;color:#fff;padding:6px}
+  .vs{font-weight:900;color:var(--accent);text-shadow:0 0 6px var(--accent-dim)}
+  .vs{animation:pulseVS 2.6s ease-in-out infinite}
+  @keyframes pulseVS{
+    0%{opacity:.65; text-shadow:0 0 2px var(--accent)}
+    50%{opacity:1; text-shadow:0 0 14px var(--accent)}
+    100%{opacity:.65; text-shadow:0 0 2px var(--accent)}
   }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <img src="assets/Chalky Trousers Logo (Man) 800x800 HR_20250927_180303_0000.png" alt="Chalky">
-      <h1>Chalky Trousers — Knockout Bracket</h1>
-    </header>
+<div class="wrap">
+  <header>
+    <img src="./assets/Chalky%20Trousers%20Logo%20(Text)%20800x500%20HR_20250927_180240_0001.png" alt="Chalky Trousers" />
+    <h1>Tournament Builder</h1>
+  </header>
 
-    <section class="lead">
-      <div>
-        <h2>Add players (one per line)</h2>
-        <p class="notice">2–64 supported. We’ll auto-add <em>byes</em> to reach a power of two.</p>
-        <textarea id="playersBox" placeholder="Alice
+  <!-- Player entry -->
+  <section class="card">
+    <div class="row split">
+      <h2 class="underline">Add players (one per line)</h2>
+      <span class="tag">2–64 supported</span>
+    </div>
+    <textarea id="players" placeholder="Alice
 Bob
-Charlie
-Dana"></textarea>
-      </div>
-      <div class="row">
-        <button class="primary" id="genBtn">Generate Bracket</button>
-        <button id="fillBtn">Fill Test Names</button>
-        <span class="pill" id="countPill">0 players</span>
-      </div>
-      <div class="footer-actions">
-        <button id="saveBtn">Save</button>
-        <button id="exportBtn">Export JSON</button>
-        <button id="importBtn">Import JSON</button>
-        <button id="resetBtn">Reset</button>
-        <span class="notice">Autosaves to <code>chalky.tourney.v0</code>.</span>
-      </div>
-    </section>
+Charlie"></textarea>
 
-    <section class="bracket-wrap" id="bracketWrap" style="display:none;">
-      <div class="bracket-head">
-        <h2 style="margin:0">Bracket</h2>
-        <div class="underline"></div>
+    <div class="spacer"></div>
+    <div class="grid-3">
+      <div>
+        <label for="series">Match length</label><br />
+        <select id="series">
+          <option value="1">Single game (best-of-1)</option>
+          <option value="3" selected>Best-of-3</option>
+          <option value="5">Best-of-5</option>
+        </select>
       </div>
-      <div class="scroller">
-        <div class="grid" id="grid"></div>
+      <div>
+        <label for="seed">Seeding</label><br />
+        <select id="seed">
+          <option value="random" selected>Random</option>
+          <option value="list">Use list order</option>
+        </select>
       </div>
-    </section>
+    </div>
 
-    <footer style="margin-top:26px; text-align:center; opacity:.7">
-      <img src="assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="Chalky Trousers" style="height:36px; width:auto">
-    </footer>
-  </div>
+    <div class="spacer"></div>
+    <div class="row">
+      <!-- Generate first, then Fill Test Names -->
+      <button class="btn" id="genBtn">Generate Bracket</button>
+      <button class="btn ghost" id="fillBtn">Fill Test Names</button>
+      <button class="btn ghost" id="resetBtn">Reset</button>
+    </div>
+
+    <p class="hint">
+      Tip: paste a list and we’ll trim blanks & de-dupe. “Match length” sets required wins
+      (e.g., best-of-3 → first to 2). Winners auto-advance as soon as a side reaches the target.
+    </p>
+  </section>
+
+  <!-- Save / Load -->
+  <section class="card">
+    <div class="row split">
+      <div class="row" style="gap:8px">
+        <div class="tag" id="metaPlayers">0 entered (0 unique)</div>
+        <div class="tag warn" id="metaDupes" style="display:none"></div>
+      </div>
+      <div class="tag" id="metaFormat">Format: Single Elimination</div>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="saveBtn">Save</button>
+      <button class="btn ghost" id="exportBtn">Export JSON</button>
+      <button class="btn ghost" id="importBtn">Import JSON</button>
+    </div>
+    <ol class="hint" style="margin-top:10px">
+      <li><strong>Autosave</strong> keeps your latest bracket in this browser (no login needed).</li>
+      <li><strong>Export JSON</strong> downloads a portable backup file.</li>
+      <li><strong>Import JSON</strong> restores a saved bracket from a file (with paste fallback).</li>
+    </ol>
+  </section>
+
+  <!-- Bracket -->
+  <section class="card">
+    <h2 class="underline">Bracket</h2>
+    <div class="bracket" id="bracket">
+      <div class="hint">Add players and click <strong>Generate Bracket</strong> to begin.</div>
+    </div>
+    <div style="margin-top:12px;text-align:center;opacity:.9">
+      <img src="./assets/Chalky%20Trousers%20Logo%20(Man)%20800x800%20HR_20250927_180303_0000.png" alt="Chalky Man" style="height:44px" />
+    </div>
+  </section>
+</div>
 
 <script>
-/* ---------- utilities ---------- */
-const storeKey = 'chalky.tourney.v0';
-const $ = sel => document.querySelector(sel);
-const el = (tag, cls, txt) => { const n=document.createElement(tag); if(cls) n.className=cls; if(txt!=null) n.textContent=txt; return n; };
-const toNextPow2 = n => (n<2?2:1<<Math.ceil(Math.log2(n)));
-const titleForRound = (r, total) => {
-  const fromEnd = total - r;
-  if(fromEnd===1) return 'Final';
-  if(fromEnd===2) return 'Semi-finals';
-  if(fromEnd===3) return 'Quarter-finals';
-  return `Round ${r+1}`;
+/* ------------ State & helpers ------------ */
+const LS_KEY = 'chalky.tourney.v2';
+
+let state = {
+  players: [],
+  rounds: [],          // rounds[r][m] = {a,b,scoreA,scoreB,winner}
+  series: 3,           // best-of
+  seed: 'random'
 };
 
-function cleanNames(raw){
-  return raw.split('\n')
-    .map(s=>s.trim())
-    .filter(Boolean)
-    .filter((v,i,a)=>a.indexOf(v)===i); // de-dupe
+const $ = sel => document.querySelector(sel);
+
+function uniqList(lines){
+  return [...new Set(lines.map(s => s.trim()).filter(Boolean).map(v=>v.toLowerCase()))]
+    .map(lower => {
+      // preserve first-cased instance from original lines
+      const idx = lines.findIndex(x => x.trim().toLowerCase() === lower);
+      return lines[idx].trim();
+    });
 }
 
-/* ---------- state ---------- */
-let bracket = null; // { rounds: [ [ {p1, p2, winnerIndex}, ... ], ... ], players: [...] }
-
-function buildBracket(players){
-  const names = [...players];
-  const size = toNextPow2(names.length);
-  while(names.length < size) names.push('bye');
-
-  // Round 0 pairings
-  const round0 = [];
-  for(let i=0;i<size;i+=2){
-    round0.push({ p1:names[i], p2:names[i+1], winnerIndex:null });
+function parsePlayersText(txt){
+  const lines = txt.split('\n').map(s=>s.trim()).filter(Boolean);
+  const rawCount = lines.length;
+  const seen = new Set();
+  let dupCount = 0;
+  for (const name of lines) {
+    const key = name.toLowerCase();
+    if (seen.has(key)) dupCount++;
+    else seen.add(key);
   }
-  const rounds = [round0];
+  return { rawCount, uniqueCount: seen.size, dupCount };
+}
 
-  // Subsequent rounds – create empty slots
-  let matches = size/2;
-  while(matches > 1){
-    const r = new Array(matches/2).fill(0).map(_=>({p1:'', p2:'', winnerIndex:null}));
-    rounds.push(r);
-    matches/=2;
+function updatePlayerMeta(){
+  const { rawCount, uniqueCount, dupCount } = parsePlayersText($('#players').value);
+  $('#metaPlayers').textContent = `${rawCount} entered (${uniqueCount} unique)`;
+  const dupEl = $('#metaDupes');
+  const genBtn = $('#genBtn');
+
+  if (dupCount > 0) {
+    dupEl.style.display = '';
+    dupEl.textContent = `${dupCount} duplicate${dupCount===1?'':'s'}`;
+  } else {
+    dupEl.style.display = 'none';
   }
-  return { players:names, rounds };
+
+  // Enable Generate only if >=2 unique and no duplicates
+  const canGen = uniqueCount >= 2 && dupCount === 0;
+  genBtn.disabled = !canGen;
 }
 
-function autosave(){
-  if(!bracket) return;
-  localStorage.setItem(storeKey, JSON.stringify(bracket));
-}
-function loadSaved(){
-  const raw = localStorage.getItem(storeKey);
-  if(!raw) return null;
-  try { return JSON.parse(raw); } catch(_) { return null; }
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
 }
 
-/* ---------- rendering ---------- */
+function requiredWins(series){ return Math.floor(series/2)+1; }
+function nextPow2(n){ let p=1; while(p<n) p<<=1; return Math.max(2,p); }
+
+/* ------------ Bracket generation ------------ */
+function buildFirstRound(players){
+  const n = players.length;
+  const size = nextPow2(n);
+  const byes = size - n;
+  const list = players.slice();
+  for(let i=0;i<byes;i++) list.push(null);
+
+  const matches=[];
+  for(let i=0;i<list.length;i+=2){
+    const m = { a:list[i], b:list[i+1], scoreA:0, scoreB:0, winner:null };
+    if(m.a && !m.b) m.winner = m.a;
+    if(!m.a && m.b) m.winner = m.b;
+    matches.push(m);
+  }
+  return matches;
+}
+
+function buildEmptyNextRound(prev){
+  const next=[];
+  for(let i=0;i<prev.length;i+=2){
+    next.push({a:null,b:null,scoreA:0,scoreB:0,winner:null});
+  }
+  return next;
+}
+
+function seedIntoNextRound(roundIdx){
+  if(roundIdx >= state.rounds.length-1) return;
+  const cur = state.rounds[roundIdx];
+  const nxt = state.rounds[roundIdx+1];
+  for(let i=0;i<nxt.length;i++){
+    const left = cur[2*i]?.winner ?? null;
+    const right = cur[2*i+1]?.winner ?? null;
+    nxt[i].a = left;
+    nxt[i].b = right;
+    if(left && !right) nxt[i].winner = left;
+    else if(!left && right) nxt[i].winner = right;
+    else if(!left && !right) nxt[i].winner = null;
+  }
+}
+
+function roundTitles(count){
+  const names=[];
+  for(let i=0;i<count;i++){
+    const remaining = count - i;
+    if(remaining===1) names.push('Final');
+    else if(remaining===2) names.push('Semi-finals');
+    else if(remaining===3) names.push('Quarter-finals');
+    else names.push(`Round ${i+1}`);
+  }
+  return names;
+}
+
+/* ------------ Rendering ------------ */
 function render(){
-  const wrap = $('#bracketWrap');
-  const grid = $('#grid');
-  if(!bracket){ wrap.style.display='none'; grid.innerHTML=''; return; }
-  wrap.style.display='block';
-  grid.innerHTML='';
+  $('#metaFormat').textContent = `Format: Single Elimination (Best-of-${state.series})`;
 
-  const totalRounds = bracket.rounds.length;
+  const container = document.createElement('div');
+  container.className = 'cols';
 
-  bracket.rounds.forEach((matches, rIndex)=>{
-    const roundCol = el('div','round');
-    roundCol.appendChild(el('div','round-title', titleForRound(rIndex,totalRounds)));
+  const titles = roundTitles(state.rounds.length);
+  state.rounds.forEach((round, rIdx)=>{
+    const col = document.createElement('div');
 
-    matches.forEach((m, mIndex)=>{
-      const card = el('div','match');
+    const t = document.createElement('div');
+    t.className='round-title';
+    t.textContent=titles[rIdx];
+    col.appendChild(t);
 
-      const s1 = el('div','slot'+(m.p1 ? '' : ' empty'));
-      s1.appendChild(el('span','', m.p1 || '—'));
-      const b1 = el('button','win-btn'+(m.winnerIndex===0?' active':''),'Win');
-      b1.addEventListener('click', ()=> setWinner(rIndex, mIndex, 0));
-      s1.appendChild(b1);
+    round.forEach((m, mIdx)=>{
+      const card = document.createElement('div');
+      card.className='match';
 
-      const vs = el('div','vs','VS');
+      const row = document.createElement('div');
+      row.className='match-row';
 
-      const s2 = el('div','slot'+(m.p2 ? '' : ' empty'));
-      s2.appendChild(el('span','', m.p2 || '—'));
-      const b2 = el('button','win-btn'+(m.winnerIndex===1?' active':''),'Win');
-      b2.addEventListener('click', ()=> setWinner(rIndex, mIndex, 1));
-      s2.appendChild(b2);
+      const a = document.createElement('div');
+      a.className='box';
+      a.innerHTML = `<span class="name">${m.a ?? '<em>bye</em>'}</span>`;
+      const as = document.createElement('div');
+      as.className='score';
+      const aInput = document.createElement('input');
+      aInput.type='number'; aInput.min='0'; aInput.step='1';
+      aInput.value = m.scoreA || 0;
+      aInput.disabled = !(m.a && m.b);
+      as.appendChild(aInput);
+      a.appendChild(as);
 
-      // bye handling hint
-      if(m.p1==='bye' && m.p2!=='bye') b2.classList.add('active');
-      if(m.p2==='bye' && m.p1!=='bye') b1.classList.add('active');
+      const vs = document.createElement('div');
+      vs.className='vs';
+      vs.textContent='VS';
 
-      card.appendChild(s1); card.appendChild(vs); card.appendChild(s2);
-      roundCol.appendChild(card);
+      const b = document.createElement('div');
+      b.className='box';
+      b.innerHTML = `<span class="name">${m.b ?? '<em>bye</em>'}</span>`;
+      const bs = document.createElement('div');
+      bs.className='score';
+      const bInput = document.createElement('input');
+      bInput.type='number'; bInput.min='0'; bInput.step='1';
+      bInput.value = m.scoreB || 0;
+      bInput.disabled = !(m.a && m.b);
+      bs.appendChild(bInput);
+      b.appendChild(bs);
+
+      // winner highlight
+      if(m.winner){
+        if(m.winner===m.a) a.style.boxShadow='0 0 0 2px var(--accent) inset';
+        if(m.winner===m.b) b.style.boxShadow='0 0 0 2px var(--accent) inset';
+      }
+
+      // input handlers
+      if(m.a && m.b){
+        const handler = ()=>{
+          m.scoreA = parseInt(aInput.value||'0',10);
+          m.scoreB = parseInt(bInput.value||'0',10);
+          const need = requiredWins(state.series);
+          let winner = null;
+
+          if(m.scoreA>=need || m.scoreB>=need){
+            if(m.scoreA!==m.scoreB){
+              winner = (m.scoreA>m.scoreB) ? m.a : m.b;
+            }
+          }else if(state.series===1){
+            // best-of-1: as soon as both numbers present, higher wins
+            if(aInput.value!=='' && bInput.value!==''){
+              if(m.scoreA>m.scoreB) winner = m.a;
+              else if(m.scoreB>m.scoreA) winner = m.b;
+            }
+          }
+
+          m.winner = winner;
+          seedIntoNextRound(rIdx);
+          for(let i=rIdx+1;i<state.rounds.length;i++) seedIntoNextRound(i);
+          saveLS();
+          render();
+        };
+        aInput.addEventListener('input', handler);
+        bInput.addEventListener('input', handler);
+      }
+
+      row.appendChild(a); row.appendChild(vs); row.appendChild(b);
+      card.appendChild(row);
+      col.appendChild(card);
     });
 
-    grid.appendChild(roundCol);
-  });
-}
-
-function setWinner(rIndex, mIndex, winnerIdx){
-  const round = bracket.rounds[rIndex];
-  const match = round[mIndex];
-  if(!match) return;
-
-  match.winnerIndex = winnerIdx;
-
-  // Advance to next round if not the final
-  if(rIndex < bracket.rounds.length - 1){
-    const nextRound = bracket.rounds[rIndex+1];
-    const targetMatch = Math.floor(mIndex/2);
-    const targetSlot = mIndex % 2; // 0 -> left, 1 -> right
-
-    const winnerName = (winnerIdx===0) ? match.p1 : match.p2;
-
-    if(targetSlot===0) nextRound[targetMatch].p1 = winnerName;
-    else               nextRound[targetMatch].p2 = winnerName;
-
-    // Auto-advance if winner is a bye
-    if(winnerName==='bye'){
-      // choose other slot as automatic winner if present
-      const other = (winnerIdx===0)? match.p2 : match.p1;
-      const realWinner = other || 'bye';
-      if(targetSlot===0) nextRound[targetMatch].p1 = realWinner;
-      else               nextRound[targetMatch].p2 = realWinner;
-    }
-  }
-  autosave();
-  render();
-}
-
-/* ---------- actions ---------- */
-function generateFromTextarea(){
-  const names = cleanNames($('#playersBox').value);
-  $('#countPill').textContent = `${names.length} players`;
-
-  if(names.length < 2){
-    alert('Add at least 2 players.'); return;
-  }
-  bracket = buildBracket(names);
-
-  // auto-advance any BYE in round 0
-  bracket.rounds[0].forEach((m,i)=>{
-    if(m.p1==='bye' && m.p2!=='bye') setWinner(0,i,1);
-    else if(m.p2==='bye' && m.p1!=='bye') setWinner(0,i,0);
+    container.appendChild(col);
   });
 
-  render();
-  autosave();
-  // scroll bracket into view
-  $('#bracketWrap').scrollIntoView({behavior:'smooth', block:'start'});
+  const host = document.getElementById('bracket');
+  host.innerHTML = '';
+  host.appendChild(container);
 }
 
-function exportJSON(){
-  if(!bracket){ alert('Nothing to export yet.'); return; }
-  const blob = new Blob([JSON.stringify(bracket,null,2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'chalky_bracket.json';
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
+/* ------------ Persistence ------------ */
+function saveLS(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+function loadLS(){
+  const raw = localStorage.getItem(LS_KEY);
+  if(!raw) return false;
+  try{
+    const obj = JSON.parse(raw);
+    if(!obj || !obj.rounds) return false;
+    state = obj; return true;
+  }catch{ return false; }
 }
 
-function importJSON(){
-  const input = document.createElement('input');
-  input.type='file'; input.accept='application/json';
-  input.onchange = e=>{
-    const file = e.target.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      try{
-        const data = JSON.parse(reader.result);
-        if(!data || !Array.isArray(data.rounds)) throw new Error('Bad format');
-        bracket = data; render(); autosave();
-        $('#bracketWrap').style.display='block';
-      }catch(err){
-        alert('Invalid JSON.');
-      }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
+/* ------------ Actions ------------ */
+function generate(){
+  // enforce unique before generating
+  const lines = $('#players').value.split('\n').map(s=>s.trim());
+  const unique = uniqList(lines);
+  const { dupCount, uniqueCount } = parsePlayersText($('#players').value);
 
-function resetAll(){
-  if(confirm('Clear the current bracket and saved data?')){
-    bracket = null;
-    localStorage.removeItem(storeKey);
-    render();
-    $('#playersBox').value='';
-    $('#countPill').textContent = '0 players';
-    $('#bracketWrap').style.display='none';
+  if(dupCount>0 || uniqueCount<2){
+    // flash the button to indicate why it won't proceed
+    $('#genBtn').classList.remove('warnpulse');
+    void $('#genBtn').offsetWidth; // reflow to restart animation
+    $('#genBtn').classList.add('warnpulse');
+    return;
   }
+
+  let players = unique;
+  if($('#seed').value==='random') shuffle(players);
+
+  state.players = players;
+  state.series = parseInt($('#series').value,10)||3;
+  state.seed = $('#seed').value;
+
+  const first = buildFirstRound(players);
+  const rounds = [first];
+  let cur = first;
+  while(cur.length>1){
+    const next = buildEmptyNextRound(cur);
+    rounds.push(next);
+    cur = next;
+  }
+  state.rounds = rounds;
+
+  // propagate any auto winners (from BYEs) forward
+  for(let i=0;i<state.rounds.length-1;i++) seedIntoNextRound(i);
+
+  saveLS();
+  render();
+  document.querySelector('.bracket').scrollLeft = 0;
 }
 
-/* ---------- wiring ---------- */
-$('#fillBtn').addEventListener('click', ()=>{
-  $('#playersBox').value = `Alice
+function fillTest(){
+  $('#players').value = `Alice
 Bob
 Charlie
 Dana
@@ -324,24 +421,62 @@ Eddie
 Frank
 Georgia
 Hector`;
-  $('#countPill').textContent = '8 players';
-});
-$('#playersBox').addEventListener('input', ()=>{
-  const n = cleanNames($('#playersBox').value).length;
-  $('#countPill').textContent = `${n} players`;
-});
-$('#genBtn').addEventListener('click', generateFromTextarea);
-$('#saveBtn').addEventListener('click', autosave);
-$('#exportBtn').addEventListener('click', exportJSON);
-$('#importBtn').addEventListener('click', importJSON);
+  updatePlayerMeta();
+}
+
+function resetAll(){
+  if(!confirm('Clear players and bracket?')) return;
+  state = {players:[],rounds:[],series:3,seed:'random'};
+  saveLS();
+  $('#players').value='';
+  document.getElementById('bracket').innerHTML = '<div class="hint">Add players and click <strong>Generate Bracket</strong> to begin.</div>';
+  updatePlayerMeta();
+}
+
+/* ------------ Import / Export ------------ */
+function download(filename, text){
+  const blob = new Blob([text], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+}
+function exportJSON(){ download('chalky-tournament.json', JSON.stringify(state,null,2)); }
+function importJSON(){
+  const input = document.createElement('input');
+  input.type='file'; input.accept='application/json';
+  input.onchange = (e)=>{
+    const file = e.target.files?.[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const obj = JSON.parse(reader.result);
+        if(!obj || !Array.isArray(obj.rounds)) throw new Error();
+        state = obj; saveLS(); render();
+      }catch{ alert('Invalid JSON.'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+/* ------------ Wire up ------------ */
+$('#genBtn').addEventListener('click', generate);
+$('#fillBtn').addEventListener('click', fillTest);
 $('#resetBtn').addEventListener('click', resetAll);
 
-/* load autosave on boot */
-const saved = loadSaved();
-if(saved){
-  bracket = saved; render();
-  $('#bracketWrap').style.display='block';
-}
+$('#saveBtn').addEventListener('click', saveLS);
+$('#exportBtn').addEventListener('click', exportJSON);
+$('#importBtn').addEventListener('click', importJSON);
+
+$('#players').addEventListener('input', updatePlayerMeta);
+$('#series').addEventListener('change', updatePlayerMeta);
+$('#seed').addEventListener('change', updatePlayerMeta);
+
+/* ------------ Init ------------ */
+if(loadLS()){ render(); }
+updatePlayerMeta();
 </script>
 </body>
 </html>
