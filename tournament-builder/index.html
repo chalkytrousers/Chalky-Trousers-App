@@ -17,72 +17,54 @@
   }
   .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
 
-  /* Header (same as homepage) */
+  /* Header (same vibe as homepage, no brand paragraph) */
   header{
-    margin-top: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    text-align: center;
+    margin-top:40px; display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center;
   }
-  header img { width: 220px; max-width: 80%; }
-  header h1 {
-    font-size: 1.8rem; margin-top: 10px; color: #fff; letter-spacing: 1px;
-  }
-  header p {
-    color: #9aa3a7; max-width: 650px; margin: 0 auto 20px;
-    line-height: 1.6em; font-size: 1rem;
-  }
-  .brand-intro{
-    color:#9aa3a7; font-size:1.05rem; line-height:1.7em;
-    max-width:700px; margin:10px auto 20px;
-  }
-  .brand-intro em{ color:#ddd; font-style:normal; }
+  header img{ width:220px; max-width:80%; }
+  header h1{ font-size:1.8rem; margin-top:10px; color:#fff; letter-spacing:1px; }
+  header p{ color:#9aa3a7; max-width:650px; margin:0 auto 10px; line-height:1.6em; font-size:1rem; }
   .back-btn{
-    display:inline-block; margin:20px auto 30px; background:#111; color:#fff;
+    display:inline-block; margin:18px auto 28px; background:#111; color:#fff;
     border:1px solid #1f1f1f; border-radius:10px; padding:10px 18px; font-size:15px;
     text-decoration:none; transition:background .2s ease, transform .1s ease;
   }
   .back-btn:hover{ background:#151515; transform:translateY(-2px); }
 
-  /* Existing app styles */
-  .lead{
-    background:var(--card); border-radius:14px; padding:18px;
-    display:grid; gap:16px; margin-bottom:18px;
-  }
-  .lead h2{margin:0 0 6px; font-size:18px}
+  /* App styles (unchanged) */
+  .lead{ background:var(--card); border-radius:14px; padding:18px; display:grid; gap:16px; margin-bottom:18px; }
+  .lead h2{ margin:0 0 6px; font-size:18px; }
   textarea{
     width:100%; min-height:160px; resize:vertical; border:0; outline:0;
     border-radius:10px; padding:12px; background:#0f0f0f; color:#fff; font-size:15px;
   }
-  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .row{ display:flex; gap:10px; flex-wrap:wrap; }
   button{
     background:#1b1b1b; color:#fff; border:0; border-radius:10px; padding:12px 16px;
     font-weight:600; cursor:pointer; transition:transform .05s ease, box-shadow .25s ease;
     box-shadow:0 0 18px 0 rgba(34,255,109,0.0);
   }
   button.primary{ background:#111; box-shadow:0 0 24px 4px rgba(34,255,109,.15); }
-  button:hover{transform:translateY(-1px)}
-  .pill{background:#0e0e0e; color:#cfd6d9; border:1px solid #1f1f1f; padding:8px 12px; border-radius:999px; font-size:13px}
+  button:hover{ transform:translateY(-1px); }
+  .pill{ background:#0e0e0e; color:#cfd6d9; border:1px solid #1f1f1f; padding:8px 12px; border-radius:999px; font-size:13px; }
 
-  .bracket-wrap{background:var(--card); border-radius:16px; padding:18px; margin-top:18px;}
-  .bracket-head{display:flex; align-items:center; gap:10px; margin-bottom:12px}
-  .underline{height:3px; width:160px; background:var(--accent); border-radius:3px}
-  .scroller{overflow-x:auto; padding-bottom:10px; margin:-6px; padding:6px;}
-  .grid{display:grid; grid-auto-flow:column; grid-auto-columns:minmax(250px, 1fr); gap:16px; min-height:180px}
-  .round{display:flex; flex-direction:column; gap:16px}
-  .round-title{color:#bcd; font-weight:700; margin-bottom:2px}
-  .match{background:#121212; border:1px solid #1f1f1f; border-radius:14px; padding:12px;}
+  .bracket-wrap{ background:var(--card); border-radius:16px; padding:18px; margin-top:18px; }
+  .bracket-head{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .underline{ height:3px; width:160px; background:var(--accent); border-radius:3px; }
+  .scroller{ overflow-x:auto; padding-bottom:10px; margin:-6px; padding:6px; }
+  .grid{ display:grid; grid-auto-flow:column; grid-auto-columns:minmax(250px, 1fr); gap:16px; min-height:180px; }
+  .round{ display:flex; flex-direction:column; gap:16px; }
+  .round-title{ color:#bcd; font-weight:700; margin-bottom:2px; }
+  .match{ background:#121212; border:1px solid #1f1f1f; border-radius:14px; padding:12px; }
 
   .slot{
     display:grid; grid-template-columns:minmax(0,1fr) 48px 50px; align-items:center; gap:8px;
     background:#0f0f0f; border:1px solid #1d1d1d; border-radius:12px; padding:10px 12px; margin-bottom:10px;
   }
-  .slot.empty{opacity:.55; font-style:italic}
-  .slot > span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .slot.empty{ opacity:.55; font-style:italic; }
+  .slot > span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-  .vs{text-align:center; color:var(--accent); font-weight:800; letter-spacing:1px; margin:6px 0}
+  .vs{ text-align:center; color:var(--accent); font-weight:800; letter-spacing:1px; margin:6px 0; }
 
   .score{
     width:48px; min-width:48px; text-align:center;
@@ -94,17 +76,14 @@
     background:#0c1320; border:1px solid #1f2a3a; color:#d4e7ff;
     padding:6px 8px; border-radius:999px; font-size:13px;
   }
-  .win-btn.active{background:#153a22; border-color:#1d5a36; color:#bff5d4}
+  .win-btn.active{ background:#153a22; border-color:#1d5a36; color:#bff5d4; }
 
-  .notice{color:#a8b2b8; font-size:13px}
-  .footer-actions{margin-top:14px; display:flex; flex-wrap:wrap; gap:10px}
+  .notice{ color:#a8b2b8; font-size:13px; }
+  .footer-actions{ margin-top:14px; display:flex; flex-wrap:wrap; gap:10px; }
 
-  @media (max-width:640px){
-    header h1{font-size:18px}
-    .grid{grid-auto-columns:minmax(220px, 1fr)}
-  }
+  @media (max-width:640px){ header h1{font-size:18px} .grid{grid-auto-columns:minmax(220px, 1fr)} }
   @media (max-width:420px){
-    .slot{ grid-template-columns: minmax(0,1fr) 42px 48px; gap:6px; }
+    .slot{ grid-template-columns:minmax(0,1fr) 42px 48px; gap:6px; }
     .score{ width:42px; min-width:42px; }
     .slot > span{ font-size:.95rem; }
   }
@@ -129,17 +108,8 @@
       <img src="/Chalky-Trousers-App/assets/Chalky%20Trousers%20Logo%20(Text)%20800x500%20HR_20250927_180240_0001.png" alt="Chalky Trousers Logo">
       <h1>Chalky Trousers — Knockout Bracket</h1>
       <p>A growing collection of tools for the cue sports community — built by Chalky Trousers.</p>
-      <div class="brand-intro">
-        <strong>Chalky Trousers</strong> is a cue sports brand for players who care about quality, precision, and the small details that make the game feel good —
-        <em>for players who take their game seriously, even if they don’t take themselves too seriously.</em>
-      </div>
-      <a
-  href="https://chalkytrousers.github.io/Chalky-Trousers-App/"
-  class="back-btn"
-  onclick="window.location.href='https://chalkytrousers.github.io/Chalky-Trousers-App/'; return false;"
->
-  ← Back to Home
-</a>
+      <a href="https://chalkytrousers.github.io/Chalky-Trousers-App/" class="back-btn"
+         onclick="window.location.href='https://chalkytrousers.github.io/Chalky-Trousers-App/'; return false;">← Back to Home</a>
     </header>
 
     <!-- App UI -->
@@ -284,7 +254,7 @@ function clearAdvance(rIndex, mIndex){
   else               nextRound[targetMatch].p2 = '';
 }
 
-/* ---------- rendering ---------- */
+/* ---------- rendering (hide bye-only R1 matches) ---------- */
 function render(){
   const wrap = $('#bracketWrap');
   const grid = $('#grid');
@@ -296,20 +266,40 @@ function render(){
 
   bracket.rounds.forEach((matches, rIndex)=>{
     const roundCol = el('div','round');
-    roundCol.appendChild(el('div','round-title', titleForRound(rIndex,totalRounds)));
 
-    matches.forEach((m, mIndex)=>{
+    const title = rIndex === 0 ? 'Round 1' : titleForRound(rIndex,totalRounds);
+    roundCol.appendChild(el('div','round-title', title));
+
+    let visibleMatches = matches;
+    let byeCount = 0;
+    if (rIndex === 0) {
+      // count single-bye matches in R1
+      byeCount = matches.filter(m =>
+        (m.p1 === 'bye' && m.p2 !== 'bye') || (m.p2 === 'bye' && m.p1 !== 'bye')
+      ).length;
+
+      // show only matches with two real players
+      visibleMatches = matches.filter(m => m.p1 !== 'bye' && m.p2 !== 'bye');
+    }
+
+    if (rIndex === 0 && byeCount > 0) {
+      const note = el('div','notice', `${byeCount} bye${byeCount>1?'s':''} awarded — auto-advanced to next round`);
+      note.style.margin = '0 0 8px 2px';
+      roundCol.appendChild(note);
+    }
+
+    visibleMatches.forEach((m)=>{
+      const mIndex = matches.indexOf(m); // original index for handlers
+
       const card = el('div','match');
 
       const s1 = el('div','slot'+(m.p1 ? '' : ' empty'));
       s1.appendChild(el('span','', m.p1 || '—'));
-
       const i1 = document.createElement('input');
       i1.type='number'; i1.min='0'; i1.step='1'; i1.className='score';
       if(m.s1!=null) i1.value = m.s1;
       i1.addEventListener('input', ()=> handleScore(rIndex, mIndex, 0, i1.value));
       s1.appendChild(i1);
-
       const b1 = el('button','win-btn'+(m.winnerIndex===0?' active':''),'Win');
       b1.addEventListener('click', ()=> setWinner(rIndex, mIndex, 0));
       s1.appendChild(b1);
@@ -318,18 +308,15 @@ function render(){
 
       const s2 = el('div','slot'+(m.p2 ? '' : ' empty'));
       s2.appendChild(el('span','', m.p2 || '—'));
-
       const i2 = document.createElement('input');
       i2.type='number'; i2.min='0'; i2.step='1'; i2.className='score';
       if(m.s2!=null) i2.value = m.s2;
       i2.addEventListener('input', ()=> handleScore(rIndex, mIndex, 1, i2.value));
       s2.appendChild(i2);
-
       const b2 = el('button','win-btn'+(m.winnerIndex===1?' active':''),'Win');
       b2.addEventListener('click', ()=> setWinner(rIndex, mIndex, 1));
       s2.appendChild(b2);
 
-      // bye hint
       if(m.p1==='bye' && m.p2!=='bye') b2.classList.add('active');
       if(m.p2==='bye' && m.p1!=='bye') b1.classList.add('active');
 
@@ -353,12 +340,10 @@ function setWinner(rIndex, mIndex, winnerIdx){
 function handleScore(rIndex, mIndex, side, rawVal){
   const match = bracket.rounds[rIndex][mIndex];
   const val = rawVal === '' ? null : Math.max(0, parseInt(rawVal,10) || 0);
-  if(side===0) match.s1 = val;
-  else         match.s2 = val;
+  if(side===0) match.s1 = val; else match.s2 = val;
 
   if(match.s1!=null && match.s2!=null && match.s1!==match.s2){
-    const winnerIdx = match.s1 > match.s2 ? 0 : 1;
-    match.winnerIndex = winnerIdx;
+    match.winnerIndex = match.s1 > match.s2 ? 0 : 1;
     advanceWinner(rIndex, mIndex);
   } else {
     match.winnerIndex = null;
@@ -382,8 +367,7 @@ function generateFromTextarea(){
     else if(m.p2==='bye' && m.p1!=='bye'){ m.winnerIndex=0; advanceWinner(0,i); }
   });
 
-  render();
-  autosave();
+  render(); autosave();
   $('#bracketWrap').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
@@ -409,9 +393,7 @@ function importJSON(){
         if(!data || !Array.isArray(data.rounds)) throw new Error('Bad format');
         bracket = data; render(); autosave();
         $('#bracketWrap').style.display='block';
-      }catch(err){
-        alert('Invalid JSON.');
-      }
+      }catch(err){ alert('Invalid JSON.'); }
     };
     reader.readAsText(file);
   };
