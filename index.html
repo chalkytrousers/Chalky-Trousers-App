@@ -34,7 +34,7 @@
     h1 {
       font-size: 1.8rem;
       margin-top: 10px;
-      color: var(--accent);
+      color: #fff; /* now white */
       letter-spacing: 1px;
     }
     p {
@@ -52,7 +52,7 @@
       max-width: 700px;
       margin: 0 auto;
     }
-    a.card {
+    a.card, .card {
       background: var(--card);
       border: 1px solid #1f1f1f;
       border-radius: var(--radius);
@@ -65,10 +65,27 @@
       transform: translateY(-4px);
       box-shadow: 0 0 25px rgba(34, 255, 109, 0.3);
     }
-    a.card h2 {
+    a.card h2, .card h2 {
       color: var(--accent);
       margin-bottom: 10px;
       font-size: 1.2rem;
+    }
+    .coming-soon {
+      opacity: 0.5;
+      position: relative;
+    }
+    .coming-soon::after {
+      content: "COMING SOON";
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: var(--accent);
+      color: #000;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      letter-spacing: 0.5px;
     }
     footer {
       margin: 60px 0 20px;
@@ -95,10 +112,26 @@
       <h2>🏆 Tournament Builder</h2>
       <p>Create and manage knockout brackets with auto-saving and score tracking.</p>
     </a>
+
     <a class="card" href="doubles-randomiser/">
       <h2>🎱 Doubles Randomiser</h2>
-      <p>Shuffle players and generate random doubles match-ups — complete with animation.</p>
+      <p>Shuffle players and generate random doubles match-ups between teams.</p>
     </a>
+
+    <div class="card coming-soon">
+      <h2>🔥 Singles Draw Generator</h2>
+      <p>Randomly seed single-player fixtures with auto BYE handling and first-round matchups.</p>
+    </div>
+
+    <div class="card coming-soon">
+      <h2>📊 Player Form Tracker</h2>
+      <p>Track win percentages and generate player form summaries across matches.</p>
+    </div>
+
+    <div class="card coming-soon">
+      <h2>🧠 Match Predictor</h2>
+      <p>Predict outcomes using player stats, head-to-heads, and recent form trends.</p>
+    </div>
   </main>
 
   <footer>
