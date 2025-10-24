@@ -17,7 +17,8 @@
   }
   .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
   header{display:flex; align-items:center; gap:12px; margin-bottom:16px}
-  header img{height:42px; width:auto}
+  /* Bigger written logo in the header */
+  header img{height:56px; width:auto}
   header h1{font-size:22px; margin:0; letter-spacing:.3px}
   .lead{
     background:var(--card); border-radius:14px; padding:18px;
@@ -58,12 +59,12 @@
     background:#121212; border:1px solid #1f1f1f; border-radius:14px; padding:12px;
   }
 
-  /* ALIGNMENT FIX: three equal columns Name | Score | Win */
+  /* ---- alignment update: give the name more space, keep score + Win aligned ---- */
   .slot{
     display:grid;
-    grid-template-columns: 1fr 56px 54px; /* name grows, score fixed, button fixed */
+    grid-template-columns: minmax(0,1fr) 48px 50px; /* name grows */
     align-items:center;
-    gap:10px;
+    gap:8px;
 
     background:#0f0f0f; border:1px solid #1d1d1d; border-radius:12px;
     padding:10px 12px; margin-bottom:10px;
@@ -79,30 +80,37 @@
   .vs{ text-align:center; color:var(--accent); font-weight:800; letter-spacing:1px; margin:6px 0}
 
   .score{
-    width:56px; min-width:56px; text-align:center;
+    width:48px; min-width:48px; text-align:center;
     border:1px solid #262626; border-radius:10px;
-    background:#101010; color:#fff; padding:6px 6px; font-weight:700;
+    background:#101010; color:#fff; padding:6px 4px; font-weight:700;
   }
 
   .win-btn{
-    min-width:54px; text-align:center;
+    min-width:50px; text-align:center;
     background:#0c1320; border:1px solid #1f2a3a; color:#d4e7ff;
-    padding:6px 10px; border-radius:999px; font-size:13px;
+    padding:6px 8px; border-radius:999px; font-size:13px;
   }
   .win-btn.active{background:#153a22; border-color:#1d5a36; color:#bff5d4}
 
   .notice{color:#a8b2b8; font-size:13px}
   .footer-actions{margin-top:14px; display:flex; flex-wrap:wrap; gap:10px}
+
   @media (max-width:640px){
     header h1{font-size:18px}
     .grid{grid-auto-columns:minmax(220px, 1fr)}
+  }
+  @media (max-width:420px){
+    .slot{ grid-template-columns: minmax(0,1fr) 42px 48px; gap:6px; }
+    .score{ width:42px; min-width:42px; }
+    .slot > span{ font-size:.95rem; }
   }
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <img src="assets/Chalky Trousers Logo (Man) 800x800 HR_20250927_180303_0000.png" alt="Chalky">
+      <!-- Swapped to written logo and enlarged -->
+      <img src="assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="Chalky Trousers">
       <h1>Chalky Trousers — Knockout Bracket</h1>
     </header>
 
@@ -166,22 +174,24 @@ function cleanNames(raw){
 }
 
 /* ---------- state ---------- */
-let bracket = null; // { rounds: [ [ {p1, p2, s1, s2, winnerIndex}, ... ], ... ], players: [...] }
+let bracket = null; // { rounds: [ [ {p1, p2, winnerIndex, s1, s2}, ... ], ... ], players: [...] }
 
 function buildBracket(players){
   const names = [...players];
   const size = toNextPow2(names.length);
   while(names.length < size) names.push('bye');
 
+  // Round 0 pairings
   const round0 = [];
   for(let i=0;i<size;i+=2){
-    round0.push({ p1:names[i], p2:names[i+1], s1:null, s2:null, winnerIndex:null });
+    round0.push({ p1:names[i], p2:names[i+1], winnerIndex:null, s1:null, s2:null });
   }
   const rounds = [round0];
 
+  // Subsequent rounds – create empty slots
   let matches = size/2;
   while(matches > 1){
-    const r = new Array(matches/2).fill(0).map(_=>({p1:'', p2:'', s1:null, s2:null, winnerIndex:null}));
+    const r = new Array(matches/2).fill(0).map(_=>({p1:'', p2:'', winnerIndex:null, s1:null, s2:null}));
     rounds.push(r);
     matches/=2;
   }
@@ -196,6 +206,30 @@ function loadSaved(){
   const raw = localStorage.getItem(storeKey);
   if(!raw) return null;
   try { return JSON.parse(raw); } catch(_) { return null; }
+}
+
+/* ---------- advancement helpers ---------- */
+function advanceWinner(rIndex, mIndex){
+  const round = bracket.rounds[rIndex];
+  const match = round[mIndex];
+  if(rIndex >= bracket.rounds.length - 1) return; // final
+
+  const nextRound = bracket.rounds[rIndex+1];
+  const targetMatch = Math.floor(mIndex/2);
+  const targetSlot = mIndex % 2; // 0 -> left, 1 -> right
+  const winnerName = match.winnerIndex===0 ? match.p1 : match.p2;
+
+  if(targetSlot===0) nextRound[targetMatch].p1 = winnerName;
+  else               nextRound[targetMatch].p2 = winnerName;
+}
+
+function clearAdvance(rIndex, mIndex){
+  if(rIndex >= bracket.rounds.length - 1) return;
+  const nextRound = bracket.rounds[rIndex+1];
+  const targetMatch = Math.floor(mIndex/2);
+  const targetSlot = mIndex % 2;
+  if(targetSlot===0) nextRound[targetMatch].p1 = '';
+  else               nextRound[targetMatch].p2 = '';
 }
 
 /* ---------- rendering ---------- */
@@ -215,42 +249,37 @@ function render(){
     matches.forEach((m, mIndex)=>{
       const card = el('div','match');
 
-      // slot 1
       const s1 = el('div','slot'+(m.p1 ? '' : ' empty'));
-      const name1 = el('span','', m.p1 || '—');
-      const inp1  = document.createElement('input');
-      inp1.type='number'; inp1.min='0'; inp1.className='score';
-      inp1.value = (m.s1 ?? '') + '';
-      const b1 = el('button','win-btn'+(m.winnerIndex===0?' active':''),'Win');
+      s1.appendChild(el('span','', m.p1 || '—'));
 
-      s1.appendChild(name1);
-      s1.appendChild(inp1);
+      const i1 = document.createElement('input');
+      i1.type='number'; i1.min='0'; i1.step='1'; i1.className='score';
+      if(m.s1!=null) i1.value = m.s1;
+      i1.addEventListener('input', ()=> handleScore(rIndex, mIndex, 0, i1.value));
+      s1.appendChild(i1);
+
+      const b1 = el('button','win-btn'+(m.winnerIndex===0?' active':''),'Win');
+      b1.addEventListener('click', ()=> setWinner(rIndex, mIndex, 0));
       s1.appendChild(b1);
 
-      // VS
       const vs = el('div','vs','VS');
 
-      // slot 2
       const s2 = el('div','slot'+(m.p2 ? '' : ' empty'));
-      const name2 = el('span','', m.p2 || '—');
-      const inp2  = document.createElement('input');
-      inp2.type='number'; inp2.min='0'; inp2.className='score';
-      inp2.value = (m.s2 ?? '') + '';
-      const b2 = el('button','win-btn'+(m.winnerIndex===1?' active':''),'Win');
+      s2.appendChild(el('span','', m.p2 || '—'));
 
-      s2.appendChild(name2);
-      s2.appendChild(inp2);
+      const i2 = document.createElement('input');
+      i2.type='number'; i2.min='0'; i2.step='1'; i2.className='score';
+      if(m.s2!=null) i2.value = m.s2;
+      i2.addEventListener('input', ()=> handleScore(rIndex, mIndex, 1, i2.value));
+      s2.appendChild(i2);
+
+      const b2 = el('button','win-btn'+(m.winnerIndex===1?' active':''),'Win');
+      b2.addEventListener('click', ()=> setWinner(rIndex, mIndex, 1));
       s2.appendChild(b2);
 
-      // Disable inputs for byes
-      if(m.p1==='bye'){ inp1.disabled = true; b1.disabled = true; }
-      if(m.p2==='bye'){ inp2.disabled = true; b2.disabled = true; }
-
-      // Handlers
-      b1.addEventListener('click', ()=> manualSetWinner(rIndex, mIndex, 0));
-      b2.addEventListener('click', ()=> manualSetWinner(rIndex, mIndex, 1));
-      inp1.addEventListener('input', ()=> handleScoreChange(rIndex, mIndex));
-      inp2.addEventListener('input', ()=> handleScoreChange(rIndex, mIndex));
+      // bye hint (buttons appear active to indicate who progresses if user wants to click)
+      if(m.p1==='bye' && m.p2!=='bye') b2.classList.add('active');
+      if(m.p2==='bye' && m.p1!=='bye') b1.classList.add('active');
 
       card.appendChild(s1); card.appendChild(vs); card.appendChild(s2);
       roundCol.appendChild(card);
@@ -260,72 +289,30 @@ function render(){
   });
 }
 
-/* set by clicking Win button */
-function manualSetWinner(rIndex, mIndex, winnerIdx){
-  const m = bracket.rounds[rIndex][mIndex];
-  // if both scores present and tie, ignore manual click until resolved
-  if(m.s1!=null && m.s2!=null && Number(m.s1)===Number(m.s2)) return;
-  setWinner(rIndex, mIndex, winnerIdx);
-}
-
-/* score-based winner */
-function handleScoreChange(rIndex, mIndex){
-  const m = bracket.rounds[rIndex][mIndex];
-  const card = m; // alias
-
-  // Pull current values from DOM
-  // (Re-query the two inputs inside the card via render-independent approach)
-  // Simpler: parse from bracket after render updates
-  // We'll scan grid for this match:
-  const roundNode = $('#grid').children[rIndex];
-  const matchNode = roundNode.querySelectorAll('.match')[mIndex];
-  const inputs = matchNode.querySelectorAll('input.score');
-  const s1 = inputs[0].value === '' ? null : Math.max(0, parseInt(inputs[0].value,10));
-  const s2 = inputs[1].value === '' ? null : Math.max(0, parseInt(inputs[1].value,10));
-
-  card.s1 = s1; card.s2 = s2;
-
-  // only decide when both scores are valid numbers
-  if(s1!=null && s2!=null){
-    if(s1 > s2) setWinner(rIndex, mIndex, 0);
-    else if(s2 > s1) setWinner(rIndex, mIndex, 1);
-    else{
-      // tie → clear winner & downstream slot (no change to names already advanced)
-      card.winnerIndex = null;
-      autosave();
-      render();
-    }
-  }else{
-    // one or both empty → just save scores, no winner highlight
-    autosave();
-  }
-}
-
 function setWinner(rIndex, mIndex, winnerIdx){
-  const round = bracket.rounds[rIndex];
-  const match = round[mIndex];
+  const match = bracket.rounds[rIndex][mIndex];
   if(!match) return;
-
   match.winnerIndex = winnerIdx;
+  advanceWinner(rIndex, mIndex);
+  autosave();
+  render();
+}
 
-  // Advance to next round if not the final
-  if(rIndex < bracket.rounds.length - 1){
-    const nextRound = bracket.rounds[rIndex+1];
-    const targetMatch = Math.floor(mIndex/2);
-    const targetSlot = mIndex % 2; // 0 -> left, 1 -> right
+function handleScore(rIndex, mIndex, side, rawVal){
+  const match = bracket.rounds[rIndex][mIndex];
+  const val = rawVal === '' ? null : Math.max(0, parseInt(rawVal,10) || 0);
+  if(side===0) match.s1 = val;
+  else         match.s2 = val;
 
-    const winnerName = (winnerIdx===0) ? match.p1 : match.p2;
-
-    if(targetSlot===0) nextRound[targetMatch].p1 = winnerName;
-    else               nextRound[targetMatch].p2 = winnerName;
-
-    // Auto-advance if winner is a bye
-    if(winnerName==='bye'){
-      const other = (winnerIdx===0)? match.p2 : match.p1;
-      const realWinner = other || 'bye';
-      if(targetSlot===0) nextRound[targetMatch].p1 = realWinner;
-      else               nextRound[targetMatch].p2 = realWinner;
-    }
+  // Only decide when both scores present and not equal
+  if(match.s1!=null && match.s2!=null && match.s1!==match.s2){
+    const winnerIdx = match.s1 > match.s2 ? 0 : 1;
+    match.winnerIndex = winnerIdx;
+    advanceWinner(rIndex, mIndex);
+  } else {
+    // unclear winner -> remove any advance
+    match.winnerIndex = null;
+    clearAdvance(rIndex, mIndex);
   }
   autosave();
   render();
@@ -335,21 +322,18 @@ function setWinner(rIndex, mIndex, winnerIdx){
 function generateFromTextarea(){
   const names = cleanNames($('#playersBox').value);
   $('#countPill').textContent = `${names.length} players`;
+  if(names.length < 2){ alert('Add at least 2 players.'); return; }
 
-  if(names.length < 2){
-    alert('Add at least 2 players.'); return;
-  }
   bracket = buildBracket(names);
 
-  // auto-advance any BYE in round 0
+  // Auto-advance BYEs in round 0
   bracket.rounds[0].forEach((m,i)=>{
-    if(m.p1==='bye' && m.p2!=='bye') setWinner(0,i,1);
-    else if(m.p2==='bye' && m.p1!=='bye') setWinner(0,i,0);
+    if(m.p1==='bye' && m.p2!=='bye'){ m.winnerIndex=1; advanceWinner(0,i); }
+    else if(m.p2==='bye' && m.p1!=='bye'){ m.winnerIndex=0; advanceWinner(0,i); }
   });
 
   render();
   autosave();
-  // scroll bracket into view
   $('#bracketWrap').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
