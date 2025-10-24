@@ -57,7 +57,7 @@
       margin: 20px auto 50px;
     }
     .brand-intro em {
-      color: var(--accent);
+      color: #ddd;
       font-style: normal;
     }
     .tools {
@@ -79,7 +79,7 @@
     }
     a.card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 0 25px rgba(34, 255, 109, 0.3);
+      box-shadow: 0 0 18px rgba(34, 255, 109, 0.2);
     }
     a.card h2 {
       color: var(--accent);
@@ -90,34 +90,38 @@
       margin-top: 40px;
       color: var(--muted);
       font-style: italic;
-      opacity: 0.7;
-      animation: pulse 3s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; color: var(--accent); }
+      opacity: 0.8;
     }
     footer {
-      margin: 60px 0 20px;
+      margin: 60px 0 25px;
       opacity: 0.85;
     }
     footer img {
       width: 120px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
     .contact {
       font-size: 0.95rem;
       color: var(--muted);
       margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
     }
     .contact a {
-      color: var(--accent);
+      color: #ddd;
       text-decoration: none;
       font-weight: 600;
       transition: color 0.2s ease;
     }
     .contact a:hover {
       color: #fff;
+    }
+    .contact span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
   </style>
 </head>
@@ -154,9 +158,8 @@
     <!-- Man logo in footer -->
     <img src="assets/Chalky Trousers Logo (Man) 800x800 HR_20250927_180303_0000.png" alt="Chalky Trousers Icon Logo">
     <div class="contact">
-      Contact: <a href="mailto:jamie@chalkytrousers.co.uk">jamie@chalkytrousers.co.uk</a>  
-      •  
-      Follow on <a href="https://instagram.com/chalkytrousers" target="_blank">Instagram</a>
+      <span>📧 <a href="mailto:jamie@chalkytrousers.co.uk">jamie@chalkytrousers.co.uk</a></span>
+      <span>📷 <a href="https://instagram.com/chalkytrousers" target="_blank">@chalkytrousers</a></span>
     </div>
   </footer>
 
