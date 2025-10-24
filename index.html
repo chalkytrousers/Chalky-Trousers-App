@@ -27,22 +27,38 @@
     }
     header {
       margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
     header img {
-      width: 120px;
+      width: 220px;
+      max-width: 80%;
     }
     h1 {
       font-size: 1.8rem;
       margin-top: 10px;
-      color: #fff; /* now white */
+      color: #fff;
       letter-spacing: 1px;
     }
     p {
       color: var(--muted);
-      max-width: 600px;
+      max-width: 650px;
       margin: 0 auto 40px;
       line-height: 1.6em;
       font-size: 1rem;
+    }
+    .brand-intro {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.7em;
+      max-width: 700px;
+      margin: 20px auto 50px;
+    }
+    .brand-intro em {
+      color: var(--accent);
+      font-style: normal;
     }
     .tools {
       display: grid;
@@ -52,7 +68,7 @@
       max-width: 700px;
       margin: 0 auto;
     }
-    a.card, .card {
+    a.card {
       background: var(--card);
       border: 1px solid #1f1f1f;
       border-radius: var(--radius);
@@ -65,46 +81,59 @@
       transform: translateY(-4px);
       box-shadow: 0 0 25px rgba(34, 255, 109, 0.3);
     }
-    a.card h2, .card h2 {
+    a.card h2 {
       color: var(--accent);
       margin-bottom: 10px;
       font-size: 1.2rem;
     }
-    .coming-soon {
-      opacity: 0.5;
-      position: relative;
+    .coming-hint {
+      margin-top: 40px;
+      color: var(--muted);
+      font-style: italic;
+      opacity: 0.7;
+      animation: pulse 3s infinite;
     }
-    .coming-soon::after {
-      content: "COMING SOON";
-      position: absolute;
-      top: 10px;
-      right: 12px;
-      background: var(--accent);
-      color: #000;
-      font-weight: bold;
-      padding: 4px 8px;
-      border-radius: 8px;
-      font-size: 0.7rem;
-      letter-spacing: 0.5px;
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; color: var(--accent); }
     }
     footer {
       margin: 60px 0 20px;
-      opacity: 0.7;
+      opacity: 0.85;
     }
     footer img {
-      width: 160px;
+      width: 120px;
+      margin-bottom: 12px;
+    }
+    .contact {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    .contact a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+    .contact a:hover {
+      color: #fff;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <img src="assets/Chalky Trousers Logo (Man) 800x800 HR_20250927_180303_0000.png" alt="Chalky Trousers Logo">
+    <!-- Text logo first -->
+    <img src="assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="Chalky Trousers Logo">
     <h1>Chalky Trousers App</h1>
     <p>
-      A growing collection of tools for the cue sports community — built by Chalky Trousers.  
-      Choose a tool below to get started.
+      A growing collection of tools for the cue sports community — built by Chalky Trousers.
     </p>
+
+    <div class="brand-intro">
+      <strong>Chalky Trousers</strong> is a cue sports brand for players who care about quality, precision, and the small details that make the game feel good — <em>for players who take their game seriously, even if they don’t take themselves too seriously.</em>
+    </div>
   </header>
 
   <main class="tools">
@@ -117,25 +146,18 @@
       <h2>🎱 Doubles Randomiser</h2>
       <p>Shuffle players and generate random doubles match-ups between teams.</p>
     </a>
-
-    <div class="card coming-soon">
-      <h2>🔥 Singles Draw Generator</h2>
-      <p>Randomly seed single-player fixtures with auto BYE handling and first-round matchups.</p>
-    </div>
-
-    <div class="card coming-soon">
-      <h2>📊 Player Form Tracker</h2>
-      <p>Track win percentages and generate player form summaries across matches.</p>
-    </div>
-
-    <div class="card coming-soon">
-      <h2>🧠 Match Predictor</h2>
-      <p>Predict outcomes using player stats, head-to-heads, and recent form trends.</p>
-    </div>
   </main>
 
+  <div class="coming-hint">More tools coming soon...</div>
+
   <footer>
-    <img src="assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="Chalky Trousers Text Logo">
+    <!-- Man logo in footer -->
+    <img src="assets/Chalky Trousers Logo (Man) 800x800 HR_20250927_180303_0000.png" alt="Chalky Trousers Icon Logo">
+    <div class="contact">
+      Contact: <a href="mailto:jamie@chalkytrousers.co.uk">jamie@chalkytrousers.co.uk</a>  
+      •  
+      Follow on <a href="https://instagram.com/chalkytrousers" target="_blank">Instagram</a>
+    </div>
   </footer>
 
 </body>
