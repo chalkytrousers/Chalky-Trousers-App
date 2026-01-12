@@ -1,1 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chalky Trousers Scoreboard</title>
+  <link rel="icon" href="../assets/Chalky Trousers Logo (Man) 800x800 HR_20250927_180303_0000.png">
+  <style>
+    :root{
+      --bg:#000;
+      --card:#111;
+      --accent:#22ff6d;
+      --muted:#a0a0a0;
+      --radius:16px;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:#fff;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+    header{
+      padding:22px 14px 10px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      text-align:center;
+    }
+    header img{width:220px;max-width:80%;}
+    header h1{
+      margin:0;
+      font-size:1.2rem;
+      letter-spacing:0.8px;
+    }
+    header p{
+      margin:6px 0 0;
+      color:var(--muted);
+      max-width:760px;
+      line-height:1.5em;
+      font-size:0.95rem;
+    }
 
+    main{
+      width:92%;
+      max-width:900px;
+      margin:0 auto;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      padding:10px 0 18px;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid #1f1f1f;
+      border-radius:var(--radius);
+      padding:14px;
+    }
+
+    .setup{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    .label{
+      color:var(--muted);
+      font-size:0.9rem;
+      margin-bottom:6px;
+    }
+    .input, button{
+      width:100%;
+      border-radius:12px;
+      border:1px solid #1f1f1f;
+      background:#0c0c0c;
+      color:#fff;
+      padding:12px 12px;
+      font-size:1rem;
+      outline:none;
+    }
+    .input:focus{
+      border-color:rgba(34,255,109,0.35);
+      box-shadow:0 0 0 3px rgba(34,255,109,0.10);
+    }
+
+    .board{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+    }
+
+    .player{
+      background:var(--card);
+      border:1px solid #1f1f1f;
+      border-radius:var(--radius);
+      padding:16px;
+      user-select:none;
+      -webkit-user-select:none;
+      touch-action:manipulation;
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+      transition:transform 0.08s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .player:active{transform:scale(0.995);}
+
+    .player-name{
+      font-size:1.05rem;
+      font-weight:700;
+      margin:0 0 10px;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      max-width:100%;
+    }
+    .tap-hint{
+      position:absolute;
+      top:16px;
+      right:16px;
+      color:var(--muted);
+      font-size:0.85rem;
+      opacity:0.85;
+    }
+    .score{
+      font-size:4.4rem;
+      font-weight:900;
+      color:var(--accent);
+      line-height:1;
+      text-align:center;
+      padding:10px 0 6px;
+    }
+
+    .flash{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity:0;
+      background:radial-gradient(circle at center, rgba(34,255,109,0.20), rgba(34,255,109,0) 55%);
+      transition:opacity 0.2s ease;
+    }
+    .player.flash-on .flash{opacity:1;}
+
+    .footerbar{
+      width:92%;
+      max-width:900px;
+      margin:0 auto 18px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+    .footerbar .panel{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      align-items:center;
+    }
+
+    .btn{
+      cursor:pointer;
+      transition:transform 0.08s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .btn:active{transform:scale(0.99);}
+    .btn-primary{
+      background:#0e0e0e;
+      border-color:rgba(34,255,109,0.25);
+    }
+    .btn-primary:hover{
+      box-shadow:0 0 18px rgba(34,255,109,0.16);
+      border-color:rgba(34,255,109,0.45);
+    }
+
+    .status{
+      width:92%;
+      max-width:900px;
+      margin:0 auto 12px;
+      color:var(--muted);
+      font-size:0.92rem;
+      min-height:1.35em;
+    }
+
+    @media (min-width:820px){
+      .setup{grid-template-columns:1fr 1fr;}
+      .board{grid-template-columns:1fr 1fr;}
+      .footerbar .panel{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="Chalky Trousers Logo">
+    <h1>Scoreboard</h1>
+    <p>Tap a player to add a point. Names and scores autosave on this device.</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="setup">
+        <div>
+          <div class="label">Player A</div>
+          <input id="nameA" class="input" type="text" inputmode="text" autocomplete="off" placeholder="Player A name">
+        </div>
+        <div>
+          <div class="label">Player B</div>
+          <input id="nameB" class="input" type="text" inputmode="text" autocomplete="off" placeholder="Player B name">
+        </div>
+      </div>
+    </section>
+
+    <section class="board">
+      <div id="playerA" class="player" role="button" aria-label="Add point to Player A">
+        <div class="flash"></div>
+        <div id="displayNameA" class="player-name">Player A</div>
+        <div class="tap-hint">Tap +1</div>
+        <div id="scoreA" class="score">0</div>
+      </div>
+
+      <div id="playerB" class="player" role="button" aria-label="Add point to Player B">
+        <div class="flash"></div>
+        <div id="displayNameB" class="player-name">Player B</div>
+        <div class="tap-hint">Tap +1</div>
+        <div id="scoreB" class="score">0</div>
+      </div>
+    </section>
+  </main>
+
+  <div id="status" class="status"></div>
+
+  <div class="footerbar">
+    <div class="panel">
+      <button id="resetBtn" class="btn btn-primary" type="button">Reset (confirm)</button>
+    </div>
+  </div>
+
+<script>
+(function () {
+  const STORAGE_KEY = "ct_scoreboard_v01";
+
+  const els = {
+    nameA: document.getElementById("nameA"),
+    nameB: document.getElementById("nameB"),
+    displayNameA: document.getElementById("displayNameA"),
+    displayNameB: document.getElementById("displayNameB"),
+    scoreA: document.getElementById("scoreA"),
+    scoreB: document.getElementById("scoreB"),
+    playerA: document.getElementById("playerA"),
+    playerB: document.getElementById("playerB"),
+    resetBtn: document.getElementById("resetBtn"),
+    status: document.getElementById("status"),
+  };
+
+  const state = {
+    nameA: "Player A",
+    nameB: "Player B",
+    scoreA: 0,
+    scoreB: 0,
+  };
+
+  function safeText(s) {
+    const t = (s ?? "").toString().trim();
+    return t.length ? t : "";
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data || typeof data !== "object") return;
+
+      if (typeof data.nameA === "string") state.nameA = data.nameA;
+      if (typeof data.nameB === "string") state.nameB = data.nameB;
+
+      if (Number.isFinite(data.scoreA)) state.scoreA = Math.max(0, Math.floor(data.scoreA));
+      if (Number.isFinite(data.scoreB)) state.scoreB = Math.max(0, Math.floor(data.scoreB));
+    } catch (_) {}
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (_) {}
+  }
+
+  function render() {
+    const a = safeText(state.nameA) || "Player A";
+    const b = safeText(state.nameB) || "Player B";
+
+    els.displayNameA.textContent = a;
+    els.displayNameB.textContent = b;
+
+    els.scoreA.textContent = String(state.scoreA);
+    els.scoreB.textContent = String(state.scoreB);
+
+    if (document.activeElement !== els.nameA) els.nameA.value = a === "Player A" && !safeText(state.nameA) ? "" : a;
+    if (document.activeElement !== els.nameB) els.nameB.value = b === "Player B" && !safeText(state.nameB) ? "" : b;
+
+    els.status.textContent = "Saved on this device.";
+  }
+
+  function flash(el) {
+    el.classList.add("flash-on");
+    window.setTimeout(() => el.classList.remove("flash-on"), 160);
+  }
+
+  function addPoint(which) {
+    if (which === "A") {
+      state.scoreA = Math.max(0, state.scoreA + 1);
+      flash(els.playerA);
+    } else {
+      state.scoreB = Math.max(0, state.scoreB + 1);
+      flash(els.playerB);
+    }
+    save();
+    render();
+  }
+
+  function resetAll() {
+    const ok = window.confirm("Reset scores to 0?");
+    if (!ok) return;
+    state.scoreA = 0;
+    state.scoreB = 0;
+    save();
+    render();
+  }
+
+  // Init
+  load();
+  render();
+
+  // Name inputs
+  els.nameA.addEventListener("input", () => {
+    state.nameA = els.nameA.value;
+    save();
+    render();
+  });
+  els.nameB.addEventListener("input", () => {
+    state.nameB = els.nameB.value;
+    save();
+    render();
+  });
+
+  // Tap to score
+  els.playerA.addEventListener("click", () => addPoint("A"));
+  els.playerB.addEventListener("click", () => addPoint("B"));
+
+  // Reset
+  els.resetBtn.addEventListener("click", resetAll);
+})();
+</script>
+
+</body>
+</html>
