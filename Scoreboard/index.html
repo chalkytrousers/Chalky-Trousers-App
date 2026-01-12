@@ -194,6 +194,66 @@
       .board{grid-template-columns:1fr 1fr;}
       .footerbar .panel{grid-template-columns:1fr 1fr 1fr;}
     }
+
+    /* Fullscreen mode: show only the scoreboard tiles */
+    :fullscreen header,
+    :fullscreen #setupPanel,
+    :fullscreen .status,
+    :fullscreen .footerbar {
+      display:none !important;
+    }
+    :fullscreen main{
+      width:100%;
+      max-width:none;
+      margin:0;
+      padding:0;
+      gap:0;
+    }
+    :fullscreen .board{
+      grid-template-columns:1fr 1fr;
+      gap:0;
+      height:100dvh;
+    }
+    :fullscreen .player{
+      border-radius:0;
+      border-left:0;
+      border-right:0;
+      border-top:0;
+      border-bottom:1px solid #1f1f1f;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      padding:22px;
+    }
+    :fullscreen .player-name{
+      font-size:1.8rem;
+      margin-bottom:18px;
+      text-align:center;
+    }
+    :fullscreen .tap-hint{ display:none; }
+    :fullscreen .score{
+      font-size:9rem;
+      padding:0;
+    }
+
+    /* Overlay controls visible only in fullscreen */
+    .fs-overlay{
+      position:fixed;
+      top:12px;
+      right:12px;
+      display:none;
+      gap:10px;
+      z-index:9999;
+    }
+    .fs-overlay button{
+      width:auto;
+      padding:10px 12px;
+      font-size:0.95rem;
+      border-radius:12px;
+      background:#0c0c0c;
+      border:1px solid rgba(34,255,109,0.25);
+    }
+    :fullscreen .fs-overlay{ display:flex; }
   </style>
 </head>
 <body>
@@ -203,6 +263,12 @@
     <h1>Scoreboard</h1>
     <p>Tap a player to add a point. Names and scores autosave on this device.</p>
   </header>
+
+  <!-- Fullscreen overlay -->
+  <div class="fs-overlay" aria-hidden="false">
+    <button id="fsEditBtn" class="btn btn-primary" type="button">Edit names</button>
+    <button id="fsExitBtn" class="btn btn-primary" type="button">Exit</button>
+  </div>
 
   <main>
     <section class="panel" id="setupPanel">
@@ -263,6 +329,8 @@
     editNamesBtn: document.getElementById("editNamesBtn"),
     setupPanel: document.getElementById("setupPanel"),
     status: document.getElementById("status"),
+    fsExitBtn: document.getElementById("fsExitBtn"),
+    fsEditBtn: document.getElementById("fsEditBtn"),
   };
 
   const state = {
@@ -374,9 +442,7 @@
 
   function editNames() {
     els.setupPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-    window.setTimeout(() => {
-      els.nameA.focus();
-    }, 250);
+    window.setTimeout(() => { els.nameA.focus(); }, 250);
   }
 
   // Init
@@ -384,25 +450,21 @@
   render();
 
   // Name inputs
-  els.nameA.addEventListener("input", () => {
-    state.nameA = els.nameA.value;
-    save();
-    render();
-  });
-  els.nameB.addEventListener("input", () => {
-    state.nameB = els.nameB.value;
-    save();
-    render();
-  });
+  els.nameA.addEventListener("input", () => { state.nameA = els.nameA.value; save(); render(); });
+  els.nameB.addEventListener("input", () => { state.nameB = els.nameB.value; save(); render(); });
 
   // Tap to score
   els.playerA.addEventListener("click", () => addPoint("A"));
   els.playerB.addEventListener("click", () => addPoint("B"));
 
-  // Buttons
+  // Buttons (normal)
   els.resetBtn.addEventListener("click", resetAll);
   els.fullscreenBtn.addEventListener("click", toggleFullscreen);
   els.editNamesBtn.addEventListener("click", editNames);
+
+  // Buttons (fullscreen overlay)
+  els.fsExitBtn.addEventListener("click", () => { if (isFullscreen()) exitFullscreen(); });
+  els.fsEditBtn.addEventListener("click", () => { if (isFullscreen()) exitFullscreen(); editNames(); });
 
   // Keep label synced
   document.addEventListener("fullscreenchange", updateFullscreenButtonLabel);
