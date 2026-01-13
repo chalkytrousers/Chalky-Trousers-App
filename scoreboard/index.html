@@ -32,6 +32,11 @@
       display:flex;
       flex-direction:column;
     }
+
+body.pseudo-fs{ padding:0 !important; }
+:fullscreen body{ padding:0 !important; }
+
+    
     @supports (padding: env(safe-area-inset-top)) {
       body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
     }
@@ -241,7 +246,10 @@
     :fullscreen .board{
       grid-template-columns:1fr 1fr;
       gap:0;
-      height:100dvh;
+      height:100vh;
+height:100svh;
+height:100dvh;
+
     }
     :fullscreen .player{
       border-radius:0;
@@ -262,10 +270,12 @@
     :fullscreen .tap-hint{ display:none; }
 
     /* Responsive fullscreen score size so portrait doesn't clip */
-    :fullscreen .score{
-      font-size: min(11rem, 24vw);
-      padding:0;
-    }
+:fullscreen .score,
+body.pseudo-fs .score{
+  font-size: clamp(9rem, 24vw, 14rem);
+  padding:0;
+}
+
 
     /* Fullscreen overlay controls */
     .fs-overlay{
@@ -310,7 +320,10 @@
     body.pseudo-fs .board{
       grid-template-columns:1fr 1fr;
       gap:0;
-      height:100dvh;
+      height:100vh;
+height:100svh;
+height:100dvh;
+
     }
     body.pseudo-fs .player{
       border-radius:0;
@@ -335,20 +348,20 @@
     }
     body.pseudo-fs .fs-overlay{ display:flex; }
 
-    /* iOS-only tuning to push closer to Android look */
-    html.ios body.pseudo-fs .player,
-    html.ios :fullscreen .player{
-      padding:22px;
-    }
-    html.ios body.pseudo-fs .player-name,
-    html.ios :fullscreen .player-name{
-      font-size:2.2rem;
-      margin-bottom:14px;
-    }
-    html.ios body.pseudo-fs .score,
-    html.ios :fullscreen .score{
-      font-size: min(12.5rem, 28vw);
-    }
+/* Fullscreen tuning (Android + iOS consistent) */
+:fullscreen .score,
+body.pseudo-fs .score{
+  font-size: clamp(10rem, 26vw, 16rem);
+  padding:0;
+}
+
+:fullscreen .player-name,
+body.pseudo-fs .player-name{
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  margin-bottom:16px;
+}
+
+    
   </style>
 </head>
 <body>
