@@ -132,4 +132,707 @@
     }
 
     .player{
-      background:var(--card
+      background:var(--card);
+      border:1px solid #1f1f1f;
+      border-radius:var(--radius);
+      padding:16px;
+      user-select:none;
+      -webkit-user-select:none;
+      touch-action:manipulation;
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+      transition:transform 0.08s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .player:active{transform:scale(0.995);}
+
+    .player-name{
+      font-size:1.05rem;
+      font-weight:700;
+      margin:0 0 10px;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      max-width:100%;
+    }
+    .tap-hint{
+      position:absolute;
+      top:16px;
+      right:16px;
+      color:var(--muted);
+      font-size:0.85rem;
+      opacity:0.85;
+    }
+    .score{
+      font-size:4.4rem;
+      font-weight:900;
+      color:var(--accent);
+      line-height:1;
+      text-align:center;
+      padding:10px 0 6px;
+    }
+
+    .flash{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity:0;
+      background:radial-gradient(circle at center, rgba(34,255,109,0.20), rgba(34,255,109,0) 55%);
+      transition:opacity 0.2s ease;
+    }
+    .player.flash-on .flash{opacity:1;}
+
+    .footerbar{
+      width:92%;
+      max-width:900px;
+      margin:0 auto 18px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+    .footerbar .panel{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      align-items:center;
+    }
+
+    .btn{
+      cursor:pointer;
+      transition:transform 0.08s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+    }
+    .btn:active{transform:scale(0.99);}
+    .btn-primary{
+      background:#0e0e0e;
+      border-color:rgba(34,255,109,0.25);
+    }
+    .btn-primary:hover{
+      box-shadow:0 0 18px rgba(34,255,109,0.16);
+      border-color:rgba(34,255,109,0.45);
+    }
+
+    .status{
+      width:92%;
+      max-width:900px;
+      margin:0 auto 12px;
+      color:var(--muted);
+      font-size:0.92rem;
+      min-height:1.35em;
+    }
+
+    @media (min-width:820px){
+      .setup{grid-template-columns:1fr 1fr;}
+      .setup-grid-3{grid-template-columns:1fr 1fr 1fr;}
+      .board{grid-template-columns:1fr 1fr;}
+      .footerbar .panel{grid-template-columns:1fr 1fr 1fr;}
+    }
+
+    /* Fullscreen mode: show only the scoreboard tiles */
+    :fullscreen header,
+    :fullscreen #setupPanel,
+    :fullscreen .status,
+    :fullscreen .footerbar {
+      display:none !important;
+    }
+    :fullscreen main{
+      width:100%;
+      max-width:none;
+      margin:0;
+      padding:0;
+      gap:0;
+    }
+    :fullscreen .board{
+      grid-template-columns:1fr 1fr;
+      gap:0;
+      height:100vh;
+      height:100svh;
+      height:100dvh;
+    }
+    :fullscreen .player{
+      border-radius:0;
+      border-left:0;
+      border-right:0;
+      border-top:0;
+      border-bottom:1px solid #1f1f1f;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      padding:26px;
+    }
+    :fullscreen .player-name{
+      font-size:2.0rem;
+      margin-bottom:18px;
+      text-align:center;
+    }
+    :fullscreen .tap-hint{ display:none; }
+
+    /* Responsive fullscreen score size so portrait doesn't clip */
+    :fullscreen .score{
+      font-size: min(11rem, 24vw);
+      padding:0;
+    }
+
+    /* Fullscreen overlay controls */
+    .fs-overlay{
+      position:fixed;
+      top:12px;
+      right:12px;
+      display:none;
+      gap:10px;
+      z-index:9999;
+      opacity:1;
+      transition:opacity 0.25s ease;
+      pointer-events:auto;
+    }
+    .fs-overlay button{
+      width:auto;
+      padding:10px 12px;
+      font-size:0.95rem;
+      border-radius:12px;
+      background:#0c0c0c;
+      border:1px solid rgba(34,255,109,0.25);
+    }
+    :fullscreen .fs-overlay{ display:flex; }
+    .fs-overlay.hidden{
+      opacity:0;
+      pointer-events:none;
+    }
+
+    /* iPhone fallback: pseudo-fullscreen (mimics :fullscreen when API is unavailable) */
+    body.pseudo-fs header,
+    body.pseudo-fs #setupPanel,
+    body.pseudo-fs .status,
+    body.pseudo-fs .footerbar{
+      display:none !important;
+    }
+    body.pseudo-fs main{
+      width:100%;
+      max-width:none;
+      margin:0;
+      padding:0;
+      gap:0;
+    }
+    body.pseudo-fs .board{
+      grid-template-columns:1fr 1fr;
+      gap:0;
+      height:100vh;
+      height:100svh;
+      height:100dvh;
+    }
+    body.pseudo-fs .player{
+      border-radius:0;
+      border-left:0;
+      border-right:0;
+      border-top:0;
+      border-bottom:1px solid #1f1f1f;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      padding:26px;
+    }
+    body.pseudo-fs .player-name{
+      font-size:2.0rem;
+      margin-bottom:18px;
+      text-align:center;
+    }
+    body.pseudo-fs .tap-hint{ display:none; }
+    body.pseudo-fs .score{
+      font-size: min(11rem, 24vw);
+      padding:0;
+    }
+    body.pseudo-fs .fs-overlay{ display:flex; }
+
+    /* iOS-only tuning to push closer to Android look */
+    html.ios body.pseudo-fs .player,
+    html.ios :fullscreen .player{
+      padding:22px;
+    }
+    html.ios body.pseudo-fs .player-name,
+    html.ios :fullscreen .player-name{
+      font-size:2.2rem;
+      margin-bottom:14px;
+    }
+    html.ios body.pseudo-fs .score,
+    html.ios :fullscreen .score{
+      font-size: min(12.5rem, 28vw);
+    }
+
+    /* Rotate gate overlay (prevents iPhone portrait fullscreen clipping) */
+    .rotate-overlay{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,0.92);
+      z-index:10000;
+      padding:24px;
+      text-align:center;
+    }
+    .rotate-overlay.show{ display:flex; }
+    .rotate-box{
+      max-width:520px;
+      width:100%;
+      background:#0c0c0c;
+      border:1px solid rgba(34,255,109,0.25);
+      border-radius:16px;
+      padding:18px 16px;
+    }
+    .rotate-title{
+      font-size:1.2rem;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+    .rotate-msg{
+      color:var(--muted);
+      line-height:1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Rotate gate (shows only when user tries fullscreen in portrait on iPhone) -->
+  <div id="rotateOverlay" class="rotate-overlay" aria-hidden="true">
+    <div class="rotate-box">
+      <div class="rotate-title">Rotate to landscape</div>
+      <div class="rotate-msg">For proper fullscreen while streaming.</div>
+    </div>
+  </div>
+
+  <header id="top">
+    <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="Chalky Trousers Logo">
+    <h1>Scoreboard v3.2</h1>
+    <p>Tap a player to add a point. Long-press a player to subtract. Names, scores, and match setup autosave on this device.</p>
+  </header>
+
+  <!-- Fullscreen overlay -->
+  <div id="fsOverlay" class="fs-overlay" aria-hidden="false">
+    <button id="fsEditBtn" class="btn btn-primary" type="button">Edit names</button>
+    <button id="fsExitBtn" class="btn btn-primary" type="button">Exit</button>
+  </div>
+
+  <main>
+    <section class="panel" id="setupPanel">
+      <div class="setup">
+        <div>
+          <div class="label">Player A</div>
+          <input id="nameA" class="input" type="text" inputmode="text" autocomplete="off" placeholder="Player A name">
+        </div>
+        <div>
+          <div class="label">Player B</div>
+          <input id="nameB" class="input" type="text" inputmode="text" autocomplete="off" placeholder="Player B name">
+        </div>
+      </div>
+
+      <div class="setup-divider"></div>
+
+      <div class="label" style="margin-top:10px;">Match setup</div>
+      <div class="setup-grid-3">
+        <div>
+          <div class="label">Ruleset</div>
+          <select id="ruleset" class="select">
+            <option value="uk8">UK 8 Ball</option>
+            <option value="wpa">WPA 8 Ball</option>
+            <option value="ultimate">Ultimate Pool</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">Breaks first</div>
+          <select id="breakFirst" class="select">
+            <option value="A">Player A</option>
+            <option value="B">Player B</option>
+            <option value="alt">Alternate</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">Race to</div>
+          <input id="raceTo" class="input" type="number" inputmode="numeric" min="1" max="99" step="1" placeholder="e.g. 7">
+          <div class="smallhint">Tip: set this before fullscreen for match-night speed.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="board">
+      <div id="playerA" class="player" role="button" aria-label="Add point to Player A">
+        <div class="flash"></div>
+        <div id="displayNameA" class="player-name">Player A</div>
+        <div class="tap-hint">Tap +1</div>
+        <div id="scoreA" class="score">0</div>
+      </div>
+
+      <div id="playerB" class="player" role="button" aria-label="Add point to Player B">
+        <div class="flash"></div>
+        <div id="displayNameB" class="player-name">Player B</div>
+        <div class="tap-hint">Tap +1</div>
+        <div id="scoreB" class="score">0</div>
+      </div>
+    </section>
+  </main>
+
+  <div id="status" class="status"></div>
+
+  <div class="footerbar">
+    <div class="panel">
+      <button id="fullscreenBtn" class="btn btn-primary" type="button">Fullscreen</button>
+      <button id="editNamesBtn" class="btn btn-primary" type="button">Edit names</button>
+      <button id="resetBtn" class="btn btn-primary" type="button">Reset (confirm)</button>
+    </div>
+  </div>
+
+<script>
+(function () {
+  const STORAGE_KEY = "ct_scoreboard_v01";
+
+  // iOS detection for CSS tuning + pseudo-fullscreen fallback
+  const ua = navigator.userAgent || "";
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (isIOS) document.documentElement.classList.add("ios");
+
+  const els = {
+    nameA: document.getElementById("nameA"),
+    nameB: document.getElementById("nameB"),
+    displayNameA: document.getElementById("displayNameA"),
+    displayNameB: document.getElementById("displayNameB"),
+    scoreA: document.getElementById("scoreA"),
+    scoreB: document.getElementById("scoreB"),
+    playerA: document.getElementById("playerA"),
+    playerB: document.getElementById("playerB"),
+    resetBtn: document.getElementById("resetBtn"),
+    fullscreenBtn: document.getElementById("fullscreenBtn"),
+    editNamesBtn: document.getElementById("editNamesBtn"),
+    setupPanel: document.getElementById("setupPanel"),
+    status: document.getElementById("status"),
+    fsExitBtn: document.getElementById("fsExitBtn"),
+    fsEditBtn: document.getElementById("fsEditBtn"),
+    fsOverlay: document.getElementById("fsOverlay"),
+
+    ruleset: document.getElementById("ruleset"),
+    breakFirst: document.getElementById("breakFirst"),
+    raceTo: document.getElementById("raceTo"),
+    rotateOverlay: document.getElementById("rotateOverlay"),
+  };
+
+  const state = {
+    nameA: "Player A",
+    nameB: "Player B",
+    scoreA: 0,
+    scoreB: 0,
+
+    ruleset: "uk8",
+    breakFirst: "A",
+    raceTo: 7,
+  };
+
+  // Locked behaviour additions
+  let lastAction = null; // { which: "A"|"B", delta: number }
+  const lastTapAt = { A: 0, B: 0 };
+  const TAP_DEBOUNCE_MS = 250;
+
+  const LONG_PRESS_MS = 420;
+  let pressTimer = null;
+  let longPressFired = false;
+
+  let overlayTimer = null;
+  const OVERLAY_HIDE_MS = 3000;
+
+  function safeText(s) {
+    const t = (s ?? "").toString().trim();
+    return t.length ? t : "";
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data || typeof data !== "object") return;
+
+      if (typeof data.nameA === "string") state.nameA = data.nameA;
+      if (typeof data.nameB === "string") state.nameB = data.nameB;
+
+      if (Number.isFinite(data.scoreA)) state.scoreA = Math.max(0, Math.floor(data.scoreA));
+      if (Number.isFinite(data.scoreB)) state.scoreB = Math.max(0, Math.floor(data.scoreB));
+
+      if (typeof data.ruleset === "string") state.ruleset = data.ruleset;
+      if (typeof data.breakFirst === "string") state.breakFirst = data.breakFirst;
+
+      if (Number.isFinite(data.raceTo)) {
+        const rt = Math.floor(data.raceTo);
+        state.raceTo = Math.min(99, Math.max(1, rt));
+      }
+    } catch (_) {}
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+  }
+
+  function render() {
+    const a = safeText(state.nameA) || "Player A";
+    const b = safeText(state.nameB) || "Player B";
+
+    els.displayNameA.textContent = a;
+    els.displayNameB.textContent = b;
+
+    els.scoreA.textContent = String(state.scoreA);
+    els.scoreB.textContent = String(state.scoreB);
+
+    if (document.activeElement !== els.nameA) els.nameA.value = a === "Player A" && !safeText(state.nameA) ? "" : a;
+    if (document.activeElement !== els.nameB) els.nameB.value = b === "Player B" && !safeText(state.nameB) ? "" : b;
+
+    // match setup
+    els.ruleset.value = state.ruleset;
+    els.breakFirst.value = state.breakFirst;
+    els.raceTo.value = String(state.raceTo);
+
+    els.status.textContent = "Saved on this device.";
+    updateFullscreenButtonLabel();
+  }
+
+  function flash(el) {
+    el.classList.add("flash-on");
+    window.setTimeout(() => el.classList.remove("flash-on"), 160);
+  }
+
+  function applyDelta(which, delta) {
+    if (which === "A") {
+      state.scoreA = Math.max(0, state.scoreA + delta);
+      flash(els.playerA);
+    } else {
+      state.scoreB = Math.max(0, state.scoreB + delta);
+      flash(els.playerB);
+    }
+    lastAction = { which, delta };
+    save();
+    render();
+  }
+
+  function addPoint(which) {
+    const now = Date.now();
+    if (now - lastTapAt[which] < TAP_DEBOUNCE_MS) return;
+    lastTapAt[which] = now;
+    applyDelta(which, +1);
+  }
+
+  function subtractPoint(which) {
+    applyDelta(which, -1);
+  }
+
+  function resetAll() {
+    const ok = window.confirm("Reset scores to 0?");
+    if (!ok) return;
+    state.scoreA = 0;
+    state.scoreB = 0;
+    lastAction = null;
+    save();
+    render();
+  }
+
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+  }
+
+  function isPseudoFullscreen() {
+    return document.body.classList.contains("pseudo-fs");
+  }
+
+  function setPseudoFullscreen(on) {
+    document.body.classList.toggle("pseudo-fs", !!on);
+    updateFullscreenButtonLabel();
+    if (on) showOverlay();
+    else hideOverlayNow();
+  }
+
+  function requestFullscreen() {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+
+    if (!req) {
+      // iPhone Safari fallback: pseudo-fullscreen
+      if (isIOS) {
+        setPseudoFullscreen(true);
+        els.status.textContent = "iPhone: rotate to landscape for best fullscreen.";
+        return;
+      }
+      els.status.textContent = "Fullscreen not supported in this browser.";
+      return;
+    }
+
+    req.call(el).catch(() => {
+      // If blocked, allow iOS fallback
+      if (isIOS) {
+        setPseudoFullscreen(true);
+        els.status.textContent = "iPhone: rotate to landscape for best fullscreen.";
+      } else {
+        els.status.textContent = "Fullscreen blocked. Try again after interacting with the page.";
+      }
+    });
+  }
+
+  function exitFullscreen() {
+    if (isPseudoFullscreen()) {
+      setPseudoFullscreen(false);
+      return;
+    }
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+    if (!exit) return;
+    exit.call(document);
+  }
+
+  function updateFullscreenButtonLabel() {
+    const active = isFullscreen() || isPseudoFullscreen();
+    els.fullscreenBtn.textContent = active ? "Exit fullscreen" : "Fullscreen";
+  }
+
+  function showRotateGate(show) {
+    if (!els.rotateOverlay) return;
+    els.rotateOverlay.classList.toggle("show", !!show);
+    els.rotateOverlay.setAttribute("aria-hidden", show ? "false" : "true");
+  }
+
+  function isLandscape() {
+    return window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
+  }
+
+  function waitForLandscapeThen(fn) {
+    showRotateGate(true);
+
+    const onChange = () => {
+      if (isLandscape()) {
+        cleanup();
+        showRotateGate(false);
+        fn();
+      }
+    };
+
+    const cleanup = () => {
+      window.removeEventListener("orientationchange", onChange);
+      window.removeEventListener("resize", onChange);
+    };
+
+    window.addEventListener("orientationchange", onChange);
+    window.addEventListener("resize", onChange);
+    onChange();
+  }
+
+  function toggleFullscreen() {
+    if (isFullscreen() || isPseudoFullscreen()) {
+      showRotateGate(false);
+      exitFullscreen();
+      return;
+    }
+
+    // iPhone Safari portrait fullscreen often results in a squashed viewport and clipped numbers.
+    // Gate fullscreen behind landscape to make match-night use reliable for streaming.
+    if (isIOS && !isLandscape()) {
+      waitForLandscapeThen(() => requestFullscreen());
+      return;
+    }
+
+    requestFullscreen();
+  }
+
+  function editNames() {
+    if (isPseudoFullscreen()) setPseudoFullscreen(false);
+    els.setupPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => { els.nameA.focus(); }, 250);
+  }
+
+  function showOverlay() {
+    if (!(isFullscreen() || isPseudoFullscreen())) return;
+    els.fsOverlay.classList.remove("hidden");
+    if (overlayTimer) window.clearTimeout(overlayTimer);
+    overlayTimer = window.setTimeout(() => {
+      els.fsOverlay.classList.add("hidden");
+    }, OVERLAY_HIDE_MS);
+  }
+
+  function hideOverlayNow() {
+    els.fsOverlay.classList.add("hidden");
+    if (overlayTimer) window.clearTimeout(overlayTimer);
+    overlayTimer = null;
+  }
+
+  function bindOverlayAutoShow() {
+    ["pointerdown","pointermove","keydown","touchstart"].forEach(evt => {
+      window.addEventListener(evt, () => { if (isFullscreen() || isPseudoFullscreen()) showOverlay(); }, { passive: true });
+    });
+  }
+
+  function startPress(which, pointerId, el) {
+    longPressFired = false;
+    if (pressTimer) window.clearTimeout(pressTimer);
+    pressTimer = window.setTimeout(() => {
+      longPressFired = true;
+      subtractPoint(which);
+      showOverlay();
+    }, LONG_PRESS_MS);
+
+    try { el.setPointerCapture(pointerId); } catch (_) {}
+  }
+
+  function endPress() {
+    if (pressTimer) window.clearTimeout(pressTimer);
+    pressTimer = null;
+  }
+
+  function attachPlayerHandlers(el, which) {
+    el.addEventListener("pointerdown", (e) => startPress(which, e.pointerId, el));
+    el.addEventListener("pointerup", () => {
+      endPress();
+      if (!longPressFired) addPoint(which);
+      showOverlay();
+    });
+    el.addEventListener("pointercancel", () => endPress());
+    el.addEventListener("pointerleave", () => endPress());
+  }
+
+  // Init
+  load();
+  render();
+  bindOverlayAutoShow();
+
+  // Name inputs
+  els.nameA.addEventListener("input", () => { state.nameA = els.nameA.value; save(); render(); });
+  els.nameB.addEventListener("input", () => { state.nameB = els.nameB.value; save(); render(); });
+
+  // Match setup inputs
+  els.ruleset.addEventListener("change", () => { state.ruleset = els.ruleset.value; save(); render(); });
+  els.breakFirst.addEventListener("change", () => { state.breakFirst = els.breakFirst.value; save(); render(); });
+  els.raceTo.addEventListener("input", () => {
+    const v = Math.floor(Number(els.raceTo.value));
+    if (!Number.isFinite(v)) return;
+    state.raceTo = Math.min(99, Math.max(1, v));
+    save();
+  });
+  els.raceTo.addEventListener("blur", () => { render(); });
+
+  // Player handlers
+  attachPlayerHandlers(els.playerA, "A");
+  attachPlayerHandlers(els.playerB, "B");
+
+  // Buttons
+  els.resetBtn.addEventListener("click", resetAll);
+  els.fullscreenBtn.addEventListener("click", toggleFullscreen);
+  els.editNamesBtn.addEventListener("click", editNames);
+
+  // Fullscreen overlay buttons
+  els.fsExitBtn.addEventListener("click", () => { exitFullscreen(); });
+  els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); editNames(); });
+
+  function onFsChange() {
+    updateFullscreenButtonLabel();
+    showRotateGate(false);
+    if (isFullscreen()) showOverlay();
+    else if (!isPseudoFullscreen()) hideOverlayNow();
+  }
+
+  document.addEventListener("fullscreenchange", onFsChange);
+  document.addEventListener("webkitfullscreenchange", onFsChange);
+  document.addEventListener("MSFullscreenChange", onFsChange);
+})();
+</script>
+
+</body>
+</html>
