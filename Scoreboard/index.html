@@ -217,7 +217,7 @@
       .footerbar .panel{grid-template-columns:1fr 1fr 1fr;}
     }
 
-    /* Fullscreen mode: show only the scoreboard tiles */
+    /* Fullscreen mode */
     :fullscreen header,
     :fullscreen #setupPanel,
     :fullscreen .status,
@@ -253,8 +253,6 @@
       text-align:center;
     }
     :fullscreen .tap-hint{ display:none; }
-
-    /* Responsive fullscreen score size so portrait doesn't clip */
     :fullscreen .score{
       font-size: min(11rem, 24vw);
       padding:0;
@@ -285,6 +283,29 @@
       opacity:0;
       pointer-events:none;
     }
+
+    /* Fullscreen match badge */
+    .fs-badge{
+      position:fixed;
+      top:12px;
+      left:12px;
+      display:none;
+      gap:10px;
+      z-index:9998;
+      pointer-events:none;
+      opacity:0.95;
+    }
+    .fs-pill{
+      background:rgba(12,12,12,0.92);
+      border:1px solid rgba(34,255,109,0.25);
+      border-radius:999px;
+      padding:10px 12px;
+      font-size:0.95rem;
+      color:#fff;
+      white-space:nowrap;
+    }
+    .fs-pill strong{ color: var(--accent); font-weight:800; }
+    :fullscreen .fs-badge{ display:flex; }
   </style>
 </head>
 <body>
@@ -292,8 +313,14 @@
   <header id="top">
     <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="Chalky Trousers Logo">
     <h1>Scoreboard</h1>
-    <p>Tap a player to add a point. Long-press a player to subtract. Names, scores, and match setup autosave on this device.</p>
+    <p>Tap a player to add a point. Long-press a player to subtract. Match setup and scores autosave on this device.</p>
   </header>
+
+  <!-- Fullscreen match badge -->
+  <div id="fsBadge" class="fs-badge" aria-hidden="true">
+    <div class="fs-pill" id="fsRacePill">Race to <strong id="fsRaceVal">7</strong></div>
+    <div class="fs-pill" id="fsBreakPill">Break: <strong id="fsBreakVal">Player A</strong></div>
+  </div>
 
   <!-- Fullscreen overlay -->
   <div id="fsOverlay" class="fs-overlay" aria-hidden="false">
@@ -332,13 +359,12 @@
           <select id="breakFirst" class="select">
             <option value="A">Player A</option>
             <option value="B">Player B</option>
-            <option value="alt">Alternate</option>
           </select>
         </div>
         <div>
           <div class="label">Race to</div>
           <input id="raceTo" class="input" type="number" inputmode="numeric" min="1" max="99" step="1" placeholder="e.g. 7">
-          <div class="smallhint">Tip: set this before fullscreen for match-night speed.</div>
+          <div class="smallhint">Break will toggle to the other player after every +1.</div>
         </div>
       </div>
     </section>
@@ -372,7 +398,7 @@
 
 <script>
 (function () {
-  const STORAGE_KEY = "ct_scoreboard_v01";
+  const STORAGE_KEY = "ct_scoreboard_v02";
 
   const els = {
     nameA: document.getElementById("nameA"),
@@ -395,6 +421,9 @@
     ruleset: document.getElementById("ruleset"),
     breakFirst: document.getElementById("breakFirst"),
     raceTo: document.getElementById("raceTo"),
+
+    fsRaceVal: document.getElementById("fsRaceVal"),
+    fsBreakVal: document.getElementById("fsBreakVal"),
   };
 
   const state = {
@@ -404,12 +433,13 @@
     scoreB: 0,
 
     ruleset: "uk8",
-    breakFirst: "A",
+    breakFirst: "A",   // selected starter
     raceTo: 7,
+
+    currentBreak: "A", // live break indicator (toggles after scoring)
   };
 
-  // Locked behaviour additions
-  let lastAction = null; // { which: "A"|"B", delta: number }
+  // Debounce and long-press
   const lastTapAt = { A: 0, B: 0 };
   const TAP_DEBOUNCE_MS = 250;
 
@@ -417,12 +447,17 @@
   let pressTimer = null;
   let longPressFired = false;
 
+  // Fullscreen overlay auto-hide
   let overlayTimer = null;
   const OVERLAY_HIDE_MS = 3000;
 
   function safeText(s) {
     const t = (s ?? "").toString().trim();
     return t.length ? t : "";
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
   }
 
   function load() {
@@ -445,11 +480,27 @@
         const rt = Math.floor(data.raceTo);
         state.raceTo = Math.min(99, Math.max(1, rt));
       }
+
+      if (data.currentBreak === "A" || data.currentBreak === "B") state.currentBreak = data.currentBreak;
+      else state.currentBreak = state.breakFirst;
+
     } catch (_) {}
   }
 
-  function save() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+  function flash(el) {
+    el.classList.add("flash-on");
+    window.setTimeout(() => el.classList.remove("flash-on"), 160);
+  }
+
+  function breakName(which) {
+    const a = safeText(state.nameA) || "Player A";
+    const b = safeText(state.nameB) || "Player B";
+    return which === "A" ? a : b;
+  }
+
+  function renderBadge() {
+    els.fsRaceVal.textContent = String(state.raceTo);
+    els.fsBreakVal.textContent = breakName(state.currentBreak);
   }
 
   function render() {
@@ -465,52 +516,14 @@
     if (document.activeElement !== els.nameA) els.nameA.value = a === "Player A" && !safeText(state.nameA) ? "" : a;
     if (document.activeElement !== els.nameB) els.nameB.value = b === "Player B" && !safeText(state.nameB) ? "" : b;
 
-    // match setup
     els.ruleset.value = state.ruleset;
     els.breakFirst.value = state.breakFirst;
     els.raceTo.value = String(state.raceTo);
 
+    renderBadge();
+
     els.status.textContent = "Saved on this device.";
     updateFullscreenButtonLabel();
-  }
-
-  function flash(el) {
-    el.classList.add("flash-on");
-    window.setTimeout(() => el.classList.remove("flash-on"), 160);
-  }
-
-  function applyDelta(which, delta) {
-    if (which === "A") {
-      state.scoreA = Math.max(0, state.scoreA + delta);
-      flash(els.playerA);
-    } else {
-      state.scoreB = Math.max(0, state.scoreB + delta);
-      flash(els.playerB);
-    }
-    lastAction = { which, delta };
-    save();
-    render();
-  }
-
-  function addPoint(which) {
-    const now = Date.now();
-    if (now - lastTapAt[which] < TAP_DEBOUNCE_MS) return;
-    lastTapAt[which] = now;
-    applyDelta(which, +1);
-  }
-
-  function subtractPoint(which) {
-    applyDelta(which, -1);
-  }
-
-  function resetAll() {
-    const ok = window.confirm("Reset scores to 0?");
-    if (!ok) return;
-    state.scoreA = 0;
-    state.scoreB = 0;
-    lastAction = null;
-    save();
-    render();
   }
 
   function isFullscreen() {
@@ -570,13 +583,57 @@
     });
   }
 
+  function applyDelta(which, delta) {
+    if (which === "A") {
+      state.scoreA = Math.max(0, state.scoreA + delta);
+      flash(els.playerA);
+    } else {
+      state.scoreB = Math.max(0, state.scoreB + delta);
+      flash(els.playerB);
+    }
+
+    // Break toggles after each rack recorded.
+    // If delta is +1, switch to other.
+    // If delta is -1, switch back (undo the last toggle).
+    if (delta === 1) {
+      state.currentBreak = (state.currentBreak === "A") ? "B" : "A";
+    } else if (delta === -1) {
+      state.currentBreak = (state.currentBreak === "A") ? "B" : "A";
+    }
+
+    save();
+    render();
+  }
+
+  function addPoint(which) {
+    const now = Date.now();
+    if (now - lastTapAt[which] < TAP_DEBOUNCE_MS) return;
+    lastTapAt[which] = now;
+    applyDelta(which, +1);
+    showOverlay();
+  }
+
+  function subtractPoint(which) {
+    applyDelta(which, -1);
+    showOverlay();
+  }
+
+  function resetAll() {
+    const ok = window.confirm("Reset scores to 0?");
+    if (!ok) return;
+    state.scoreA = 0;
+    state.scoreB = 0;
+    state.currentBreak = state.breakFirst;
+    save();
+    render();
+  }
+
   function startPress(which, pointerId, el) {
     longPressFired = false;
     if (pressTimer) window.clearTimeout(pressTimer);
     pressTimer = window.setTimeout(() => {
       longPressFired = true;
       subtractPoint(which);
-      showOverlay();
     }, LONG_PRESS_MS);
 
     try { el.setPointerCapture(pointerId); } catch (_) {}
@@ -592,7 +649,6 @@
     el.addEventListener("pointerup", () => {
       endPress();
       if (!longPressFired) addPoint(which);
-      showOverlay();
     });
     el.addEventListener("pointercancel", () => endPress());
     el.addEventListener("pointerleave", () => endPress());
@@ -600,6 +656,7 @@
 
   // Init
   load();
+  if (state.currentBreak !== "A" && state.currentBreak !== "B") state.currentBreak = state.breakFirst;
   render();
   bindOverlayAutoShow();
 
@@ -609,12 +666,18 @@
 
   // Match setup inputs
   els.ruleset.addEventListener("change", () => { state.ruleset = els.ruleset.value; save(); render(); });
-  els.breakFirst.addEventListener("change", () => { state.breakFirst = els.breakFirst.value; save(); render(); });
+  els.breakFirst.addEventListener("change", () => {
+    state.breakFirst = els.breakFirst.value;
+    state.currentBreak = state.breakFirst;
+    save();
+    render();
+  });
   els.raceTo.addEventListener("input", () => {
     const v = Math.floor(Number(els.raceTo.value));
     if (!Number.isFinite(v)) return;
     state.raceTo = Math.min(99, Math.max(1, v));
     save();
+    renderBadge();
   });
   els.raceTo.addEventListener("blur", () => { render(); });
 
@@ -638,10 +701,4 @@
   }
 
   document.addEventListener("fullscreenchange", onFsChange);
-  document.addEventListener("webkitfullscreenchange", onFsChange);
-  document.addEventListener("MSFullscreenChange", onFsChange);
-})();
-</script>
-
-</body>
-</html>
+  document.addEventList
