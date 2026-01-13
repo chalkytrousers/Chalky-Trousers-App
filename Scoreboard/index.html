@@ -79,7 +79,7 @@
       font-size:0.9rem;
       margin-bottom:6px;
     }
-    .input, button{
+    .input, .select, button{
       width:100%;
       border-radius:12px;
       border:1px solid #1f1f1f;
@@ -89,9 +89,30 @@
       font-size:1rem;
       outline:none;
     }
-    .input:focus{
+    .input:focus, .select:focus{
       border-color:rgba(34,255,109,0.35);
       box-shadow:0 0 0 3px rgba(34,255,109,0.10);
+    }
+
+    .setup-divider{
+      height:1px;
+      background:#1f1f1f;
+      margin:6px 0 2px;
+      border-radius:1px;
+      opacity:0.9;
+    }
+
+    .setup-grid-3{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+
+    .smallhint{
+      color:var(--muted);
+      font-size:0.85rem;
+      margin-top:6px;
+      line-height:1.35em;
     }
 
     .board{
@@ -191,6 +212,7 @@
 
     @media (min-width:820px){
       .setup{grid-template-columns:1fr 1fr;}
+      .setup-grid-3{grid-template-columns:1fr 1fr 1fr;}
       .board{grid-template-columns:1fr 1fr;}
       .footerbar .panel{grid-template-columns:1fr 1fr 1fr;}
     }
@@ -232,7 +254,7 @@
     }
     :fullscreen .tap-hint{ display:none; }
 
-    /* FIX: responsive fullscreen score size so portrait doesn't clip */
+    /* Responsive fullscreen score size so portrait doesn't clip */
     :fullscreen .score{
       font-size: min(11rem, 24vw);
       padding:0;
@@ -270,7 +292,7 @@
   <header id="top">
     <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="Chalky Trousers Logo">
     <h1>Scoreboard</h1>
-    <p>Tap a player to add a point. Long-press a player to subtract. Names and scores autosave on this device.</p>
+    <p>Tap a player to add a point. Long-press a player to subtract. Names, scores, and match setup autosave on this device.</p>
   </header>
 
   <!-- Fullscreen overlay -->
@@ -289,6 +311,34 @@
         <div>
           <div class="label">Player B</div>
           <input id="nameB" class="input" type="text" inputmode="text" autocomplete="off" placeholder="Player B name">
+        </div>
+      </div>
+
+      <div class="setup-divider"></div>
+
+      <div class="label" style="margin-top:10px;">Match setup</div>
+      <div class="setup-grid-3">
+        <div>
+          <div class="label">Ruleset</div>
+          <select id="ruleset" class="select">
+            <option value="uk8">UK 8 Ball</option>
+            <option value="wpa">WPA 8 Ball</option>
+            <option value="ultimate">Ultimate Pool</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">Breaks first</div>
+          <select id="breakFirst" class="select">
+            <option value="A">Player A</option>
+            <option value="B">Player B</option>
+            <option value="alt">Alternate</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">Race to</div>
+          <input id="raceTo" class="input" type="number" inputmode="numeric" min="1" max="99" step="1" placeholder="e.g. 7">
+          <div class="smallhint">Tip: set this before fullscreen for match-night speed.</div>
         </div>
       </div>
     </section>
@@ -312,7 +362,6 @@
 
   <div id="status" class="status"></div>
 
-  <!-- These are the buttons you are missing in non-fullscreen -->
   <div class="footerbar">
     <div class="panel">
       <button id="fullscreenBtn" class="btn btn-primary" type="button">Fullscreen</button>
@@ -342,6 +391,10 @@
     fsExitBtn: document.getElementById("fsExitBtn"),
     fsEditBtn: document.getElementById("fsEditBtn"),
     fsOverlay: document.getElementById("fsOverlay"),
+
+    ruleset: document.getElementById("ruleset"),
+    breakFirst: document.getElementById("breakFirst"),
+    raceTo: document.getElementById("raceTo"),
   };
 
   const state = {
@@ -349,9 +402,13 @@
     nameB: "Player B",
     scoreA: 0,
     scoreB: 0,
+
+    ruleset: "uk8",
+    breakFirst: "A",
+    raceTo: 7,
   };
 
-  // Phase 0.2
+  // Locked behaviour additions
   let lastAction = null; // { which: "A"|"B", delta: number }
   const lastTapAt = { A: 0, B: 0 };
   const TAP_DEBOUNCE_MS = 250;
@@ -380,6 +437,14 @@
 
       if (Number.isFinite(data.scoreA)) state.scoreA = Math.max(0, Math.floor(data.scoreA));
       if (Number.isFinite(data.scoreB)) state.scoreB = Math.max(0, Math.floor(data.scoreB));
+
+      if (typeof data.ruleset === "string") state.ruleset = data.ruleset;
+      if (typeof data.breakFirst === "string") state.breakFirst = data.breakFirst;
+
+      if (Number.isFinite(data.raceTo)) {
+        const rt = Math.floor(data.raceTo);
+        state.raceTo = Math.min(99, Math.max(1, rt));
+      }
     } catch (_) {}
   }
 
@@ -399,6 +464,11 @@
 
     if (document.activeElement !== els.nameA) els.nameA.value = a === "Player A" && !safeText(state.nameA) ? "" : a;
     if (document.activeElement !== els.nameB) els.nameB.value = b === "Player B" && !safeText(state.nameB) ? "" : b;
+
+    // match setup
+    els.ruleset.value = state.ruleset;
+    els.breakFirst.value = state.breakFirst;
+    els.raceTo.value = String(state.raceTo);
 
     els.status.textContent = "Saved on this device.";
     updateFullscreenButtonLabel();
@@ -536,6 +606,17 @@
   // Name inputs
   els.nameA.addEventListener("input", () => { state.nameA = els.nameA.value; save(); render(); });
   els.nameB.addEventListener("input", () => { state.nameB = els.nameB.value; save(); render(); });
+
+  // Match setup inputs
+  els.ruleset.addEventListener("change", () => { state.ruleset = els.ruleset.value; save(); render(); });
+  els.breakFirst.addEventListener("change", () => { state.breakFirst = els.breakFirst.value; save(); render(); });
+  els.raceTo.addEventListener("input", () => {
+    const v = Math.floor(Number(els.raceTo.value));
+    if (!Number.isFinite(v)) return;
+    state.raceTo = Math.min(99, Math.max(1, v));
+    save();
+  });
+  els.raceTo.addEventListener("blur", () => { render(); });
 
   // Player handlers
   attachPlayerHandlers(els.playerA, "A");
