@@ -38,11 +38,7 @@
       text-align:center;
     }
     header img{width:220px;max-width:80%;}
-    header h1{
-      margin:0;
-      font-size:1.2rem;
-      letter-spacing:0.8px;
-    }
+    header h1{ margin:0; font-size:1.2rem; letter-spacing:0.8px; }
     header p{
       margin:6px 0 0;
       color:var(--muted);
@@ -74,11 +70,8 @@
       grid-template-columns:1fr;
       gap:12px;
     }
-    .label{
-      color:var(--muted);
-      font-size:0.9rem;
-      margin-bottom:6px;
-    }
+    .label{ color:var(--muted); font-size:0.9rem; margin-bottom:6px; }
+
     .input, .select, button{
       width:100%;
       border-radius:12px;
@@ -187,19 +180,10 @@
       align-items:center;
     }
 
-    .btn{
-      cursor:pointer;
-      transition:transform 0.08s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
-    }
+    .btn{ cursor:pointer; transition:transform 0.08s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease; }
     .btn:active{transform:scale(0.99);}
-    .btn-primary{
-      background:#0e0e0e;
-      border-color:rgba(34,255,109,0.25);
-    }
-    .btn-primary:hover{
-      box-shadow:0 0 18px rgba(34,255,109,0.16);
-      border-color:rgba(34,255,109,0.45);
-    }
+    .btn-primary{ background:#0e0e0e; border-color:rgba(34,255,109,0.25); }
+    .btn-primary:hover{ box-shadow:0 0 18px rgba(34,255,109,0.16); border-color:rgba(34,255,109,0.45); }
 
     .status{
       width:92%;
@@ -209,6 +193,7 @@
       font-size:0.92rem;
       min-height:1.35em;
     }
+    .status.error{ color:#ff6b6b; }
 
     @media (min-width:820px){
       .setup{grid-template-columns:1fr 1fr;}
@@ -221,9 +206,8 @@
     :fullscreen header,
     :fullscreen #setupPanel,
     :fullscreen .status,
-    :fullscreen .footerbar {
-      display:none !important;
-    }
+    :fullscreen .footerbar { display:none !important; }
+
     :fullscreen main{
       width:100%;
       max-width:none;
@@ -247,16 +231,9 @@
       justify-content:center;
       padding:26px;
     }
-    :fullscreen .player-name{
-      font-size:2.0rem;
-      margin-bottom:18px;
-      text-align:center;
-    }
+    :fullscreen .player-name{ font-size:2.0rem; margin-bottom:18px; text-align:center; }
     :fullscreen .tap-hint{ display:none; }
-    :fullscreen .score{
-      font-size: min(11rem, 24vw);
-      padding:0;
-    }
+    :fullscreen .score{ font-size:min(11rem, 24vw); padding:0; }
 
     /* Fullscreen overlay controls */
     .fs-overlay{
@@ -279,10 +256,7 @@
       border:1px solid rgba(34,255,109,0.25);
     }
     :fullscreen .fs-overlay{ display:flex; }
-    .fs-overlay.hidden{
-      opacity:0;
-      pointer-events:none;
-    }
+    .fs-overlay.hidden{ opacity:0; pointer-events:none; }
 
     /* Fullscreen match badge */
     .fs-badge{
@@ -304,7 +278,7 @@
       color:#fff;
       white-space:nowrap;
     }
-    .fs-pill strong{ color: var(--accent); font-weight:800; }
+    .fs-pill strong{ color:var(--accent); font-weight:800; }
     :fullscreen .fs-badge{ display:flex; }
   </style>
 </head>
@@ -316,13 +290,11 @@
     <p>Tap a player to add a point. Long-press a player to subtract. Match setup and scores autosave on this device.</p>
   </header>
 
-  <!-- Fullscreen match badge -->
   <div id="fsBadge" class="fs-badge" aria-hidden="true">
-    <div class="fs-pill" id="fsRacePill">Race to <strong id="fsRaceVal">7</strong></div>
-    <div class="fs-pill" id="fsBreakPill">Break: <strong id="fsBreakVal">Player A</strong></div>
+    <div class="fs-pill">Race to <strong id="fsRaceVal">7</strong></div>
+    <div class="fs-pill">Break: <strong id="fsBreakVal">Player A</strong></div>
   </div>
 
-  <!-- Fullscreen overlay -->
   <div id="fsOverlay" class="fs-overlay" aria-hidden="false">
     <button id="fsEditBtn" class="btn btn-primary" type="button">Edit names</button>
     <button id="fsExitBtn" class="btn btn-primary" type="button">Exit</button>
@@ -364,7 +336,7 @@
         <div>
           <div class="label">Race to</div>
           <input id="raceTo" class="input" type="number" inputmode="numeric" min="1" max="99" step="1" placeholder="e.g. 7">
-          <div class="smallhint">Break will toggle to the other player after every +1.</div>
+          <div class="smallhint">Break toggles to the other player after every +1.</div>
         </div>
       </div>
     </section>
@@ -398,7 +370,7 @@
 
 <script>
 (function () {
-  const STORAGE_KEY = "ct_scoreboard_v02";
+  const STORAGE_KEY = "ct_scoreboard_v03";
 
   const els = {
     nameA: document.getElementById("nameA"),
@@ -417,29 +389,42 @@
     fsExitBtn: document.getElementById("fsExitBtn"),
     fsEditBtn: document.getElementById("fsEditBtn"),
     fsOverlay: document.getElementById("fsOverlay"),
-
     ruleset: document.getElementById("ruleset"),
     breakFirst: document.getElementById("breakFirst"),
     raceTo: document.getElementById("raceTo"),
-
     fsRaceVal: document.getElementById("fsRaceVal"),
     fsBreakVal: document.getElementById("fsBreakVal"),
   };
+
+  function setStatus(msg, isError=false){
+    els.status.textContent = msg;
+    els.status.classList.toggle("error", !!isError);
+  }
+
+  window.addEventListener("error", (e) => {
+    setStatus("JS error: " + (e.message || "unknown"), true);
+  });
+
+  // Quick sanity check. If this fails, IDs are wrong or script is not being applied.
+  const required = ["nameA","nameB","displayNameA","displayNameB","fullscreenBtn","playerA","playerB"];
+  for (const k of required){
+    if (!els[k]) {
+      setStatus("JS error: missing element #" + k, true);
+      return;
+    }
+  }
 
   const state = {
     nameA: "Player A",
     nameB: "Player B",
     scoreA: 0,
     scoreB: 0,
-
     ruleset: "uk8",
-    breakFirst: "A",   // selected starter
+    breakFirst: "A",
     raceTo: 7,
-
-    currentBreak: "A", // live break indicator (toggles after scoring)
+    currentBreak: "A",
   };
 
-  // Debounce and long-press
   const lastTapAt = { A: 0, B: 0 };
   const TAP_DEBOUNCE_MS = 250;
 
@@ -447,7 +432,6 @@
   let pressTimer = null;
   let longPressFired = false;
 
-  // Fullscreen overlay auto-hide
   let overlayTimer = null;
   const OVERLAY_HIDE_MS = 3000;
 
@@ -474,7 +458,7 @@
       if (Number.isFinite(data.scoreB)) state.scoreB = Math.max(0, Math.floor(data.scoreB));
 
       if (typeof data.ruleset === "string") state.ruleset = data.ruleset;
-      if (typeof data.breakFirst === "string") state.breakFirst = data.breakFirst;
+      if (data.breakFirst === "A" || data.breakFirst === "B") state.breakFirst = data.breakFirst;
 
       if (Number.isFinite(data.raceTo)) {
         const rt = Math.floor(data.raceTo);
@@ -521,9 +505,8 @@
     els.raceTo.value = String(state.raceTo);
 
     renderBadge();
-
-    els.status.textContent = "Saved on this device.";
     updateFullscreenButtonLabel();
+    setStatus("Ready. Saved on this device.");
   }
 
   function isFullscreen() {
@@ -533,12 +516,9 @@
   function requestFullscreen() {
     const el = document.documentElement;
     const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-    if (!req) {
-      els.status.textContent = "Fullscreen not supported in this browser.";
-      return;
-    }
-    req.call(el).catch(() => {
-      els.status.textContent = "Fullscreen blocked. Try again after interacting with the page.";
+    if (!req) { setStatus("Fullscreen not supported in this browser.", true); return; }
+    Promise.resolve(req.call(el)).catch(() => {
+      setStatus("Fullscreen blocked. Try tapping Fullscreen again.", true);
     });
   }
 
@@ -583,6 +563,10 @@
     });
   }
 
+  function toggleBreak() {
+    state.currentBreak = (state.currentBreak === "A") ? "B" : "A";
+  }
+
   function applyDelta(which, delta) {
     if (which === "A") {
       state.scoreA = Math.max(0, state.scoreA + delta);
@@ -592,14 +576,8 @@
       flash(els.playerB);
     }
 
-    // Break toggles after each rack recorded.
-    // If delta is +1, switch to other.
-    // If delta is -1, switch back (undo the last toggle).
-    if (delta === 1) {
-      state.currentBreak = (state.currentBreak === "A") ? "B" : "A";
-    } else if (delta === -1) {
-      state.currentBreak = (state.currentBreak === "A") ? "B" : "A";
-    }
+    // Break toggles after every rack recorded. Subtract toggles back.
+    if (delta === 1 || delta === -1) toggleBreak();
 
     save();
     render();
@@ -635,7 +613,6 @@
       longPressFired = true;
       subtractPoint(which);
     }, LONG_PRESS_MS);
-
     try { el.setPointerCapture(pointerId); } catch (_) {}
   }
 
@@ -657,14 +634,11 @@
   // Init
   load();
   if (state.currentBreak !== "A" && state.currentBreak !== "B") state.currentBreak = state.breakFirst;
-  render();
-  bindOverlayAutoShow();
 
-  // Name inputs
+  // Listeners
   els.nameA.addEventListener("input", () => { state.nameA = els.nameA.value; save(); render(); });
   els.nameB.addEventListener("input", () => { state.nameB = els.nameB.value; save(); render(); });
 
-  // Match setup inputs
   els.ruleset.addEventListener("change", () => { state.ruleset = els.ruleset.value; save(); render(); });
   els.breakFirst.addEventListener("change", () => {
     state.breakFirst = els.breakFirst.value;
@@ -677,20 +651,16 @@
     if (!Number.isFinite(v)) return;
     state.raceTo = Math.min(99, Math.max(1, v));
     save();
-    renderBadge();
+    render();
   });
-  els.raceTo.addEventListener("blur", () => { render(); });
 
-  // Player handlers
   attachPlayerHandlers(els.playerA, "A");
   attachPlayerHandlers(els.playerB, "B");
 
-  // Buttons
   els.resetBtn.addEventListener("click", resetAll);
   els.fullscreenBtn.addEventListener("click", toggleFullscreen);
   els.editNamesBtn.addEventListener("click", editNames);
 
-  // Fullscreen overlay buttons
   els.fsExitBtn.addEventListener("click", () => { if (isFullscreen()) exitFullscreen(); });
   els.fsEditBtn.addEventListener("click", () => { if (isFullscreen()) exitFullscreen(); editNames(); });
 
@@ -699,6 +669,8 @@
     if (isFullscreen()) showOverlay();
     else hideOverlayNow();
   }
-
   document.addEventListener("fullscreenchange", onFsChange);
-  document.addEventList
+  document.addEventListener("webkitfullscreenchange", onFsChange);
+  document.addEventListener("MSFullscreenChange", onFsChange);
+
+  bindOverlayAutoShow
