@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="screen-orientation" content="landscape">
+
+  <!-- iPhone Home Screen (standalone) hints -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000">
+
   <title>Chalky Trousers Scoreboard</title>
   <link rel="icon" href="../assets/Chalky Trousers Logo (Man) 800x800 HR_20250927_180303_0000.png">
   <style>
@@ -285,6 +291,63 @@
       opacity:0;
       pointer-events:none;
     }
+
+    /* iPhone fallback: pseudo-fullscreen (mimics :fullscreen when API is unavailable) */
+    body.pseudo-fs header,
+    body.pseudo-fs #setupPanel,
+    body.pseudo-fs .status,
+    body.pseudo-fs .footerbar{
+      display:none !important;
+    }
+    body.pseudo-fs main{
+      width:100%;
+      max-width:none;
+      margin:0;
+      padding:0;
+      gap:0;
+    }
+    body.pseudo-fs .board{
+      grid-template-columns:1fr 1fr;
+      gap:0;
+      height:100dvh;
+    }
+    body.pseudo-fs .player{
+      border-radius:0;
+      border-left:0;
+      border-right:0;
+      border-top:0;
+      border-bottom:1px solid #1f1f1f;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      padding:26px;
+    }
+    body.pseudo-fs .player-name{
+      font-size:2.0rem;
+      margin-bottom:18px;
+      text-align:center;
+    }
+    body.pseudo-fs .tap-hint{ display:none; }
+    body.pseudo-fs .score{
+      font-size: min(11rem, 24vw);
+      padding:0;
+    }
+    body.pseudo-fs .fs-overlay{ display:flex; }
+
+    /* iOS-only tuning to push closer to Android look */
+    html.ios body.pseudo-fs .player,
+    html.ios :fullscreen .player{
+      padding:22px;
+    }
+    html.ios body.pseudo-fs .player-name,
+    html.ios :fullscreen .player-name{
+      font-size:2.2rem;
+      margin-bottom:14px;
+    }
+    html.ios body.pseudo-fs .score,
+    html.ios :fullscreen .score{
+      font-size: min(12.5rem, 28vw);
+    }
   </style>
 </head>
 <body>
@@ -373,6 +436,11 @@
 <script>
 (function () {
   const STORAGE_KEY = "ct_scoreboard_v01";
+
+  // iOS detection for CSS tuning + pseudo-fullscreen fallback
+  const ua = navigator.userAgent || "";
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (isIOS) document.documentElement.classList.add("ios");
 
   const els = {
     nameA: document.getElementById("nameA"),
@@ -517,40 +585,71 @@
     return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
   }
 
+  function isPseudoFullscreen() {
+    return document.body.classList.contains("pseudo-fs");
+  }
+
+  function setPseudoFullscreen(on) {
+    document.body.classList.toggle("pseudo-fs", !!on);
+    updateFullscreenButtonLabel();
+    if (on) showOverlay();
+    else hideOverlayNow();
+  }
+
   function requestFullscreen() {
     const el = document.documentElement;
     const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+
     if (!req) {
+      // iPhone Safari fallback: pseudo-fullscreen
+      if (isIOS) {
+        setPseudoFullscreen(true);
+        els.status.textContent = "iPhone: add to Home Screen for true fullscreen.";
+        return;
+      }
       els.status.textContent = "Fullscreen not supported in this browser.";
       return;
     }
+
     req.call(el).catch(() => {
-      els.status.textContent = "Fullscreen blocked. Try again after interacting with the page.";
+      // If blocked, allow iOS fallback
+      if (isIOS) {
+        setPseudoFullscreen(true);
+        els.status.textContent = "iPhone: add to Home Screen for true fullscreen.";
+      } else {
+        els.status.textContent = "Fullscreen blocked. Try again after interacting with the page.";
+      }
     });
   }
 
   function exitFullscreen() {
+    if (isPseudoFullscreen()) {
+      setPseudoFullscreen(false);
+      return;
+    }
     const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
     if (!exit) return;
     exit.call(document);
   }
 
   function updateFullscreenButtonLabel() {
-    els.fullscreenBtn.textContent = isFullscreen() ? "Exit fullscreen" : "Fullscreen";
+    const active = isFullscreen() || isPseudoFullscreen();
+    els.fullscreenBtn.textContent = active ? "Exit fullscreen" : "Fullscreen";
   }
 
   function toggleFullscreen() {
-    if (isFullscreen()) exitFullscreen();
+    if (isFullscreen() || isPseudoFullscreen()) exitFullscreen();
     else requestFullscreen();
   }
 
   function editNames() {
+    if (isPseudoFullscreen()) setPseudoFullscreen(false);
     els.setupPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     window.setTimeout(() => { els.nameA.focus(); }, 250);
   }
 
   function showOverlay() {
-    if (!isFullscreen()) return;
+    if (!(isFullscreen() || isPseudoFullscreen())) return;
     els.fsOverlay.classList.remove("hidden");
     if (overlayTimer) window.clearTimeout(overlayTimer);
     overlayTimer = window.setTimeout(() => {
@@ -566,7 +665,7 @@
 
   function bindOverlayAutoShow() {
     ["pointerdown","pointermove","keydown","touchstart"].forEach(evt => {
-      window.addEventListener(evt, () => { if (isFullscreen()) showOverlay(); }, { passive: true });
+      window.addEventListener(evt, () => { if (isFullscreen() || isPseudoFullscreen()) showOverlay(); }, { passive: true });
     });
   }
 
@@ -628,13 +727,13 @@
   els.editNamesBtn.addEventListener("click", editNames);
 
   // Fullscreen overlay buttons
-  els.fsExitBtn.addEventListener("click", () => { if (isFullscreen()) exitFullscreen(); });
-  els.fsEditBtn.addEventListener("click", () => { if (isFullscreen()) exitFullscreen(); editNames(); });
+  els.fsExitBtn.addEventListener("click", () => { exitFullscreen(); });
+  els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); editNames(); });
 
   function onFsChange() {
     updateFullscreenButtonLabel();
     if (isFullscreen()) showOverlay();
-    else hideOverlayNow();
+    else if (!isPseudoFullscreen()) hideOverlayNow();
   }
 
   document.addEventListener("fullscreenchange", onFsChange);
