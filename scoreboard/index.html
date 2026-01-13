@@ -2,10 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+
+  <!-- Viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="screen-orientation" content="landscape">
+
+  <!-- iOS "Add to Home Screen" fullscreen support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Scoreboard">
+  <meta name="theme-color" content="#000000">
+
   <title>Chalky Trousers Scoreboard</title>
   <link rel="icon" href="../assets/Chalky Trousers Logo (Man) 800x800 HR_20250927_180303_0000.png">
+
   <style>
     :root{
       --bg:#000;
@@ -217,11 +227,54 @@
       .footerbar .panel{grid-template-columns:1fr 1fr 1fr;}
     }
 
+    /* iOS "Add to Home Screen" banner */
+    .ios-banner{
+      width:92%;
+      max-width:900px;
+      margin:10px auto 0;
+      background:#0b0b0b;
+      border:1px solid rgba(34,255,109,0.25);
+      border-radius:var(--radius);
+      padding:12px 14px;
+      color:#fff;
+      display:none;
+    }
+    .ios-banner .title{
+      font-weight:800;
+      margin:0 0 6px;
+      font-size:0.95rem;
+    }
+    .ios-banner .text{
+      margin:0;
+      color:var(--muted);
+      line-height:1.4em;
+      font-size:0.9rem;
+    }
+    .ios-banner .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:10px;
+    }
+    .ios-banner .mini{
+      width:auto;
+      padding:10px 12px;
+      font-size:0.95rem;
+      border-radius:12px;
+      background:#0c0c0c;
+      border:1px solid rgba(34,255,109,0.25);
+      color:#fff;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
     /* Fullscreen mode: show only the scoreboard tiles */
     :fullscreen header,
     :fullscreen #setupPanel,
     :fullscreen .status,
-    :fullscreen .footerbar {
+    :fullscreen .footerbar,
+    :fullscreen #iosBanner {
       display:none !important;
     }
     :fullscreen main{
@@ -294,6 +347,18 @@
     <h1>Scoreboard</h1>
     <p>Tap a player to add a point. Long-press a player to subtract. Names, scores, and match setup autosave on this device.</p>
   </header>
+
+  <!-- iOS banner (only shows on iPhone Safari when NOT added to home screen) -->
+  <div id="iosBanner" class="ios-banner" role="region" aria-label="iPhone fullscreen tip">
+    <div class="title">iPhone fullscreen tip</div>
+    <p class="text">
+      In Safari, fullscreen button may not work. Use: Share → Add to Home Screen. Then open from the new icon for true fullscreen.
+    </p>
+    <div class="row">
+      <button id="iosBannerHide" class="mini" type="button">Hide</button>
+      <button id="iosBannerHow" class="mini" type="button">How?</button>
+    </div>
+  </div>
 
   <!-- Fullscreen overlay -->
   <div id="fsOverlay" class="fs-overlay" aria-hidden="false">
@@ -373,6 +438,7 @@
 <script>
 (function () {
   const STORAGE_KEY = "ct_scoreboard_v01";
+  const IOS_BANNER_KEY = "ct_ios_banner_hide_v01";
 
   const els = {
     nameA: document.getElementById("nameA"),
@@ -395,6 +461,10 @@
     ruleset: document.getElementById("ruleset"),
     breakFirst: document.getElementById("breakFirst"),
     raceTo: document.getElementById("raceTo"),
+
+    iosBanner: document.getElementById("iosBanner"),
+    iosBannerHide: document.getElementById("iosBannerHide"),
+    iosBannerHow: document.getElementById("iosBannerHow"),
   };
 
   const state = {
@@ -450,6 +520,32 @@
 
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+  }
+
+  function isIOS() {
+    const ua = navigator.userAgent || "";
+    return /iP(ad|hone|od)/.test(ua);
+  }
+
+  function isStandalone() {
+    // iOS Safari: navigator.standalone
+    // Modern: display-mode
+    return (window.navigator && window.navigator.standalone === true) ||
+           (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+  }
+
+  function maybeShowIOSBanner() {
+    try {
+      const hidden = localStorage.getItem(IOS_BANNER_KEY) === "1";
+      if (!isIOS() || isStandalone() || hidden) {
+        els.iosBanner.style.display = "none";
+        return;
+      }
+      els.iosBanner.style.display = "block";
+    } catch (_) {
+      // If storage blocked, still show banner on iOS Safari browser mode.
+      if (isIOS() && !isStandalone()) els.iosBanner.style.display = "block";
+    }
   }
 
   function render() {
@@ -521,7 +617,13 @@
     const el = document.documentElement;
     const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
     if (!req) {
-      els.status.textContent = "Fullscreen not supported in this browser.";
+      // Improved iPhone guidance
+      if (isIOS() && !isStandalone()) {
+        els.status.textContent = "iPhone: use Share → Add to Home Screen, then open from the icon for fullscreen.";
+        maybeShowIOSBanner();
+      } else {
+        els.status.textContent = "Fullscreen not supported in this browser.";
+      }
       return;
     }
     req.call(el).catch(() => {
@@ -602,46 +704,8 @@
   load();
   render();
   bindOverlayAutoShow();
+  maybeShowIOSBanner();
 
-  // Name inputs
-  els.nameA.addEventListener("input", () => { state.nameA = els.nameA.value; save(); render(); });
-  els.nameB.addEventListener("input", () => { state.nameB = els.nameB.value; save(); render(); });
-
-  // Match setup inputs
-  els.ruleset.addEventListener("change", () => { state.ruleset = els.ruleset.value; save(); render(); });
-  els.breakFirst.addEventListener("change", () => { state.breakFirst = els.breakFirst.value; save(); render(); });
-  els.raceTo.addEventListener("input", () => {
-    const v = Math.floor(Number(els.raceTo.value));
-    if (!Number.isFinite(v)) return;
-    state.raceTo = Math.min(99, Math.max(1, v));
-    save();
-  });
-  els.raceTo.addEventListener("blur", () => { render(); });
-
-  // Player handlers
-  attachPlayerHandlers(els.playerA, "A");
-  attachPlayerHandlers(els.playerB, "B");
-
-  // Buttons
-  els.resetBtn.addEventListener("click", resetAll);
-  els.fullscreenBtn.addEventListener("click", toggleFullscreen);
-  els.editNamesBtn.addEventListener("click", editNames);
-
-  // Fullscreen overlay buttons
-  els.fsExitBtn.addEventListener("click", () => { if (isFullscreen()) exitFullscreen(); });
-  els.fsEditBtn.addEventListener("click", () => { if (isFullscreen()) exitFullscreen(); editNames(); });
-
-  function onFsChange() {
-    updateFullscreenButtonLabel();
-    if (isFullscreen()) showOverlay();
-    else hideOverlayNow();
-  }
-
-  document.addEventListener("fullscreenchange", onFsChange);
-  document.addEventListener("webkitfullscreenchange", onFsChange);
-  document.addEventListener("MSFullscreenChange", onFsChange);
-})();
-</script>
-
-</body>
-</html>
+  // iOS banner buttons
+  els.iosBannerHide.addEventListener("click", () => {
+    try { localStorage.set
