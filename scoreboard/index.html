@@ -4,7 +4,7 @@
   <link rel="apple-touch-icon" href="icon-192.png">
 
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="screen-orientation" content="landscape">
 
   <!-- iPhone Home Screen (standalone) hints -->
@@ -529,38 +529,6 @@
   let overlayTimer = null;
   const OVERLAY_HIDE_MS = 3000;
 
-  // iOS double-tap zoom guard
-  // Prevents Safari's double-tap-to-zoom on key interactive areas.
-  let lastTouchEndAt = 0;
-  function guardDoubleTapZoom(e) {
-    if (!isIOS) return;
-    const now = Date.now();
-    if (now - lastTouchEndAt <= 350) {
-      e.preventDefault();
-    }
-    lastTouchEndAt = now;
-  }
-
-  // iOS zoom/layout recovery
-  // After pinch/double-tap zoom, Safari can keep stale visual viewport metrics.
-  // This forces a safe reflow so tiles stop clipping.
-  let vvFixTimer = null;
-  function nudgeLayout() {
-    if (!isIOS) return;
-    if (vvFixTimer) window.clearTimeout(vvFixTimer);
-
-    vvFixTimer = window.setTimeout(() => {
-      // Force reflow without visual change
-      document.body.style.webkitTransform = "translateZ(0)";
-      void document.body.offsetHeight;
-      document.body.style.webkitTransform = "";
-
-      // Re-apply sizing logic
-      enforceLandscape();
-      render();
-    }, 60);
-  }
-
   function safeText(s) {
     const t = (s ?? "").toString().trim();
     return t.length ? t : "";
@@ -787,9 +755,6 @@
     });
     el.addEventListener("pointercancel", () => endPress());
     el.addEventListener("pointerleave", () => endPress());
-
-    // iOS double-tap zoom guard on the tiles
-    el.addEventListener("touchend", guardDoubleTapZoom, { passive: false });
   }
 
   // Init
@@ -812,13 +777,6 @@
     save();
   });
   els.raceTo.addEventListener("blur", () => { render(); });
-
-  // Guard double-tap zoom on main buttons as well (iOS)
-  els.fullscreenBtn.addEventListener("touchend", guardDoubleTapZoom, { passive: false });
-  els.editNamesBtn.addEventListener("touchend", guardDoubleTapZoom, { passive: false });
-  els.resetBtn.addEventListener("touchend", guardDoubleTapZoom, { passive: false });
-  els.fsExitBtn.addEventListener("touchend", guardDoubleTapZoom, { passive: false });
-  els.fsEditBtn.addEventListener("touchend", guardDoubleTapZoom, { passive: false });
 
   // Player handlers
   attachPlayerHandlers(els.playerA, "A");
@@ -844,20 +802,8 @@
   document.addEventListener("webkitfullscreenchange", onFsChange);
   document.addEventListener("MSFullscreenChange", onFsChange);
 
-  // Existing orientation/resize logic
   window.addEventListener("orientationchange", () => setTimeout(enforceLandscape, 150));
   window.addEventListener("resize", enforceLandscape);
-
-  // iOS zoom/layout recovery hooks
-  if (isIOS) {
-    window.addEventListener("gestureend", nudgeLayout, { passive: true });
-    window.addEventListener("focus", nudgeLayout, { passive: true });
-
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", nudgeLayout, { passive: true });
-      window.visualViewport.addEventListener("scroll", nudgeLayout, { passive: true });
-    }
-  }
 })();
 </script>
 
