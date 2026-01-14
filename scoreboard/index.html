@@ -4,7 +4,7 @@
   <link rel="apple-touch-icon" href="icon-192.png">
 
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="screen-orientation" content="landscape">
 
   <!-- iPhone Home Screen (standalone) hints -->
@@ -243,9 +243,7 @@
     :fullscreen .board{
       grid-template-columns:1fr 1fr;
       gap:0;
-      height:100vh;
-      height:100svh;
-      height:100dvh;
+      height:100dvh; /* CHANGED: dvh only */
     }
     :fullscreen .player{
       border-radius:0;
@@ -312,9 +310,7 @@
     body.pseudo-fs .board{
       grid-template-columns:1fr 1fr;
       gap:0;
-      height:100vh;
-      height:100svh;
-      height:100dvh;
+      height:100dvh; /* CHANGED: dvh only */
     }
     body.pseudo-fs .player{
       border-radius:0;
@@ -339,16 +335,10 @@
     }
     body.pseudo-fs .fs-overlay{ display:flex; }
 
-    /* Stop scroll while in pseudo-fullscreen so Safari UI bars cannot shift the viewport */
-    body.pseudo-fs{
-      overflow:hidden;
-      position:fixed;
-      width:100%;
-    }
-
-    /* Stop scroll while in true fullscreen (best-effort, JS below is the main lock) */
-    :fullscreen body{
-      overflow:hidden;
+    /* CHANGED: safety line-height tweak */
+    :fullscreen .player-name,
+    body.pseudo-fs .player-name{
+      line-height:1.1;
     }
 
     /* iOS-only tuning to push closer to Android look */
@@ -498,15 +488,6 @@
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (isIOS) document.documentElement.classList.add("ios");
 
-  // iOS: hard block pinch + double-tap zoom at the event level (keeps normal scroll working)
-  if (isIOS) {
-    const prevent = (e) => { e.preventDefault(); };
-    document.addEventListener("gesturestart", prevent, { passive:false });
-    document.addEventListener("gesturechange", prevent, { passive:false });
-    document.addEventListener("gestureend", prevent, { passive:false });
-    document.addEventListener("dblclick", prevent, { passive:false });
-  }
-
   const els = {
     nameA: document.getElementById("nameA"),
     nameB: document.getElementById("nameB"),
@@ -647,15 +628,6 @@
   function isPseudoFullscreen() {
     return document.body.classList.contains("pseudo-fs");
   }
-
-  // Lock scroll only while fullscreen/pseudo-fullscreen is active
-  function shouldLockScroll() {
-    return isFullscreen() || isPseudoFullscreen();
-  }
-  window.addEventListener("touchmove", (e) => {
-    if (!shouldLockScroll()) return;
-    e.preventDefault();
-  }, { passive: false });
 
   function setPseudoFullscreen(on) {
     document.body.classList.toggle("pseudo-fs", !!on);
