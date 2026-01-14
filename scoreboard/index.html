@@ -243,7 +243,7 @@
     :fullscreen .board{
       grid-template-columns:1fr 1fr;
       gap:0;
-      height:100dvh; /* CHANGED: dvh only */
+      height:100dvh; /* dvh only */
     }
     :fullscreen .player{
       border-radius:0;
@@ -310,7 +310,7 @@
     body.pseudo-fs .board{
       grid-template-columns:1fr 1fr;
       gap:0;
-      height:100dvh; /* CHANGED: dvh only */
+      height:100dvh; /* dvh only */
     }
     body.pseudo-fs .player{
       border-radius:0;
@@ -335,7 +335,7 @@
     }
     body.pseudo-fs .fs-overlay{ display:flex; }
 
-    /* CHANGED: safety line-height tweak */
+    /* Safety line-height tweak */
     :fullscreen .player-name,
     body.pseudo-fs .player-name{
       line-height:1.1;
@@ -354,6 +354,18 @@
     html.ios body.pseudo-fs .score,
     html.ios :fullscreen .score{
       font-size: min(12.5rem, 28vw);
+    }
+
+    /* EVEN MORE NUCLEAR iOS protection: extra safe-area padding + slightly smaller name */
+    html.ios :fullscreen .player,
+    html.ios body.pseudo-fs .player{
+      padding-top: calc(26px + env(safe-area-inset-top));
+      padding-bottom: calc(26px + env(safe-area-inset-bottom));
+    }
+    html.ios :fullscreen .player-name,
+    html.ios body.pseudo-fs .player-name{
+      font-size:2.0rem;
+      line-height:1.1;
     }
 
     /* Rotate gate overlay (enforces landscape) */
