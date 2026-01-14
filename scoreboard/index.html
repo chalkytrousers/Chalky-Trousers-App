@@ -181,6 +181,29 @@
     }
     .player.flash-on .flash{opacity:1;}
 
+    /* NEW: brand bar inside the grid */
+    .brandbar{
+      grid-column:1 / -1;
+      background:#0c0c0c;
+      border:1px solid #1f1f1f;
+      border-radius:var(--radius);
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      user-select:none;
+      -webkit-user-select:none;
+      pointer-events:none; /* keeps it non-interactive */
+    }
+    .brandbar img{
+      height:34px;
+      width:auto;
+      max-width:92%;
+      opacity:0.9;
+      display:block;
+    }
+
     .footerbar{
       width:92%;
       max-width:900px;
@@ -242,6 +265,7 @@
     }
     :fullscreen .board{
       grid-template-columns:1fr 1fr;
+      grid-template-rows: 1fr auto; /* NEW */
       gap:0;
       height:100dvh; /* dvh only */
     }
@@ -255,6 +279,7 @@
       flex-direction:column;
       justify-content:center;
       padding:26px;
+      height:100%;
     }
     :fullscreen .player-name{
       font-size:2.0rem;
@@ -265,6 +290,23 @@
     :fullscreen .score{
       font-size: min(11rem, 24vw);
       padding:0;
+    }
+
+    /* NEW: brand bar in fullscreen */
+    :fullscreen .brandbar{
+      grid-column:1 / -1;
+      grid-row:2;
+      border-radius:0;
+      border-left:0;
+      border-right:0;
+      border-bottom:0;
+      border-top:1px solid #1f1f1f;
+      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+      background:#0b0b0b;
+    }
+    :fullscreen .brandbar img{
+      height:34px;
+      opacity:0.85;
     }
 
     /* Fullscreen overlay controls */
@@ -311,6 +353,7 @@
     }
     body.pseudo-fs .board{
       grid-template-columns:1fr 1fr;
+      grid-template-rows: 1fr auto; /* NEW */
       gap:0;
       height:100dvh; /* dvh only */
     }
@@ -324,6 +367,7 @@
       flex-direction:column;
       justify-content:center;
       padding:26px;
+      height:100%;
     }
     body.pseudo-fs .player-name{
       font-size:2.0rem;
@@ -336,6 +380,23 @@
       padding:0;
     }
     body.pseudo-fs .fs-overlay{ display:flex; }
+
+    /* NEW: brand bar in pseudo fullscreen */
+    body.pseudo-fs .brandbar{
+      grid-column:1 / -1;
+      grid-row:2;
+      border-radius:0;
+      border-left:0;
+      border-right:0;
+      border-bottom:0;
+      border-top:1px solid #1f1f1f;
+      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+      background:#0b0b0b;
+    }
+    body.pseudo-fs .brandbar img{
+      height:34px;
+      opacity:0.85;
+    }
 
     /* Safety line-height tweak */
     :fullscreen .player-name,
@@ -370,7 +431,7 @@
       line-height:1.1;
     }
 
-    /* NEW: prevent scroll during fullscreen/pseudo-fs so Safari URL bar cannot be pulled in */
+    /* prevent scroll during fullscreen/pseudo-fs so Safari URL bar cannot be pulled in */
     :fullscreen,
     :fullscreen body{
       overflow:hidden !important;
@@ -493,6 +554,11 @@
         <div id="displayNameB" class="player-name">Player B</div>
         <div class="tap-hint">Tap +1</div>
         <div id="scoreB" class="score">0</div>
+      </div>
+
+      <!-- NEW: centre-bottom brand bar -->
+      <div class="brandbar" aria-hidden="true">
+        <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="">
       </div>
     </section>
   </main>
@@ -659,7 +725,6 @@
   }
 
   function applyScrollLock(on) {
-    // force body overflow lock to prevent Safari URL bar pull-down
     document.body.style.overflow = on ? "hidden" : "";
     document.documentElement.style.overflow = on ? "hidden" : "";
   }
@@ -740,7 +805,6 @@
     requestFullscreen();
   }
 
-  // NEW: overlay "Re-fullscreen" button to reset viewport state
   function reFullscreen() {
     if (!isLandscape()) {
       showRotateGate(true);
@@ -817,7 +881,6 @@
     el.addEventListener("pointerleave", () => endPress());
   }
 
-  // stop touchmove scroll while fullscreen/pseudo-fs on iOS (prevents URL bar reveal)
   function bindTouchMoveBlocker() {
     if (!isIOS) return;
     window.addEventListener("touchmove", (e) => {
@@ -825,7 +888,6 @@
     }, { passive: false });
   }
 
-  // NEW: block iOS double-tap zoom while fullscreen/pseudo-fs only
   function bindDoubleTapZoomBlocker() {
     if (!isIOS) return;
 
@@ -884,8 +946,6 @@
 
   function onFsChange() {
     updateFullscreenButtonLabel();
-
-    // lock scroll while in true fullscreen too
     applyScrollLock(isFullscreen());
 
     if (isFullscreen()) showOverlay();
