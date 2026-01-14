@@ -368,6 +368,19 @@
       line-height:1.1;
     }
 
+    /* NEW: prevent scroll during fullscreen/pseudo-fs so Safari URL bar cannot be pulled in */
+    :fullscreen,
+    :fullscreen body{
+      overflow:hidden !important;
+      overscroll-behavior:none;
+      -webkit-overflow-scrolling:auto;
+    }
+    body.pseudo-fs{
+      overflow:hidden !important;
+      overscroll-behavior:none;
+      -webkit-overflow-scrolling:auto;
+    }
+
     /* Rotate gate overlay (enforces landscape) */
     .rotate-overlay{
       position:fixed;
@@ -641,9 +654,16 @@
     return document.body.classList.contains("pseudo-fs");
   }
 
+  function applyScrollLock(on) {
+    // NEW: force body overflow lock to prevent Safari URL bar pull-down
+    document.body.style.overflow = on ? "hidden" : "";
+    document.documentElement.style.overflow = on ? "hidden" : "";
+  }
+
   function setPseudoFullscreen(on) {
     document.body.classList.toggle("pseudo-fs", !!on);
     updateFullscreenButtonLabel();
+    applyScrollLock(!!on);
     if (on) showOverlay();
     else hideOverlayNow();
   }
@@ -771,10 +791,19 @@
     el.addEventListener("pointerleave", () => endPress());
   }
 
+  // NEW: stop touchmove scroll while fullscreen/pseudo-fs on iOS (prevents URL bar reveal)
+  function bindTouchMoveBlocker() {
+    if (!isIOS) return;
+    window.addEventListener("touchmove", (e) => {
+      if (isFullscreen() || isPseudoFullscreen()) e.preventDefault();
+    }, { passive: false });
+  }
+
   // Init
   load();
   render();
   bindOverlayAutoShow();
+  bindTouchMoveBlocker();
   enforceLandscape();
 
   // Name inputs
@@ -807,8 +836,13 @@
 
   function onFsChange() {
     updateFullscreenButtonLabel();
+
+    // NEW: lock scroll while in true fullscreen too
+    applyScrollLock(isFullscreen());
+
     if (isFullscreen()) showOverlay();
     else if (!isPseudoFullscreen()) hideOverlayNow();
+
     enforceLandscape();
   }
 
