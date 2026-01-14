@@ -226,6 +226,7 @@
       .footerbar .panel{grid-template-columns:1fr 1fr 1fr;}
     }
 
+    /* Fullscreen mode: show only the scoreboard tiles */
     :fullscreen header,
     :fullscreen #setupPanel,
     :fullscreen .status,
@@ -268,6 +269,7 @@
       padding:0;
     }
 
+    /* Fullscreen overlay controls */
     .fs-overlay{
       position:fixed;
       top:12px;
@@ -293,6 +295,7 @@
       pointer-events:none;
     }
 
+    /* iPhone fallback: pseudo-fullscreen (mimics :fullscreen when API is unavailable) */
     body.pseudo-fs header,
     body.pseudo-fs #setupPanel,
     body.pseudo-fs .status,
@@ -336,6 +339,7 @@
     }
     body.pseudo-fs .fs-overlay{ display:flex; }
 
+    /* iOS-only tuning to push closer to Android look */
     html.ios body.pseudo-fs .player,
     html.ios :fullscreen .player{
       padding:22px;
@@ -350,6 +354,7 @@
       font-size: min(12.5rem, 28vw);
     }
 
+    /* Rotate gate overlay (enforces landscape) */
     .rotate-overlay{
       position:fixed;
       inset:0;
@@ -383,6 +388,7 @@
 </head>
 
 <body>
+  <!-- Rotate gate (blocks portrait completely) -->
   <div id="rotateOverlay" class="rotate-overlay" aria-hidden="true">
     <div class="rotate-box">
       <div class="rotate-title">Rotate to landscape</div>
@@ -396,6 +402,7 @@
     <p>Tap a player to add a point. Long-press a player to subtract. Names, scores, and match setup autosave on this device.</p>
   </header>
 
+  <!-- Fullscreen overlay -->
   <div id="fsOverlay" class="fs-overlay" aria-hidden="false">
     <button id="fsEditBtn" class="btn btn-primary" type="button">Edit names</button>
     <button id="fsExitBtn" class="btn btn-primary" type="button">Exit</button>
@@ -406,11 +413,11 @@
       <div class="setup">
         <div>
           <div class="label">Player A</div>
-          <input id="nameA" class="input" type="text" autocomplete="off" placeholder="Player A name">
+          <input id="nameA" class="input" type="text" inputmode="text" autocomplete="off" placeholder="Player A name">
         </div>
         <div>
           <div class="label">Player B</div>
-          <input id="nameB" class="input" type="text" autocomplete="off" placeholder="Player B name">
+          <input id="nameB" class="input" type="text" inputmode="text" autocomplete="off" placeholder="Player B name">
         </div>
       </div>
 
@@ -437,21 +444,21 @@
         </div>
         <div>
           <div class="label">Race to</div>
-          <input id="raceTo" class="input" type="number" min="1" max="99" placeholder="e.g. 7">
+          <input id="raceTo" class="input" type="number" inputmode="numeric" min="1" max="99" step="1" placeholder="e.g. 7">
           <div class="smallhint">Tip: set this before fullscreen for match-night speed.</div>
         </div>
       </div>
     </section>
 
     <section class="board">
-      <div id="playerA" class="player">
+      <div id="playerA" class="player" role="button" aria-label="Add point to Player A">
         <div class="flash"></div>
         <div id="displayNameA" class="player-name">Player A</div>
         <div class="tap-hint">Tap +1</div>
         <div id="scoreA" class="score">0</div>
       </div>
 
-      <div id="playerB" class="player">
+      <div id="playerB" class="player" role="button" aria-label="Add point to Player B">
         <div class="flash"></div>
         <div id="displayNameB" class="player-name">Player B</div>
         <div class="tap-hint">Tap +1</div>
@@ -464,9 +471,9 @@
 
   <div class="footerbar">
     <div class="panel">
-      <button id="fullscreenBtn" class="btn btn-primary">Fullscreen</button>
-      <button id="editNamesBtn" class="btn btn-primary">Edit names</button>
-      <button id="resetBtn" class="btn btn-primary">Reset (confirm)</button>
+      <button id="fullscreenBtn" class="btn btn-primary" type="button">Fullscreen</button>
+      <button id="editNamesBtn" class="btn btn-primary" type="button">Edit names</button>
+      <button id="resetBtn" class="btn btn-primary" type="button">Reset (confirm)</button>
     </div>
   </div>
 
@@ -474,6 +481,7 @@
 (function () {
   const STORAGE_KEY = "ct_scoreboard";
 
+  // iOS detection for CSS tuning + pseudo-fullscreen fallback
   const ua = navigator.userAgent || "";
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (isIOS) document.documentElement.classList.add("ios");
@@ -513,6 +521,7 @@
 
   const lastTapAt = { A: 0, B: 0 };
   const TAP_DEBOUNCE_MS = 250;
+
   const LONG_PRESS_MS = 420;
   let pressTimer = null;
   let longPressFired = false;
@@ -531,7 +540,20 @@
       if (!raw) return;
       const data = JSON.parse(raw);
       if (!data || typeof data !== "object") return;
-      Object.assign(state, data);
+
+      if (typeof data.nameA === "string") state.nameA = data.nameA;
+      if (typeof data.nameB === "string") state.nameB = data.nameB;
+
+      if (Number.isFinite(data.scoreA)) state.scoreA = Math.max(0, Math.floor(data.scoreA));
+      if (Number.isFinite(data.scoreB)) state.scoreB = Math.max(0, Math.floor(data.scoreB));
+
+      if (typeof data.ruleset === "string") state.ruleset = data.ruleset;
+      if (typeof data.breakFirst === "string") state.breakFirst = data.breakFirst;
+
+      if (Number.isFinite(data.raceTo)) {
+        const rt = Math.floor(data.raceTo);
+        state.raceTo = Math.min(99, Math.max(1, rt));
+      }
     } catch (_) {}
   }
 
@@ -540,44 +562,248 @@
   }
 
   function render() {
-    els.displayNameA.textContent = safeText(state.nameA) || "Player A";
-    els.displayNameB.textContent = safeText(state.nameB) || "Player B";
-    els.scoreA.textContent = state.scoreA;
-    els.scoreB.textContent = state.scoreB;
+    const a = safeText(state.nameA) || "Player A";
+    const b = safeText(state.nameB) || "Player B";
+
+    els.displayNameA.textContent = a;
+    els.displayNameB.textContent = b;
+
+    els.scoreA.textContent = String(state.scoreA);
+    els.scoreB.textContent = String(state.scoreB);
+
+    if (document.activeElement !== els.nameA) els.nameA.value = a === "Player A" && !safeText(state.nameA) ? "" : a;
+    if (document.activeElement !== els.nameB) els.nameB.value = b === "Player B" && !safeText(state.nameB) ? "" : b;
+
     els.ruleset.value = state.ruleset;
     els.breakFirst.value = state.breakFirst;
-    els.raceTo.value = state.raceTo;
+    els.raceTo.value = String(state.raceTo);
+
     els.status.textContent = "Saved on this device.";
+    updateFullscreenButtonLabel();
+  }
+
+  function flash(el) {
+    el.classList.add("flash-on");
+    window.setTimeout(() => el.classList.remove("flash-on"), 160);
   }
 
   function applyDelta(which, delta) {
-    state["score" + which] = Math.max(0, state["score" + which] + delta);
+    if (which === "A") {
+      state.scoreA = Math.max(0, state.scoreA + delta);
+      flash(els.playerA);
+    } else {
+      state.scoreB = Math.max(0, state.scoreB + delta);
+      flash(els.playerB);
+    }
     save();
     render();
   }
 
-  function addPoint(which) { applyDelta(which, 1); }
-  function subtractPoint(which) { applyDelta(which, -1); }
+  function addPoint(which) {
+    const now = Date.now();
+    if (now - lastTapAt[which] < TAP_DEBOUNCE_MS) return;
+    lastTapAt[which] = now;
+    applyDelta(which, +1);
+  }
+
+  function subtractPoint(which) {
+    applyDelta(which, -1);
+  }
 
   function resetAll() {
-    if (!confirm("Reset scores to 0?")) return;
+    const ok = window.confirm("Reset scores to 0?");
+    if (!ok) return;
     state.scoreA = 0;
     state.scoreB = 0;
     save();
     render();
   }
 
-  els.playerA.addEventListener("click", () => addPoint("A"));
-  els.playerB.addEventListener("click", () => addPoint("B"));
-  els.resetBtn.addEventListener("click", resetAll);
-  els.fullscreenBtn.addEventListener("click", () => document.documentElement.requestFullscreen?.());
-  els.editNamesBtn.addEventListener("click", () => els.nameA.focus());
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+  }
 
+  function isPseudoFullscreen() {
+    return document.body.classList.contains("pseudo-fs");
+  }
+
+  function setPseudoFullscreen(on) {
+    document.body.classList.toggle("pseudo-fs", !!on);
+    updateFullscreenButtonLabel();
+    if (on) showOverlay();
+    else hideOverlayNow();
+  }
+
+  function exitFullscreen() {
+    if (isPseudoFullscreen()) {
+      setPseudoFullscreen(false);
+      return;
+    }
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+    if (!exit) return;
+    exit.call(document);
+  }
+
+  function requestFullscreen() {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+
+    if (!req) {
+      if (isIOS) {
+        setPseudoFullscreen(true);
+        return;
+      }
+      els.status.textContent = "Fullscreen not supported in this browser.";
+      return;
+    }
+
+    req.call(el).catch(() => {
+      if (isIOS) setPseudoFullscreen(true);
+      else els.status.textContent = "Fullscreen blocked. Try again after interacting with the page.";
+    });
+  }
+
+  function updateFullscreenButtonLabel() {
+    const active = isFullscreen() || isPseudoFullscreen();
+    els.fullscreenBtn.textContent = active ? "Exit fullscreen" : "Fullscreen";
+  }
+
+  function showRotateGate(show) {
+    if (!els.rotateOverlay) return;
+    els.rotateOverlay.classList.toggle("show", !!show);
+    els.rotateOverlay.setAttribute("aria-hidden", show ? "false" : "true");
+  }
+
+  function isLandscape() {
+    return window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
+  }
+
+  function enforceLandscape() {
+    const portrait = window.matchMedia && window.matchMedia("(orientation: portrait)").matches;
+    const active = isFullscreen() || isPseudoFullscreen();
+
+    if (portrait) {
+      showRotateGate(true);
+      if (active) exitFullscreen();
+    } else {
+      showRotateGate(false);
+    }
+  }
+
+  function toggleFullscreen() {
+    if (isFullscreen() || isPseudoFullscreen()) {
+      exitFullscreen();
+      return;
+    }
+    if (!isLandscape()) {
+      showRotateGate(true);
+      return;
+    }
+    requestFullscreen();
+  }
+
+  function editNames() {
+    if (isPseudoFullscreen()) setPseudoFullscreen(false);
+    els.setupPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => { els.nameA.focus(); }, 250);
+  }
+
+  function showOverlay() {
+    if (!(isFullscreen() || isPseudoFullscreen())) return;
+    els.fsOverlay.classList.remove("hidden");
+    if (overlayTimer) window.clearTimeout(overlayTimer);
+    overlayTimer = window.setTimeout(() => {
+      els.fsOverlay.classList.add("hidden");
+    }, OVERLAY_HIDE_MS);
+  }
+
+  function hideOverlayNow() {
+    els.fsOverlay.classList.add("hidden");
+    if (overlayTimer) window.clearTimeout(overlayTimer);
+    overlayTimer = null;
+  }
+
+  function bindOverlayAutoShow() {
+    ["pointerdown","pointermove","keydown","touchstart"].forEach(evt => {
+      window.addEventListener(evt, () => { if (isFullscreen() || isPseudoFullscreen()) showOverlay(); }, { passive: true });
+    });
+  }
+
+  function startPress(which, pointerId, el) {
+    longPressFired = false;
+    if (pressTimer) window.clearTimeout(pressTimer);
+    pressTimer = window.setTimeout(() => {
+      longPressFired = true;
+      subtractPoint(which);
+      showOverlay();
+    }, LONG_PRESS_MS);
+
+    try { el.setPointerCapture(pointerId); } catch (_) {}
+  }
+
+  function endPress() {
+    if (pressTimer) window.clearTimeout(pressTimer);
+    pressTimer = null;
+  }
+
+  function attachPlayerHandlers(el, which) {
+    el.addEventListener("pointerdown", (e) => startPress(which, e.pointerId, el));
+    el.addEventListener("pointerup", () => {
+      endPress();
+      if (!longPressFired) addPoint(which);
+      showOverlay();
+    });
+    el.addEventListener("pointercancel", () => endPress());
+    el.addEventListener("pointerleave", () => endPress());
+  }
+
+  // Init
+  load();
+  render();
+  bindOverlayAutoShow();
+  enforceLandscape();
+
+  // Name inputs
   els.nameA.addEventListener("input", () => { state.nameA = els.nameA.value; save(); render(); });
   els.nameB.addEventListener("input", () => { state.nameB = els.nameB.value; save(); render(); });
 
-  load();
-  render();
+  // Match setup inputs
+  els.ruleset.addEventListener("change", () => { state.ruleset = els.ruleset.value; save(); render(); });
+  els.breakFirst.addEventListener("change", () => { state.breakFirst = els.breakFirst.value; save(); render(); });
+  els.raceTo.addEventListener("input", () => {
+    const v = Math.floor(Number(els.raceTo.value));
+    if (!Number.isFinite(v)) return;
+    state.raceTo = Math.min(99, Math.max(1, v));
+    save();
+  });
+  els.raceTo.addEventListener("blur", () => { render(); });
+
+  // Player handlers
+  attachPlayerHandlers(els.playerA, "A");
+  attachPlayerHandlers(els.playerB, "B");
+
+  // Buttons
+  els.resetBtn.addEventListener("click", resetAll);
+  els.fullscreenBtn.addEventListener("click", toggleFullscreen);
+  els.editNamesBtn.addEventListener("click", editNames);
+
+  // Fullscreen overlay buttons
+  els.fsExitBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); });
+  els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); editNames(); });
+
+  function onFsChange() {
+    updateFullscreenButtonLabel();
+    if (isFullscreen()) showOverlay();
+    else if (!isPseudoFullscreen()) hideOverlayNow();
+    enforceLandscape();
+  }
+
+  document.addEventListener("fullscreenchange", onFsChange);
+  document.addEventListener("webkitfullscreenchange", onFsChange);
+  document.addEventListener("MSFullscreenChange", onFsChange);
+
+  window.addEventListener("orientationchange", () => setTimeout(enforceLandscape, 150));
+  window.addEventListener("resize", enforceLandscape);
 })();
 </script>
 
