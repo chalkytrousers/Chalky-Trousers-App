@@ -38,8 +38,6 @@
       body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
     }
 
-
-
     header{
       padding:22px 14px 10px;
       display:flex;
@@ -341,6 +339,18 @@
     }
     body.pseudo-fs .fs-overlay{ display:flex; }
 
+    /* Stop scroll while in pseudo-fullscreen so Safari UI bars cannot shift the viewport */
+    body.pseudo-fs{
+      overflow:hidden;
+      position:fixed;
+      width:100%;
+    }
+
+    /* Stop scroll while in true fullscreen (best-effort, JS below is the main lock) */
+    :fullscreen body{
+      overflow:hidden;
+    }
+
     /* iOS-only tuning to push closer to Android look */
     html.ios body.pseudo-fs .player,
     html.ios :fullscreen .player{
@@ -488,16 +498,12 @@
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (isIOS) document.documentElement.classList.add("ios");
 
-  // iOS: hard block pinch + double-tap zoom at the event level
+  // iOS: hard block pinch + double-tap zoom at the event level (keeps normal scroll working)
   if (isIOS) {
     const prevent = (e) => { e.preventDefault(); };
-
-    // Pinch zoom (Safari-only gesture events)
     document.addEventListener("gesturestart", prevent, { passive:false });
     document.addEventListener("gesturechange", prevent, { passive:false });
     document.addEventListener("gestureend", prevent, { passive:false });
-
-    // Double-tap zoom often routes through dblclick
     document.addEventListener("dblclick", prevent, { passive:false });
   }
 
@@ -641,6 +647,15 @@
   function isPseudoFullscreen() {
     return document.body.classList.contains("pseudo-fs");
   }
+
+  // Lock scroll only while fullscreen/pseudo-fullscreen is active
+  function shouldLockScroll() {
+    return isFullscreen() || isPseudoFullscreen();
+  }
+  window.addEventListener("touchmove", (e) => {
+    if (!shouldLockScroll()) return;
+    e.preventDefault();
+  }, { passive: false });
 
   function setPseudoFullscreen(on) {
     document.body.classList.toggle("pseudo-fs", !!on);
