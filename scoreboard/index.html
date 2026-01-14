@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
   <link rel="apple-touch-icon" href="icon-192.png">
 
-  
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="screen-orientation" content="landscape">
@@ -16,6 +14,7 @@
 
   <title>Chalky Trousers Scoreboard</title>
   <link rel="icon" href="../assets/Chalky Trousers Logo (Man) 800x800 HR_20250927_180303_0000.png">
+
   <style>
     :root{
       --bg:#000;
@@ -265,8 +264,6 @@
       text-align:center;
     }
     :fullscreen .tap-hint{ display:none; }
-
-    /* Responsive fullscreen score size so portrait doesn't clip */
     :fullscreen .score{
       font-size: min(11rem, 24vw);
       padding:0;
@@ -357,7 +354,7 @@
       font-size: min(12.5rem, 28vw);
     }
 
-    /* Rotate gate overlay (prevents iPhone portrait fullscreen clipping) */
+    /* Rotate gate overlay (enforces landscape) */
     .rotate-overlay{
       position:fixed;
       inset:0;
@@ -389,24 +386,19 @@
     }
   </style>
 </head>
-<body>
 
-  <!-- Rotate gate (shows only when user tries fullscreen in portrait on iPhone) -->
+<body>
+  <!-- Rotate gate (blocks portrait completely) -->
   <div id="rotateOverlay" class="rotate-overlay" aria-hidden="true">
     <div class="rotate-box">
       <div class="rotate-title">Rotate to landscape</div>
-      <div class="rotate-msg">For proper fullscreen while streaming.</div>
+      <div class="rotate-msg">Landscape is required for a clean fullscreen scoreboard while streaming.</div>
     </div>
   </div>
 
   <header id="top">
     <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="Chalky Trousers Logo">
     <h1>Scoreboard v3.2</h1>
-
-<p style="opacity:.6;font-size:.8rem;">
-  Loaded: <span id="lm"></span>
-</p>
-    
     <p>Tap a player to add a point. Long-press a player to subtract. Names, scores, and match setup autosave on this device.</p>
   </header>
 
@@ -511,11 +503,10 @@
     fsExitBtn: document.getElementById("fsExitBtn"),
     fsEditBtn: document.getElementById("fsEditBtn"),
     fsOverlay: document.getElementById("fsOverlay"),
-
+    rotateOverlay: document.getElementById("rotateOverlay"),
     ruleset: document.getElementById("ruleset"),
     breakFirst: document.getElementById("breakFirst"),
     raceTo: document.getElementById("raceTo"),
-    rotateOverlay: document.getElementById("rotateOverlay"),
   };
 
   const state = {
@@ -523,14 +514,11 @@
     nameB: "Player B",
     scoreA: 0,
     scoreB: 0,
-
     ruleset: "uk8",
     breakFirst: "A",
     raceTo: 7,
   };
 
-  // Locked behaviour additions
-  let lastAction = null; // { which: "A"|"B", delta: number }
   const lastTapAt = { A: 0, B: 0 };
   const TAP_DEBOUNCE_MS = 250;
 
@@ -586,7 +574,6 @@
     if (document.activeElement !== els.nameA) els.nameA.value = a === "Player A" && !safeText(state.nameA) ? "" : a;
     if (document.activeElement !== els.nameB) els.nameB.value = b === "Player B" && !safeText(state.nameB) ? "" : b;
 
-    // match setup
     els.ruleset.value = state.ruleset;
     els.breakFirst.value = state.breakFirst;
     els.raceTo.value = String(state.raceTo);
@@ -608,7 +595,6 @@
       state.scoreB = Math.max(0, state.scoreB + delta);
       flash(els.playerB);
     }
-    lastAction = { which, delta };
     save();
     render();
   }
@@ -629,7 +615,6 @@
     if (!ok) return;
     state.scoreA = 0;
     state.scoreB = 0;
-    lastAction = null;
     save();
     render();
   }
@@ -649,32 +634,6 @@
     else hideOverlayNow();
   }
 
-  function requestFullscreen() {
-    const el = document.documentElement;
-    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-
-    if (!req) {
-      // iPhone Safari fallback: pseudo-fullscreen
-      if (isIOS) {
-        setPseudoFullscreen(true);
-        els.status.textContent = "iPhone: rotate to landscape for best fullscreen.";
-        return;
-      }
-      els.status.textContent = "Fullscreen not supported in this browser.";
-      return;
-    }
-
-    req.call(el).catch(() => {
-      // If blocked, allow iOS fallback
-      if (isIOS) {
-        setPseudoFullscreen(true);
-        els.status.textContent = "iPhone: rotate to landscape for best fullscreen.";
-      } else {
-        els.status.textContent = "Fullscreen blocked. Try again after interacting with the page.";
-      }
-    });
-  }
-
   function exitFullscreen() {
     if (isPseudoFullscreen()) {
       setPseudoFullscreen(false);
@@ -683,6 +642,25 @@
     const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
     if (!exit) return;
     exit.call(document);
+  }
+
+  function requestFullscreen() {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+
+    if (!req) {
+      if (isIOS) {
+        setPseudoFullscreen(true);
+        return;
+      }
+      els.status.textContent = "Fullscreen not supported in this browser.";
+      return;
+    }
+
+    req.call(el).catch(() => {
+      if (isIOS) setPseudoFullscreen(true);
+      else els.status.textContent = "Fullscreen blocked. Try again after interacting with the page.";
+    });
   }
 
   function updateFullscreenButtonLabel() {
@@ -700,41 +678,27 @@
     return window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
   }
 
-  function waitForLandscapeThen(fn) {
-    showRotateGate(true);
+  function enforceLandscape() {
+    const portrait = window.matchMedia && window.matchMedia("(orientation: portrait)").matches;
+    const active = isFullscreen() || isPseudoFullscreen();
 
-    const onChange = () => {
-      if (isLandscape()) {
-        cleanup();
-        showRotateGate(false);
-        fn();
-      }
-    };
-
-    const cleanup = () => {
-      window.removeEventListener("orientationchange", onChange);
-      window.removeEventListener("resize", onChange);
-    };
-
-    window.addEventListener("orientationchange", onChange);
-    window.addEventListener("resize", onChange);
-    onChange();
+    if (portrait) {
+      showRotateGate(true);
+      if (active) exitFullscreen();
+    } else {
+      showRotateGate(false);
+    }
   }
 
   function toggleFullscreen() {
     if (isFullscreen() || isPseudoFullscreen()) {
-      showRotateGate(false);
       exitFullscreen();
       return;
     }
-
-    // iPhone Safari portrait fullscreen often results in a squashed viewport and clipped numbers.
-    // Gate fullscreen behind landscape to make match-night use reliable for streaming.
-    if (isIOS && !isLandscape()) {
-      waitForLandscapeThen(() => requestFullscreen());
+    if (!isLandscape()) {
+      showRotateGate(true);
       return;
     }
-
     requestFullscreen();
   }
 
@@ -797,6 +761,7 @@
   load();
   render();
   bindOverlayAutoShow();
+  enforceLandscape();
 
   // Name inputs
   els.nameA.addEventListener("input", () => { state.nameA = els.nameA.value; save(); render(); });
@@ -823,25 +788,24 @@
   els.editNamesBtn.addEventListener("click", editNames);
 
   // Fullscreen overlay buttons
-  els.fsExitBtn.addEventListener("click", () => { exitFullscreen(); });
-  els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); editNames(); });
+  els.fsExitBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); });
+  els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); editNames(); });
 
   function onFsChange() {
     updateFullscreenButtonLabel();
-    showRotateGate(false);
     if (isFullscreen()) showOverlay();
     else if (!isPseudoFullscreen()) hideOverlayNow();
+    enforceLandscape();
   }
 
   document.addEventListener("fullscreenchange", onFsChange);
   document.addEventListener("webkitfullscreenchange", onFsChange);
   document.addEventListener("MSFullscreenChange", onFsChange);
+
+  window.addEventListener("orientationchange", () => setTimeout(enforceLandscape, 150));
+  window.addEventListener("resize", enforceLandscape);
 })();
 </script>
 
-<script>
-document.getElementById("lm").textContent = document.lastModified;
-</script>
-  
 </body>
 </html>
