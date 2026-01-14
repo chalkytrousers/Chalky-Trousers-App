@@ -278,6 +278,8 @@
       opacity:1;
       transition:opacity 0.25s ease;
       pointer-events:auto;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
     .fs-overlay button{
       width:auto;
@@ -431,6 +433,7 @@
 
   <!-- Fullscreen overlay -->
   <div id="fsOverlay" class="fs-overlay" aria-hidden="false">
+    <button id="fsFullBtn" class="btn btn-primary" type="button">Re-fullscreen</button>
     <button id="fsEditBtn" class="btn btn-primary" type="button">Edit names</button>
     <button id="fsExitBtn" class="btn btn-primary" type="button">Exit</button>
   </div>
@@ -529,6 +532,7 @@
     status: document.getElementById("status"),
     fsExitBtn: document.getElementById("fsExitBtn"),
     fsEditBtn: document.getElementById("fsEditBtn"),
+    fsFullBtn: document.getElementById("fsFullBtn"),
     fsOverlay: document.getElementById("fsOverlay"),
     rotateOverlay: document.getElementById("rotateOverlay"),
     ruleset: document.getElementById("ruleset"),
@@ -655,7 +659,7 @@
   }
 
   function applyScrollLock(on) {
-    // NEW: force body overflow lock to prevent Safari URL bar pull-down
+    // force body overflow lock to prevent Safari URL bar pull-down
     document.body.style.overflow = on ? "hidden" : "";
     document.documentElement.style.overflow = on ? "hidden" : "";
   }
@@ -736,6 +740,28 @@
     requestFullscreen();
   }
 
+  // NEW: overlay "Re-fullscreen" button to reset viewport state
+  function reFullscreen() {
+    if (!isLandscape()) {
+      showRotateGate(true);
+      return;
+    }
+
+    if (isPseudoFullscreen()) {
+      setPseudoFullscreen(false);
+      window.setTimeout(() => setPseudoFullscreen(true), 60);
+      return;
+    }
+
+    if (isFullscreen()) {
+      exitFullscreen();
+      window.setTimeout(() => requestFullscreen(), 90);
+      return;
+    }
+
+    requestFullscreen();
+  }
+
   function editNames() {
     if (isPseudoFullscreen()) setPseudoFullscreen(false);
     els.setupPanel.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -791,11 +817,31 @@
     el.addEventListener("pointerleave", () => endPress());
   }
 
-  // NEW: stop touchmove scroll while fullscreen/pseudo-fs on iOS (prevents URL bar reveal)
+  // stop touchmove scroll while fullscreen/pseudo-fs on iOS (prevents URL bar reveal)
   function bindTouchMoveBlocker() {
     if (!isIOS) return;
     window.addEventListener("touchmove", (e) => {
       if (isFullscreen() || isPseudoFullscreen()) e.preventDefault();
+    }, { passive: false });
+  }
+
+  // NEW: block iOS double-tap zoom while fullscreen/pseudo-fs only
+  function bindDoubleTapZoomBlocker() {
+    if (!isIOS) return;
+
+    let lastTouchEnd = 0;
+    document.addEventListener("touchend", (e) => {
+      if (!(isFullscreen() || isPseudoFullscreen())) return;
+
+      const t = e.target;
+      const tag = (t && t.tagName) ? t.tagName.toLowerCase() : "";
+      if (tag === "input" || tag === "textarea" || tag === "select") return;
+
+      const now = Date.now();
+      if (now - lastTouchEnd <= 320) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
     }, { passive: false });
   }
 
@@ -804,6 +850,7 @@
   render();
   bindOverlayAutoShow();
   bindTouchMoveBlocker();
+  bindDoubleTapZoomBlocker();
   enforceLandscape();
 
   // Name inputs
@@ -833,11 +880,12 @@
   // Fullscreen overlay buttons
   els.fsExitBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); });
   els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); editNames(); });
+  els.fsFullBtn.addEventListener("click", () => { reFullscreen(); });
 
   function onFsChange() {
     updateFullscreenButtonLabel();
 
-    // NEW: lock scroll while in true fullscreen too
+    // lock scroll while in true fullscreen too
     applyScrollLock(isFullscreen());
 
     if (isFullscreen()) showOverlay();
