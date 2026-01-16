@@ -22,7 +22,6 @@
       --accent:#22ff6d;
       --muted:#a0a0a0;
       --radius:16px;
-
       --brand-bg:#0c0c0c;
       --brand-border:#1f1f1f;
     }
@@ -231,7 +230,6 @@
       .footerbar .panel{grid-template-columns:1fr 1fr 1fr;}
     }
 
-    /* Brand bars (top + bottom) */
     .brandbar{
       background:var(--brand-bg);
       border:1px solid var(--brand-border);
@@ -250,7 +248,6 @@
       opacity:0.92;
     }
 
-    /* Fullscreen mode: show only the scoreboard tiles (and banners) */
     :fullscreen header,
     :fullscreen #setupPanel,
     :fullscreen .status,
@@ -265,7 +262,6 @@
       gap:0;
     }
 
-    /* FULLSCREEN GRID: top brand, players, bottom brand */
     :fullscreen .board{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -274,7 +270,6 @@
       height:100dvh;
     }
 
-    /* Fullscreen banners */
     :fullscreen .brandbar{
       grid-column:1 / -1;
       border-radius:0;
@@ -283,7 +278,6 @@
       background:var(--brand-bg);
     }
 
-    /* V3: keep top banner, remove image, ensure visible height */
     :fullscreen .brandbar.top{
       grid-row:1;
       border-top:0;
@@ -293,7 +287,6 @@
     }
     :fullscreen .brandbar.top img{ display:none; }
 
-    /* V3: bigger bottom banner + bigger logo */
     :fullscreen .brandbar.bottom{
       grid-row:3;
       border-bottom:0;
@@ -306,22 +299,18 @@
       width:auto;
     }
 
-    /* Fullscreen players forced to row 2 */
     :fullscreen #playerA{ grid-column:1; grid-row:2; }
     :fullscreen #playerB{ grid-column:2; grid-row:2; }
 
-    /* FULLSCREEN TILE LAYOUT: grid inside tile so name cannot be pushed off */
     :fullscreen .player{
       border-radius:0;
       border-left:0;
       border-right:0;
       border-top:0;
       border-bottom:1px solid #1f1f1f;
-
       display:grid;
       grid-template-rows:auto 1fr;
       align-items:start;
-
       padding:18px;
     }
     :fullscreen .player-name{
@@ -340,7 +329,6 @@
       line-height:1;
     }
 
-    /* Fullscreen overlay controls */
     .fs-overlay{
       position:fixed;
       top:12px;
@@ -366,7 +354,6 @@
       pointer-events:none;
     }
 
-    /* iPhone fallback: pseudo-fullscreen (mimics :fullscreen when API is unavailable) */
     body.pseudo-fs header,
     body.pseudo-fs #setupPanel,
     body.pseudo-fs .status,
@@ -396,7 +383,6 @@
       background:var(--brand-bg);
     }
 
-    /* V3: keep top banner, remove image, ensure visible height */
     body.pseudo-fs .brandbar.top{
       grid-row:1;
       border-top:0;
@@ -406,7 +392,6 @@
     }
     body.pseudo-fs .brandbar.top img{ display:none; }
 
-    /* V3: bigger bottom banner + bigger logo */
     body.pseudo-fs .brandbar.bottom{
       grid-row:3;
       border-bottom:0;
@@ -428,11 +413,9 @@
       border-right:0;
       border-top:0;
       border-bottom:1px solid #1f1f1f;
-
       display:grid;
       grid-template-rows:auto 1fr;
       align-items:start;
-
       padding:18px;
     }
     body.pseudo-fs .player-name{
@@ -452,14 +435,18 @@
     }
     body.pseudo-fs .fs-overlay{ display:flex; }
 
-    /* iOS-only tuning */
+    /* iOS-only tuning, INCLUDING bigger gap */
     html.ios :fullscreen .player,
     html.ios body.pseudo-fs .player{
       padding-top: calc(18px + env(safe-area-inset-top));
       padding-bottom: calc(18px + env(safe-area-inset-bottom));
     }
 
-    /* Prevent scroll while fullscreen/pseudo-fs to reduce Safari URL-bar pull */
+    html.ios :fullscreen .player-name,
+    html.ios body.pseudo-fs .player-name{
+      margin-bottom: 20px; /* <-- BIGGER GAP HERE */
+    }
+
     :fullscreen,
     :fullscreen body{
       overflow:hidden !important;
@@ -472,7 +459,6 @@
       -webkit-overflow-scrolling:auto;
     }
 
-    /* Rotate gate overlay (enforces landscape) */
     .rotate-overlay{
       position:fixed;
       inset:0;
@@ -506,7 +492,6 @@
 </head>
 
 <body>
-  <!-- Rotate gate (blocks portrait completely) -->
   <div id="rotateOverlay" class="rotate-overlay" aria-hidden="true">
     <div class="rotate-box">
       <div class="rotate-title">Rotate to landscape</div>
@@ -520,7 +505,6 @@
     <p>Tap a player to add a point. Long-press a player to subtract. Names, scores, and match setup autosave on this device.</p>
   </header>
 
-  <!-- Fullscreen overlay (V3: removed Re-fullscreen button) -->
   <div id="fsOverlay" class="fs-overlay" aria-hidden="false">
     <button id="fsEditBtn" class="btn btn-primary" type="button">Edit names</button>
     <button id="fsExitBtn" class="btn btn-primary" type="button">Exit</button>
@@ -569,7 +553,6 @@
     </section>
 
     <section class="board">
-      <!-- V3 top banner stays but has no image -->
       <div class="brandbar top" aria-hidden="true"></div>
 
       <div id="playerA" class="player" role="button" aria-label="Add point to Player A">
@@ -586,7 +569,6 @@
         <div id="scoreB" class="score">0</div>
       </div>
 
-      <!-- V3 bottom banner bigger + bigger logo -->
       <div class="brandbar bottom" aria-hidden="true">
         <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="">
       </div>
@@ -605,11 +587,9 @@
 
 <script>
 (function () {
-  // Locked in as V3
   const VERSION = "v3";
   const STORAGE_KEY = "ct_scoreboard";
 
-  // iOS detection for CSS tuning + pseudo-fullscreen fallback
   const ua = navigator.userAgent || "";
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (isIOS) document.documentElement.classList.add("ios");
@@ -649,11 +629,9 @@
 
   const lastTapAt = { A: 0, B: 0 };
   const TAP_DEBOUNCE_MS = 250;
-
   const LONG_PRESS_MS = 420;
   let pressTimer = null;
   let longPressFired = false;
-
   let overlayTimer = null;
   const OVERLAY_HIDE_MS = 3000;
 
@@ -699,15 +677,16 @@
     els.scoreA.textContent = String(state.scoreA);
     els.scoreB.textContent = String(state.scoreB);
 
-    if (document.activeElement !== els.nameA) els.nameA.value = a === "Player A" && !safeText(state.nameA) ? "" : a;
-    if (document.activeElement !== els.nameB) els.nameB.value = b === "Player B" && !safeText(state.nameB) ? "" : b;
+    if (document.activeElement !== els.nameA)
+      els.nameA.value = a === "Player A" && !safeText(state.nameA) ? "" : a;
+    if (document.activeElement !== els.nameB)
+      els.nameB.value = b === "Player B" && !safeText(state.nameB) ? "" : b;
 
     els.ruleset.value = state.ruleset;
     els.breakFirst.value = state.breakFirst;
     els.raceTo.value = String(state.raceTo);
 
     els.status.textContent = "Saved on this device. " + VERSION;
-    updateFullscreenButtonLabel();
   }
 
   function flash(el) {
@@ -762,10 +741,7 @@
 
   function setPseudoFullscreen(on) {
     document.body.classList.toggle("pseudo-fs", !!on);
-    updateFullscreenButtonLabel();
     applyScrollLock(!!on);
-    if (on) showOverlay();
-    else hideOverlayNow();
   }
 
   function exitFullscreen() {
@@ -774,8 +750,7 @@
       return;
     }
     const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
-    if (!exit) return;
-    exit.call(document);
+    if (exit) exit.call(document);
   }
 
   function requestFullscreen() {
@@ -783,54 +758,20 @@
     const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
 
     if (!req) {
-      if (isIOS) {
-        setPseudoFullscreen(true);
-        return;
-      }
-      els.status.textContent = "Fullscreen not supported in this browser. " + VERSION;
+      if (isIOS) setPseudoFullscreen(true);
+      else els.status.textContent = "Fullscreen not supported in this browser. " + VERSION;
       return;
     }
 
     req.call(el).catch(() => {
       if (isIOS) setPseudoFullscreen(true);
-      else els.status.textContent = "Fullscreen blocked. Try again after interacting with the page. " + VERSION;
+      else els.status.textContent = "Fullscreen blocked. Try again. " + VERSION;
     });
-  }
-
-  function updateFullscreenButtonLabel() {
-    const active = isFullscreen() || isPseudoFullscreen();
-    els.fullscreenBtn.textContent = active ? "Exit fullscreen" : "Fullscreen";
-  }
-
-  function showRotateGate(show) {
-    if (!els.rotateOverlay) return;
-    els.rotateOverlay.classList.toggle("show", !!show);
-    els.rotateOverlay.setAttribute("aria-hidden", show ? "false" : "true");
-  }
-
-  function isLandscape() {
-    return window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
-  }
-
-  function enforceLandscape() {
-    const portrait = window.matchMedia && window.matchMedia("(orientation: portrait)").matches;
-    const active = isFullscreen() || isPseudoFullscreen();
-
-    if (portrait) {
-      showRotateGate(true);
-      if (active) exitFullscreen();
-    } else {
-      showRotateGate(false);
-    }
   }
 
   function toggleFullscreen() {
     if (isFullscreen() || isPseudoFullscreen()) {
       exitFullscreen();
-      return;
-    }
-    if (!isLandscape()) {
-      showRotateGate(true);
       return;
     }
     requestFullscreen();
@@ -842,118 +783,36 @@
     window.setTimeout(() => { els.nameA.focus(); }, 250);
   }
 
-  function showOverlay() {
-    if (!(isFullscreen() || isPseudoFullscreen())) return;
-    els.fsOverlay.classList.remove("hidden");
-    if (overlayTimer) window.clearTimeout(overlayTimer);
-    overlayTimer = window.setTimeout(() => {
-      els.fsOverlay.classList.add("hidden");
-    }, OVERLAY_HIDE_MS);
-  }
-
-  function hideOverlayNow() {
-    els.fsOverlay.classList.add("hidden");
-    if (overlayTimer) window.clearTimeout(overlayTimer);
-    overlayTimer = null;
-  }
-
-  function bindOverlayAutoShow() {
-    ["pointerdown","pointermove","keydown","touchstart"].forEach(evt => {
-      window.addEventListener(evt, () => {
-        if (isFullscreen() || isPseudoFullscreen()) showOverlay();
-      }, { passive: true });
-    });
-  }
-
-  function startPress(which, pointerId, el) {
-    longPressFired = false;
-    if (pressTimer) window.clearTimeout(pressTimer);
-    pressTimer = window.setTimeout(() => {
-      longPressFired = true;
-      subtractPoint(which);
-      showOverlay();
-    }, LONG_PRESS_MS);
-
-    try { el.setPointerCapture(pointerId); } catch (_) {}
-  }
-
-  function endPress() {
-    if (pressTimer) window.clearTimeout(pressTimer);
-    pressTimer = null;
-  }
-
   function attachPlayerHandlers(el, which) {
-    el.addEventListener("pointerdown", (e) => startPress(which, e.pointerId, el));
-    el.addEventListener("pointerup", () => {
-      endPress();
-      if (!longPressFired) addPoint(which);
-      showOverlay();
+    el.addEventListener("pointerdown", (e) => {
+      longPressFired = false;
+      if (pressTimer) window.clearTimeout(pressTimer);
+      pressTimer = window.setTimeout(() => {
+        longPressFired = true;
+        subtractPoint(which);
+      }, LONG_PRESS_MS);
+      try { el.setPointerCapture(e.pointerId); } catch (_) {}
     });
-    el.addEventListener("pointercancel", () => endPress());
-    el.addEventListener("pointerleave", () => endPress());
+
+    el.addEventListener("pointerup", () => {
+      if (pressTimer) window.clearTimeout(pressTimer);
+      pressTimer = null;
+      if (!longPressFired) addPoint(which);
+    });
   }
 
-  // Stop touchmove scroll while fullscreen/pseudo-fs on iOS (helps reduce URL bar reveal)
-  function bindTouchMoveBlocker() {
-    if (!isIOS) return;
-    window.addEventListener("touchmove", (e) => {
-      if (isFullscreen() || isPseudoFullscreen()) e.preventDefault();
-    }, { passive: false });
-  }
-
-  // Init
   load();
   render();
-  bindOverlayAutoShow();
-  bindTouchMoveBlocker();
-  enforceLandscape();
 
-  // Name inputs
-  els.nameA.addEventListener("input", () => { state.nameA = els.nameA.value; save(); render(); });
-  els.nameB.addEventListener("input", () => { state.nameB = els.nameB.value; save(); render(); });
-
-  // Match setup inputs
-  els.ruleset.addEventListener("change", () => { state.ruleset = els.ruleset.value; save(); render(); });
-  els.breakFirst.addEventListener("change", () => { state.breakFirst = els.breakFirst.value; save(); render(); });
-  els.raceTo.addEventListener("input", () => {
-    const v = Math.floor(Number(els.raceTo.value));
-    if (!Number.isFinite(v)) return;
-    state.raceTo = Math.min(99, Math.max(1, v));
-    save();
-  });
-  els.raceTo.addEventListener("blur", () => { render(); });
-
-  // Player handlers
   attachPlayerHandlers(els.playerA, "A");
   attachPlayerHandlers(els.playerB, "B");
 
-  // Buttons
   els.resetBtn.addEventListener("click", resetAll);
   els.fullscreenBtn.addEventListener("click", toggleFullscreen);
   els.editNamesBtn.addEventListener("click", editNames);
-
-  // Fullscreen overlay buttons (V3: no re-fullscreen)
-  els.fsExitBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); });
-  els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); editNames(); });
-
-  function onFsChange() {
-    updateFullscreenButtonLabel();
-    applyScrollLock(isFullscreen() || isPseudoFullscreen());
-
-    if (isFullscreen() || isPseudoFullscreen()) showOverlay();
-    else hideOverlayNow();
-
-    enforceLandscape();
-  }
-
-  document.addEventListener("fullscreenchange", onFsChange);
-  document.addEventListener("webkitfullscreenchange", onFsChange);
-  document.addEventListener("MSFullscreenChange", onFsChange);
-
-  window.addEventListener("orientationchange", () => setTimeout(enforceLandscape, 150));
-  window.addEventListener("resize", enforceLandscape);
+  els.fsExitBtn.addEventListener("click", exitFullscreen);
+  els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); editNames(); });
 })();
 </script>
-
 </body>
 </html>
