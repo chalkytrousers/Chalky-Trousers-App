@@ -22,11 +22,17 @@
       --accent:#22ff6d;
       --muted:#a0a0a0;
       --radius:16px;
-      --brand-bg:#0b0b0b;
+
+      /* brand bar tuning */
+      --brand-bg:#0c0c0c;
       --brand-border:#1f1f1f;
+      --brand-height:34px;         /* normal */
+      --brand-height-fs:24px;      /* fullscreen */
     }
+
     *{box-sizing:border-box;}
     html, body { height: 100%; }
+
     body{
       margin:0;
       background:var(--bg);
@@ -36,8 +42,11 @@
       display:flex;
       flex-direction:column;
     }
+
     @supports (padding: env(safe-area-inset-top)) {
-      body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+      body {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      }
     }
 
     header{
@@ -183,25 +192,22 @@
     }
     .player.flash-on .flash{opacity:1;}
 
-    /* Brand banner */
+    /* Brand bars (hidden in normal mode) */
     .brandbar{
+      display:none;
       background:var(--brand-bg);
       border:1px solid var(--brand-border);
       border-radius:var(--radius);
       padding:10px 12px;
-      display:flex;
       align-items:center;
       justify-content:center;
-      user-select:none;
-      -webkit-user-select:none;
       pointer-events:none;
     }
     .brandbar img{
-      height:28px;
-      width:auto;
-      max-width:92%;
-      opacity:0.88;
-      display:block;
+      height:var(--brand-height);
+      max-width:90%;
+      object-fit:contain;
+      opacity:0.9;
     }
 
     .footerbar{
@@ -273,14 +279,8 @@
       height:100dvh;
     }
 
-    /* Fullscreen top/bottom banners */
-    :fullscreen .brandbar{
-      grid-column:1 / -1;
-      border-radius:0;
-      border-left:0;
-      border-right:0;
-      background:var(--brand-bg);
-    }
+    /* show brandbars in fullscreen */
+    :fullscreen .brandbar{ display:flex; grid-column:1 / -1; border-radius:0; border-left:0; border-right:0; }
     :fullscreen .brandbar.top{
       grid-row:1;
       border-top:0;
@@ -293,14 +293,14 @@
       border-top:1px solid var(--brand-border);
       padding:8px 12px calc(8px + env(safe-area-inset-bottom));
     }
-    :fullscreen .brandbar img{
-      height:22px;
-      opacity:0.85;
-    }
+    :fullscreen .brandbar img{ height:var(--brand-height-fs); }
 
-    /* FULLSCREEN PLAYERS: reserve a fixed name strip so it cannot disappear */
+    /* place players into row 2 explicitly */
+    :fullscreen #playerA{ grid-column:1; grid-row:2; }
+    :fullscreen #playerB{ grid-column:2; grid-row:2; }
+
+    /* FULLSCREEN PLAYER: grid inside tile so name cannot be pushed off */
     :fullscreen .player{
-      grid-row:2;
       border-radius:0;
       border-left:0;
       border-right:0;
@@ -308,29 +308,29 @@
       border-bottom:1px solid #1f1f1f;
 
       display:grid;
-      grid-template-rows:54px 1fr; /* fixed name strip, then score */
-      align-items:stretch;
+      grid-template-rows:auto 1fr;
+      align-items:start;
 
-      padding:14px;
+      padding:18px;
     }
+
     :fullscreen .player-name{
-      margin:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.55rem;
-      line-height:1.05;
+      margin:0 0 8px;
+      font-size:1.6rem;
+      line-height:1.1;
       text-align:center;
-      padding:0 10px;
     }
+
     :fullscreen .tap-hint{ display:none; }
+
     :fullscreen .score{
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:min(7.6rem, 18vw);
+      font-size:min(8.5rem, 19vw);
       padding:0;
       line-height:1;
+      text-align:center;
     }
 
     /* Fullscreen overlay controls */
@@ -382,13 +382,8 @@
       gap:0;
       height:100dvh;
     }
-    body.pseudo-fs .brandbar{
-      grid-column:1 / -1;
-      border-radius:0;
-      border-left:0;
-      border-right:0;
-      background:var(--brand-bg);
-    }
+
+    body.pseudo-fs .brandbar{ display:flex; grid-column:1 / -1; border-radius:0; border-left:0; border-right:0; }
     body.pseudo-fs .brandbar.top{
       grid-row:1;
       border-top:0;
@@ -401,13 +396,13 @@
       border-top:1px solid var(--brand-border);
       padding:8px 12px calc(8px + env(safe-area-inset-bottom));
     }
-    body.pseudo-fs .brandbar img{
-      height:22px;
-      opacity:0.85;
-    }
+    body.pseudo-fs .brandbar img{ height:var(--brand-height-fs); }
 
+    body.pseudo-fs #playerA{ grid-column:1; grid-row:2; }
+    body.pseudo-fs #playerB{ grid-column:2; grid-row:2; }
+
+    /* PSEUDO-FS PLAYER: grid inside tile so name cannot be pushed off */
     body.pseudo-fs .player{
-      grid-row:2;
       border-radius:0;
       border-left:0;
       border-right:0;
@@ -415,34 +410,45 @@
       border-bottom:1px solid #1f1f1f;
 
       display:grid;
-      grid-template-rows:54px 1fr;
-      align-items:stretch;
+      grid-template-rows:auto 1fr;
+      align-items:start;
 
-      padding:14px;
+      padding:18px;
     }
     body.pseudo-fs .player-name{
-      margin:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.55rem;
-      line-height:1.05;
+      margin:0 0 8px;
+      font-size:1.6rem;
+      line-height:1.1;
       text-align:center;
-      padding:0 10px;
     }
     body.pseudo-fs .tap-hint{ display:none; }
     body.pseudo-fs .score{
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:min(7.6rem, 18vw);
+      font-size:min(8.5rem, 19vw);
       padding:0;
       line-height:1;
+      text-align:center;
     }
-
     body.pseudo-fs .fs-overlay{ display:flex; }
 
-    /* Prevent scroll during fullscreen/pseudo-fs so Safari URL bar cannot be pulled in */
+    /* iOS-only tuning */
+    html.ios body.pseudo-fs .player,
+    html.ios :fullscreen .player{
+      padding-top: calc(18px + env(safe-area-inset-top));
+      padding-bottom: calc(18px + env(safe-area-inset-bottom));
+    }
+    html.ios body.pseudo-fs .player-name,
+    html.ios :fullscreen .player-name{
+      font-size:1.7rem;
+    }
+    html.ios body.pseudo-fs .score,
+    html.ios :fullscreen .score{
+      font-size:min(8.0rem, 18vw);
+    }
+
+    /* prevent scroll during fullscreen/pseudo-fs so Safari URL bar cannot be pulled in */
     :fullscreen,
     :fullscreen body{
       overflow:hidden !important;
@@ -505,6 +511,7 @@
 
   <!-- Fullscreen overlay -->
   <div id="fsOverlay" class="fs-overlay" aria-hidden="false">
+    <button id="fsRefullBtn" class="btn btn-primary" type="button">Re-fullscreen</button>
     <button id="fsEditBtn" class="btn btn-primary" type="button">Edit names</button>
     <button id="fsExitBtn" class="btn btn-primary" type="button">Exit</button>
   </div>
@@ -552,7 +559,8 @@
     </section>
 
     <section class="board">
-      <!-- TOP banner row -->
+
+      <!-- TOP BRAND BAR (fullscreen/pseudo-fs only) -->
       <div class="brandbar top" aria-hidden="true">
         <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="">
       </div>
@@ -571,10 +579,11 @@
         <div id="scoreB" class="score">0</div>
       </div>
 
-      <!-- BOTTOM banner row -->
+      <!-- BOTTOM BRAND BAR (fullscreen/pseudo-fs only) -->
       <div class="brandbar bottom" aria-hidden="true">
         <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="">
       </div>
+
     </section>
   </main>
 
@@ -612,6 +621,7 @@
     status: document.getElementById("status"),
     fsExitBtn: document.getElementById("fsExitBtn"),
     fsEditBtn: document.getElementById("fsEditBtn"),
+    fsRefullBtn: document.getElementById("fsRefullBtn"),
     fsOverlay: document.getElementById("fsOverlay"),
     rotateOverlay: document.getElementById("rotateOverlay"),
     ruleset: document.getElementById("ruleset"),
@@ -880,29 +890,11 @@
     }, { passive: false });
   }
 
-  function bindDoubleTapZoomBlocker() {
-    if (!isIOS) return;
-
-    let lastTouchEnd = 0;
-    document.addEventListener("touchend", (e) => {
-      if (!(isFullscreen() || isPseudoFullscreen())) return;
-
-      const t = e.target;
-      const tag = (t && t.tagName) ? t.tagName.toLowerCase() : "";
-      if (tag === "input" || tag === "textarea" || tag === "select") return;
-
-      const now = Date.now();
-      if (now - lastTouchEnd <= 320) e.preventDefault();
-      lastTouchEnd = now;
-    }, { passive: false });
-  }
-
   // Init
   load();
   render();
   bindOverlayAutoShow();
   bindTouchMoveBlocker();
-  bindDoubleTapZoomBlocker();
   enforceLandscape();
 
   // Name inputs
@@ -933,13 +925,21 @@
   els.fsExitBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); });
   els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); editNames(); });
 
+  // Re-fullscreen: exit then re-enter (helps on some browsers; iOS zoom state is still Safari-limited)
+  els.fsRefullBtn.addEventListener("click", () => {
+    if (!(isFullscreen() || isPseudoFullscreen())) return;
+    exitFullscreen();
+    setTimeout(() => {
+      enforceLandscape();
+      if (isLandscape()) requestFullscreen();
+    }, 250);
+  });
+
   function onFsChange() {
     updateFullscreenButtonLabel();
     applyScrollLock(isFullscreen());
-
     if (isFullscreen()) showOverlay();
     else if (!isPseudoFullscreen()) hideOverlayNow();
-
     enforceLandscape();
   }
 
