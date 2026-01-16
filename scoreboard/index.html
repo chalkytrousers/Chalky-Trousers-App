@@ -23,16 +23,12 @@
       --muted:#a0a0a0;
       --radius:16px;
 
-      /* brand bar tuning */
       --brand-bg:#0c0c0c;
       --brand-border:#1f1f1f;
-      --brand-height:34px;         /* normal */
-      --brand-height-fs:24px;      /* fullscreen */
     }
 
     *{box-sizing:border-box;}
     html, body { height: 100%; }
-
     body{
       margin:0;
       background:var(--bg);
@@ -44,9 +40,7 @@
     }
 
     @supports (padding: env(safe-area-inset-top)) {
-      body {
-        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-      }
+      body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
     }
 
     header{
@@ -192,24 +186,6 @@
     }
     .player.flash-on .flash{opacity:1;}
 
-    /* Brand bars (hidden in normal mode) */
-    .brandbar{
-      display:none;
-      background:var(--brand-bg);
-      border:1px solid var(--brand-border);
-      border-radius:var(--radius);
-      padding:10px 12px;
-      align-items:center;
-      justify-content:center;
-      pointer-events:none;
-    }
-    .brandbar img{
-      height:var(--brand-height);
-      max-width:90%;
-      object-fit:contain;
-      opacity:0.9;
-    }
-
     .footerbar{
       width:92%;
       max-width:900px;
@@ -255,7 +231,26 @@
       .footerbar .panel{grid-template-columns:1fr 1fr 1fr;}
     }
 
-    /* Fullscreen mode: show only the scoreboard tiles */
+    /* Brand bars (top + bottom) */
+    .brandbar{
+      background:var(--brand-bg);
+      border:1px solid var(--brand-border);
+      border-radius:var(--radius);
+      padding:8px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      pointer-events:none;
+    }
+    .brandbar img{
+      display:block;
+      height:28px;
+      width:auto;
+      opacity:0.92;
+    }
+
+    /* Fullscreen mode: show only the scoreboard tiles (and banners) */
     :fullscreen header,
     :fullscreen #setupPanel,
     :fullscreen .status,
@@ -279,27 +274,43 @@
       height:100dvh;
     }
 
-    /* show brandbars in fullscreen */
-    :fullscreen .brandbar{ display:flex; grid-column:1 / -1; border-radius:0; border-left:0; border-right:0; }
+    /* Fullscreen banners */
+    :fullscreen .brandbar{
+      grid-column:1 / -1;
+      border-radius:0;
+      border-left:0;
+      border-right:0;
+      background:var(--brand-bg);
+    }
+
+    /* V3: keep top banner, remove image, ensure visible height */
     :fullscreen .brandbar.top{
       grid-row:1;
       border-top:0;
       border-bottom:1px solid var(--brand-border);
-      padding:8px 12px calc(8px + env(safe-area-inset-top));
+      min-height:44px;
+      padding:10px 12px calc(10px + env(safe-area-inset-top));
     }
+    :fullscreen .brandbar.top img{ display:none; }
+
+    /* V3: bigger bottom banner + bigger logo */
     :fullscreen .brandbar.bottom{
       grid-row:3;
       border-bottom:0;
       border-top:1px solid var(--brand-border);
-      padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+      min-height:64px;
+      padding:12px 16px calc(12px + env(safe-area-inset-bottom));
     }
-    :fullscreen .brandbar img{ height:var(--brand-height-fs); }
+    :fullscreen .brandbar.bottom img{
+      height:42px;
+      width:auto;
+    }
 
-    /* place players into row 2 explicitly */
+    /* Fullscreen players forced to row 2 */
     :fullscreen #playerA{ grid-column:1; grid-row:2; }
     :fullscreen #playerB{ grid-column:2; grid-row:2; }
 
-    /* FULLSCREEN PLAYER: grid inside tile so name cannot be pushed off */
+    /* FULLSCREEN TILE LAYOUT: grid inside tile so name cannot be pushed off */
     :fullscreen .player{
       border-radius:0;
       border-left:0;
@@ -313,16 +324,13 @@
 
       padding:18px;
     }
-
     :fullscreen .player-name{
       margin:0 0 8px;
       font-size:1.6rem;
       line-height:1.1;
       text-align:center;
     }
-
     :fullscreen .tap-hint{ display:none; }
-
     :fullscreen .score{
       display:flex;
       align-items:center;
@@ -330,7 +338,6 @@
       font-size:min(8.5rem, 19vw);
       padding:0;
       line-height:1;
-      text-align:center;
     }
 
     /* Fullscreen overlay controls */
@@ -373,8 +380,6 @@
       padding:0;
       gap:0;
     }
-
-    /* PSEUDO-FS GRID: top brand, players, bottom brand */
     body.pseudo-fs .board{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -383,25 +388,40 @@
       height:100dvh;
     }
 
-    body.pseudo-fs .brandbar{ display:flex; grid-column:1 / -1; border-radius:0; border-left:0; border-right:0; }
+    body.pseudo-fs .brandbar{
+      grid-column:1 / -1;
+      border-radius:0;
+      border-left:0;
+      border-right:0;
+      background:var(--brand-bg);
+    }
+
+    /* V3: keep top banner, remove image, ensure visible height */
     body.pseudo-fs .brandbar.top{
       grid-row:1;
       border-top:0;
       border-bottom:1px solid var(--brand-border);
-      padding:8px 12px calc(8px + env(safe-area-inset-top));
+      min-height:44px;
+      padding:10px 12px calc(10px + env(safe-area-inset-top));
     }
+    body.pseudo-fs .brandbar.top img{ display:none; }
+
+    /* V3: bigger bottom banner + bigger logo */
     body.pseudo-fs .brandbar.bottom{
       grid-row:3;
       border-bottom:0;
       border-top:1px solid var(--brand-border);
-      padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+      min-height:64px;
+      padding:12px 16px calc(12px + env(safe-area-inset-bottom));
     }
-    body.pseudo-fs .brandbar img{ height:var(--brand-height-fs); }
+    body.pseudo-fs .brandbar.bottom img{
+      height:42px;
+      width:auto;
+    }
 
     body.pseudo-fs #playerA{ grid-column:1; grid-row:2; }
     body.pseudo-fs #playerB{ grid-column:2; grid-row:2; }
 
-    /* PSEUDO-FS PLAYER: grid inside tile so name cannot be pushed off */
     body.pseudo-fs .player{
       border-radius:0;
       border-left:0;
@@ -429,26 +449,17 @@
       font-size:min(8.5rem, 19vw);
       padding:0;
       line-height:1;
-      text-align:center;
     }
     body.pseudo-fs .fs-overlay{ display:flex; }
 
     /* iOS-only tuning */
-    html.ios body.pseudo-fs .player,
-    html.ios :fullscreen .player{
+    html.ios :fullscreen .player,
+    html.ios body.pseudo-fs .player{
       padding-top: calc(18px + env(safe-area-inset-top));
       padding-bottom: calc(18px + env(safe-area-inset-bottom));
     }
-    html.ios body.pseudo-fs .player-name,
-    html.ios :fullscreen .player-name{
-      font-size:1.7rem;
-    }
-    html.ios body.pseudo-fs .score,
-    html.ios :fullscreen .score{
-      font-size:min(8.0rem, 18vw);
-    }
 
-    /* prevent scroll during fullscreen/pseudo-fs so Safari URL bar cannot be pulled in */
+    /* Prevent scroll while fullscreen/pseudo-fs to reduce Safari URL-bar pull */
     :fullscreen,
     :fullscreen body{
       overflow:hidden !important;
@@ -509,9 +520,8 @@
     <p>Tap a player to add a point. Long-press a player to subtract. Names, scores, and match setup autosave on this device.</p>
   </header>
 
-  <!-- Fullscreen overlay -->
+  <!-- Fullscreen overlay (V3: removed Re-fullscreen button) -->
   <div id="fsOverlay" class="fs-overlay" aria-hidden="false">
-    <button id="fsRefullBtn" class="btn btn-primary" type="button">Re-fullscreen</button>
     <button id="fsEditBtn" class="btn btn-primary" type="button">Edit names</button>
     <button id="fsExitBtn" class="btn btn-primary" type="button">Exit</button>
   </div>
@@ -559,11 +569,8 @@
     </section>
 
     <section class="board">
-
-      <!-- TOP BRAND BAR (fullscreen/pseudo-fs only) -->
-      <div class="brandbar top" aria-hidden="true">
-        <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="">
-      </div>
+      <!-- V3 top banner stays but has no image -->
+      <div class="brandbar top" aria-hidden="true"></div>
 
       <div id="playerA" class="player" role="button" aria-label="Add point to Player A">
         <div class="flash"></div>
@@ -579,11 +586,10 @@
         <div id="scoreB" class="score">0</div>
       </div>
 
-      <!-- BOTTOM BRAND BAR (fullscreen/pseudo-fs only) -->
+      <!-- V3 bottom banner bigger + bigger logo -->
       <div class="brandbar bottom" aria-hidden="true">
         <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="">
       </div>
-
     </section>
   </main>
 
@@ -599,8 +605,11 @@
 
 <script>
 (function () {
+  // Locked in as V3
+  const VERSION = "v3";
   const STORAGE_KEY = "ct_scoreboard";
 
+  // iOS detection for CSS tuning + pseudo-fullscreen fallback
   const ua = navigator.userAgent || "";
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (isIOS) document.documentElement.classList.add("ios");
@@ -621,7 +630,6 @@
     status: document.getElementById("status"),
     fsExitBtn: document.getElementById("fsExitBtn"),
     fsEditBtn: document.getElementById("fsEditBtn"),
-    fsRefullBtn: document.getElementById("fsRefullBtn"),
     fsOverlay: document.getElementById("fsOverlay"),
     rotateOverlay: document.getElementById("rotateOverlay"),
     ruleset: document.getElementById("ruleset"),
@@ -698,7 +706,7 @@
     els.breakFirst.value = state.breakFirst;
     els.raceTo.value = String(state.raceTo);
 
-    els.status.textContent = "Saved on this device.";
+    els.status.textContent = "Saved on this device. " + VERSION;
     updateFullscreenButtonLabel();
   }
 
@@ -779,13 +787,13 @@
         setPseudoFullscreen(true);
         return;
       }
-      els.status.textContent = "Fullscreen not supported in this browser.";
+      els.status.textContent = "Fullscreen not supported in this browser. " + VERSION;
       return;
     }
 
     req.call(el).catch(() => {
       if (isIOS) setPseudoFullscreen(true);
-      else els.status.textContent = "Fullscreen blocked. Try again after interacting with the page.";
+      else els.status.textContent = "Fullscreen blocked. Try again after interacting with the page. " + VERSION;
     });
   }
 
@@ -851,7 +859,9 @@
 
   function bindOverlayAutoShow() {
     ["pointerdown","pointermove","keydown","touchstart"].forEach(evt => {
-      window.addEventListener(evt, () => { if (isFullscreen() || isPseudoFullscreen()) showOverlay(); }, { passive: true });
+      window.addEventListener(evt, () => {
+        if (isFullscreen() || isPseudoFullscreen()) showOverlay();
+      }, { passive: true });
     });
   }
 
@@ -883,6 +893,7 @@
     el.addEventListener("pointerleave", () => endPress());
   }
 
+  // Stop touchmove scroll while fullscreen/pseudo-fs on iOS (helps reduce URL bar reveal)
   function bindTouchMoveBlocker() {
     if (!isIOS) return;
     window.addEventListener("touchmove", (e) => {
@@ -921,25 +932,17 @@
   els.fullscreenBtn.addEventListener("click", toggleFullscreen);
   els.editNamesBtn.addEventListener("click", editNames);
 
-  // Fullscreen overlay buttons
+  // Fullscreen overlay buttons (V3: no re-fullscreen)
   els.fsExitBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); });
   els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); editNames(); });
 
-  // Re-fullscreen: exit then re-enter (helps on some browsers; iOS zoom state is still Safari-limited)
-  els.fsRefullBtn.addEventListener("click", () => {
-    if (!(isFullscreen() || isPseudoFullscreen())) return;
-    exitFullscreen();
-    setTimeout(() => {
-      enforceLandscape();
-      if (isLandscape()) requestFullscreen();
-    }, 250);
-  });
-
   function onFsChange() {
     updateFullscreenButtonLabel();
-    applyScrollLock(isFullscreen());
-    if (isFullscreen()) showOverlay();
-    else if (!isPseudoFullscreen()) hideOverlayNow();
+    applyScrollLock(isFullscreen() || isPseudoFullscreen());
+
+    if (isFullscreen() || isPseudoFullscreen()) showOverlay();
+    else hideOverlayNow();
+
     enforceLandscape();
   }
 
