@@ -22,9 +22,17 @@
       --accent:#22ff6d;
       --muted:#a0a0a0;
       --radius:16px;
+
+      /* brand bar tuning */
+      --brand-bg:#0c0c0c;
+      --brand-border:#1f1f1f;
+      --brand-height:34px;         /* normal */
+      --brand-height-fs:24px;      /* fullscreen */
     }
+
     *{box-sizing:border-box;}
     html, body { height: 100%; }
+
     body{
       margin:0;
       background:var(--bg);
@@ -34,8 +42,11 @@
       display:flex;
       flex-direction:column;
     }
+
     @supports (padding: env(safe-area-inset-top)) {
-      body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+      body {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      }
     }
 
     header{
@@ -181,27 +192,22 @@
     }
     .player.flash-on .flash{opacity:1;}
 
-    /* NEW: brand bar inside the grid */
+    /* Brand bars (hidden in normal mode) */
     .brandbar{
-      grid-column:1 / -1;
-      background:#0c0c0c;
-      border:1px solid #1f1f1f;
+      display:none;
+      background:var(--brand-bg);
+      border:1px solid var(--brand-border);
       border-radius:var(--radius);
       padding:10px 12px;
-      display:flex;
       align-items:center;
       justify-content:center;
-      gap:10px;
-      user-select:none;
-      -webkit-user-select:none;
-      pointer-events:none; /* keeps it non-interactive */
+      pointer-events:none;
     }
     .brandbar img{
-      height:34px;
-      width:auto;
-      max-width:92%;
+      height:var(--brand-height);
+      max-width:90%;
+      object-fit:contain;
       opacity:0.9;
-      display:block;
     }
 
     .footerbar{
@@ -263,50 +269,68 @@
       padding:0;
       gap:0;
     }
+
+    /* FULLSCREEN GRID: top brand, players, bottom brand */
     :fullscreen .board{
+      display:grid;
       grid-template-columns:1fr 1fr;
-      grid-template-rows: 1fr auto; /* NEW */
+      grid-template-rows:auto 1fr auto;
       gap:0;
-      height:100dvh; /* dvh only */
+      height:100dvh;
     }
+
+    /* show brandbars in fullscreen */
+    :fullscreen .brandbar{ display:flex; grid-column:1 / -1; border-radius:0; border-left:0; border-right:0; }
+    :fullscreen .brandbar.top{
+      grid-row:1;
+      border-top:0;
+      border-bottom:1px solid var(--brand-border);
+      padding:8px 12px calc(8px + env(safe-area-inset-top));
+    }
+    :fullscreen .brandbar.bottom{
+      grid-row:3;
+      border-bottom:0;
+      border-top:1px solid var(--brand-border);
+      padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+    }
+    :fullscreen .brandbar img{ height:var(--brand-height-fs); }
+
+    /* place players into row 2 explicitly */
+    :fullscreen #playerA{ grid-column:1; grid-row:2; }
+    :fullscreen #playerB{ grid-column:2; grid-row:2; }
+
+    /* FULLSCREEN PLAYER: grid inside tile so name cannot be pushed off */
     :fullscreen .player{
       border-radius:0;
       border-left:0;
       border-right:0;
       border-top:0;
       border-bottom:1px solid #1f1f1f;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      padding:26px;
-      height:100%;
-    }
-    :fullscreen .player-name{
-      font-size:2.0rem;
-      margin-bottom:18px;
-      text-align:center;
-    }
-    :fullscreen .tap-hint{ display:none; }
-    :fullscreen .score{
-      font-size: min(11rem, 24vw);
-      padding:0;
+
+      display:grid;
+      grid-template-rows:auto 1fr;
+      align-items:start;
+
+      padding:18px;
     }
 
-    /* NEW: brand bar in fullscreen */
-    :fullscreen .brandbar{
-      grid-column:1 / -1;
-      grid-row:2;
-      border-radius:0;
-      border-left:0;
-      border-right:0;
-      border-bottom:0;
-      border-top:1px solid #1f1f1f;
-      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
-      background:#0b0b0b;
+    :fullscreen .player-name{
+      margin:0 0 8px;
+      font-size:1.6rem;
+      line-height:1.1;
+      text-align:center;
     }
-    :fullscreen .brandbar img{
-      height:34px;
-      opacity:0.85;
+
+    :fullscreen .tap-hint{ display:none; }
+
+    :fullscreen .score{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:min(8.5rem, 19vw);
+      padding:0;
+      line-height:1;
+      text-align:center;
     }
 
     /* Fullscreen overlay controls */
@@ -320,8 +344,6 @@
       opacity:1;
       transition:opacity 0.25s ease;
       pointer-events:auto;
-      flex-wrap:wrap;
-      justify-content:flex-end;
     }
     .fs-overlay button{
       width:auto;
@@ -351,84 +373,79 @@
       padding:0;
       gap:0;
     }
+
+    /* PSEUDO-FS GRID: top brand, players, bottom brand */
     body.pseudo-fs .board{
+      display:grid;
       grid-template-columns:1fr 1fr;
-      grid-template-rows: 1fr auto; /* NEW */
+      grid-template-rows:auto 1fr auto;
       gap:0;
-      height:100dvh; /* dvh only */
+      height:100dvh;
     }
+
+    body.pseudo-fs .brandbar{ display:flex; grid-column:1 / -1; border-radius:0; border-left:0; border-right:0; }
+    body.pseudo-fs .brandbar.top{
+      grid-row:1;
+      border-top:0;
+      border-bottom:1px solid var(--brand-border);
+      padding:8px 12px calc(8px + env(safe-area-inset-top));
+    }
+    body.pseudo-fs .brandbar.bottom{
+      grid-row:3;
+      border-bottom:0;
+      border-top:1px solid var(--brand-border);
+      padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+    }
+    body.pseudo-fs .brandbar img{ height:var(--brand-height-fs); }
+
+    body.pseudo-fs #playerA{ grid-column:1; grid-row:2; }
+    body.pseudo-fs #playerB{ grid-column:2; grid-row:2; }
+
+    /* PSEUDO-FS PLAYER: grid inside tile so name cannot be pushed off */
     body.pseudo-fs .player{
       border-radius:0;
       border-left:0;
       border-right:0;
       border-top:0;
       border-bottom:1px solid #1f1f1f;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      padding:26px;
-      height:100%;
+
+      display:grid;
+      grid-template-rows:auto 1fr;
+      align-items:start;
+
+      padding:18px;
     }
     body.pseudo-fs .player-name{
-      font-size:2.0rem;
-      margin-bottom:18px;
+      margin:0 0 8px;
+      font-size:1.6rem;
+      line-height:1.1;
       text-align:center;
     }
     body.pseudo-fs .tap-hint{ display:none; }
     body.pseudo-fs .score{
-      font-size: min(11rem, 24vw);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:min(8.5rem, 19vw);
       padding:0;
+      line-height:1;
+      text-align:center;
     }
     body.pseudo-fs .fs-overlay{ display:flex; }
 
-    /* NEW: brand bar in pseudo fullscreen */
-    body.pseudo-fs .brandbar{
-      grid-column:1 / -1;
-      grid-row:2;
-      border-radius:0;
-      border-left:0;
-      border-right:0;
-      border-bottom:0;
-      border-top:1px solid #1f1f1f;
-      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
-      background:#0b0b0b;
-    }
-    body.pseudo-fs .brandbar img{
-      height:34px;
-      opacity:0.85;
-    }
-
-    /* Safety line-height tweak */
-    :fullscreen .player-name,
-    body.pseudo-fs .player-name{
-      line-height:1.1;
-    }
-
-    /* iOS-only tuning to push closer to Android look */
+    /* iOS-only tuning */
     html.ios body.pseudo-fs .player,
     html.ios :fullscreen .player{
-      padding:22px;
+      padding-top: calc(18px + env(safe-area-inset-top));
+      padding-bottom: calc(18px + env(safe-area-inset-bottom));
     }
     html.ios body.pseudo-fs .player-name,
     html.ios :fullscreen .player-name{
-      font-size:2.2rem;
-      margin-bottom:14px;
+      font-size:1.7rem;
     }
     html.ios body.pseudo-fs .score,
     html.ios :fullscreen .score{
-      font-size: min(12.5rem, 28vw);
-    }
-
-    /* EVEN MORE NUCLEAR iOS protection: extra safe-area padding + slightly smaller name */
-    html.ios :fullscreen .player,
-    html.ios body.pseudo-fs .player{
-      padding-top: calc(26px + env(safe-area-inset-top));
-      padding-bottom: calc(26px + env(safe-area-inset-bottom));
-    }
-    html.ios :fullscreen .player-name,
-    html.ios body.pseudo-fs .player-name{
-      font-size:2.0rem;
-      line-height:1.1;
+      font-size:min(8.0rem, 18vw);
     }
 
     /* prevent scroll during fullscreen/pseudo-fs so Safari URL bar cannot be pulled in */
@@ -494,7 +511,7 @@
 
   <!-- Fullscreen overlay -->
   <div id="fsOverlay" class="fs-overlay" aria-hidden="false">
-    <button id="fsFullBtn" class="btn btn-primary" type="button">Re-fullscreen</button>
+    <button id="fsRefullBtn" class="btn btn-primary" type="button">Re-fullscreen</button>
     <button id="fsEditBtn" class="btn btn-primary" type="button">Edit names</button>
     <button id="fsExitBtn" class="btn btn-primary" type="button">Exit</button>
   </div>
@@ -542,6 +559,12 @@
     </section>
 
     <section class="board">
+
+      <!-- TOP BRAND BAR (fullscreen/pseudo-fs only) -->
+      <div class="brandbar top" aria-hidden="true">
+        <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="">
+      </div>
+
       <div id="playerA" class="player" role="button" aria-label="Add point to Player A">
         <div class="flash"></div>
         <div id="displayNameA" class="player-name">Player A</div>
@@ -556,10 +579,11 @@
         <div id="scoreB" class="score">0</div>
       </div>
 
-      <!-- NEW: centre-bottom brand bar -->
-      <div class="brandbar" aria-hidden="true">
+      <!-- BOTTOM BRAND BAR (fullscreen/pseudo-fs only) -->
+      <div class="brandbar bottom" aria-hidden="true">
         <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="">
       </div>
+
     </section>
   </main>
 
@@ -577,7 +601,6 @@
 (function () {
   const STORAGE_KEY = "ct_scoreboard";
 
-  // iOS detection for CSS tuning + pseudo-fullscreen fallback
   const ua = navigator.userAgent || "";
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (isIOS) document.documentElement.classList.add("ios");
@@ -598,7 +621,7 @@
     status: document.getElementById("status"),
     fsExitBtn: document.getElementById("fsExitBtn"),
     fsEditBtn: document.getElementById("fsEditBtn"),
-    fsFullBtn: document.getElementById("fsFullBtn"),
+    fsRefullBtn: document.getElementById("fsRefullBtn"),
     fsOverlay: document.getElementById("fsOverlay"),
     rotateOverlay: document.getElementById("rotateOverlay"),
     ruleset: document.getElementById("ruleset"),
@@ -805,27 +828,6 @@
     requestFullscreen();
   }
 
-  function reFullscreen() {
-    if (!isLandscape()) {
-      showRotateGate(true);
-      return;
-    }
-
-    if (isPseudoFullscreen()) {
-      setPseudoFullscreen(false);
-      window.setTimeout(() => setPseudoFullscreen(true), 60);
-      return;
-    }
-
-    if (isFullscreen()) {
-      exitFullscreen();
-      window.setTimeout(() => requestFullscreen(), 90);
-      return;
-    }
-
-    requestFullscreen();
-  }
-
   function editNames() {
     if (isPseudoFullscreen()) setPseudoFullscreen(false);
     els.setupPanel.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -888,31 +890,11 @@
     }, { passive: false });
   }
 
-  function bindDoubleTapZoomBlocker() {
-    if (!isIOS) return;
-
-    let lastTouchEnd = 0;
-    document.addEventListener("touchend", (e) => {
-      if (!(isFullscreen() || isPseudoFullscreen())) return;
-
-      const t = e.target;
-      const tag = (t && t.tagName) ? t.tagName.toLowerCase() : "";
-      if (tag === "input" || tag === "textarea" || tag === "select") return;
-
-      const now = Date.now();
-      if (now - lastTouchEnd <= 320) {
-        e.preventDefault();
-      }
-      lastTouchEnd = now;
-    }, { passive: false });
-  }
-
   // Init
   load();
   render();
   bindOverlayAutoShow();
   bindTouchMoveBlocker();
-  bindDoubleTapZoomBlocker();
   enforceLandscape();
 
   // Name inputs
@@ -942,15 +924,22 @@
   // Fullscreen overlay buttons
   els.fsExitBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); });
   els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); editNames(); });
-  els.fsFullBtn.addEventListener("click", () => { reFullscreen(); });
+
+  // Re-fullscreen: exit then re-enter (helps on some browsers; iOS zoom state is still Safari-limited)
+  els.fsRefullBtn.addEventListener("click", () => {
+    if (!(isFullscreen() || isPseudoFullscreen())) return;
+    exitFullscreen();
+    setTimeout(() => {
+      enforceLandscape();
+      if (isLandscape()) requestFullscreen();
+    }, 250);
+  });
 
   function onFsChange() {
     updateFullscreenButtonLabel();
     applyScrollLock(isFullscreen());
-
     if (isFullscreen()) showOverlay();
     else if (!isPseudoFullscreen()) hideOverlayNow();
-
     enforceLandscape();
   }
 
