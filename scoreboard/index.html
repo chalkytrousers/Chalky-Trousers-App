@@ -288,6 +288,37 @@
       text-overflow:ellipsis;
     }
 
+    /* Break line (label + value) to avoid truncation */
+    .ms-break{
+      margin-top:12px;
+      max-width:100%;
+      padding:0 8px;
+    }
+    .ms-break .ms-sub{
+      margin-top:0;
+      padding:0;
+      white-space:normal;
+      overflow:visible;
+      text-overflow:clip;
+    }
+    .ms-break-label{
+      color:var(--muted);
+      font-size:0.9rem;
+      line-height:1.2;
+    }
+    .ms-break-name{
+      color:#fff;
+      font-size:1.05rem;
+      font-weight:800;
+      line-height:1.15;
+      margin-top:4px;
+      white-space:normal;
+      overflow:hidden;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+    }
+
     /* Hide everything except scoreboard tiles in fullscreen */
     :fullscreen header,
     :fullscreen #setupPanel,
@@ -639,7 +670,12 @@
       <div id="matchStrip" class="matchstrip" aria-hidden="true">
         <div class="ms-label">Race to</div>
         <div id="msRaceTo" class="ms-value">7</div>
-        <div id="msBreak" class="ms-sub">Breaks: Player A</div>
+
+        <div class="ms-break">
+          <div class="ms-break-label">Break</div>
+          <div id="msBreakName" class="ms-break-name">Player A</div>
+        </div>
+
         <div id="msRules" class="ms-sub">UK 8 Ball</div>
       </div>
 
@@ -698,7 +734,7 @@
     breakFirst: document.getElementById("breakFirst"),
     raceTo: document.getElementById("raceTo"),
     msRaceTo: document.getElementById("msRaceTo"),
-    msBreak: document.getElementById("msBreak"),
+    msBreakName: document.getElementById("msBreakName"),
     msRules: document.getElementById("msRules"),
   };
 
@@ -732,11 +768,11 @@
     return "Ruleset";
   }
 
-  function breakLabel(v) {
-    if (v === "A") return "Breaks: " + (safeText(state.nameA) || "Player A");
-    if (v === "B") return "Breaks: " + (safeText(state.nameB) || "Player B");
-    if (v === "alt") return "Breaks: Alternate";
-    return "Breaks";
+  function breakName(v) {
+    if (v === "A") return safeText(state.nameA) || "Player A";
+    if (v === "B") return safeText(state.nameB) || "Player B";
+    if (v === "alt") return "Alternate";
+    return "";
   }
 
   function load() {
@@ -787,7 +823,7 @@
 
     // Center strip values
     if (els.msRaceTo) els.msRaceTo.textContent = String(state.raceTo);
-    if (els.msBreak) els.msBreak.textContent = breakLabel(state.breakFirst);
+    if (els.msBreakName) els.msBreakName.textContent = breakName(state.breakFirst);
     if (els.msRules) els.msRules.textContent = rulesetLabel(state.ruleset);
 
     els.status.textContent = "Saved on this device. " + VERSION;
