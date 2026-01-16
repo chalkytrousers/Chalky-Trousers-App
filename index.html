@@ -267,35 +267,35 @@
       grid-template-columns:1fr 1fr;
       grid-template-rows: 1fr auto;
       gap:0;
-      height:100dvh; /* dvh only */
+      height:100dvh;
     }
 
-    /* Fullscreen players: NAME PINNED, SCORE CENTRED */
+    /* FULLSCREEN PLAYERS: use GRID inside each tile so name cannot be pushed off */
     :fullscreen .player{
       border-radius:0;
       border-left:0;
       border-right:0;
       border-top:0;
       border-bottom:1px solid #1f1f1f;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-start; /* was center */
+
+      display:grid;
+      grid-template-rows:auto 1fr; /* name, then score */
+      align-items:start;
+
       padding:18px;
     }
     :fullscreen .player-name{
-      flex:0 0 auto;
-      font-size:1.6rem;
       margin:0 0 8px;
+      font-size:1.6rem;
       line-height:1.1;
       text-align:center;
     }
     :fullscreen .tap-hint{ display:none; }
     :fullscreen .score{
-      flex:1 1 auto;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size: min(8.5rem, 19vw);
+      font-size:min(8.5rem, 19vw);
       padding:0;
       line-height:1;
     }
@@ -363,35 +363,35 @@
       grid-template-columns:1fr 1fr;
       grid-template-rows: 1fr auto;
       gap:0;
-      height:100dvh; /* dvh only */
+      height:100dvh;
     }
 
-    /* Pseudo-fs players: NAME PINNED, SCORE CENTRED */
+    /* PSEUDO-FS PLAYERS: same grid behaviour */
     body.pseudo-fs .player{
       border-radius:0;
       border-left:0;
       border-right:0;
       border-top:0;
       border-bottom:1px solid #1f1f1f;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-start;
+
+      display:grid;
+      grid-template-rows:auto 1fr;
+      align-items:start;
+
       padding:18px;
     }
     body.pseudo-fs .player-name{
-      flex:0 0 auto;
-      font-size:1.6rem;
       margin:0 0 8px;
+      font-size:1.6rem;
       line-height:1.1;
       text-align:center;
     }
     body.pseudo-fs .tap-hint{ display:none; }
     body.pseudo-fs .score{
-      flex:1 1 auto;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size: min(8.5rem, 19vw);
+      font-size:min(8.5rem, 19vw);
       padding:0;
       line-height:1;
     }
@@ -415,11 +415,10 @@
 
     body.pseudo-fs .fs-overlay{ display:flex; }
 
-    /* iOS-only tuning */
-    html.ios body.pseudo-fs .player,
-    html.ios :fullscreen .player{
+    /* iOS-only: safe-area top padding so name is not under notch/URL bar */
+    html.ios :fullscreen .player,
+    html.ios body.pseudo-fs .player{
       padding-top: calc(18px + env(safe-area-inset-top));
-      padding-bottom: calc(18px + env(safe-area-inset-bottom));
     }
 
     /* Prevent scroll during fullscreen/pseudo-fs so Safari URL bar cannot be pulled in */
