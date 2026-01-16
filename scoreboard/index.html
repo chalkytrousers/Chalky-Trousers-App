@@ -26,13 +26,11 @@
       --brand-bg:#0c0c0c;
       --brand-border:#1f1f1f;
 
-      /* middle strip width (fullscreen/pseudo-fs only) */
-      --midcol: 176px;
+      --midcol: 170px; /* middle strip width in fullscreen/pseudo-fs */
     }
 
-    *{ box-sizing:border-box; }
-    html, body { height:100%; }
-
+    *{box-sizing:border-box;}
+    html, body { height: 100%; }
     body{
       margin:0;
       background:var(--bg);
@@ -44,13 +42,7 @@
     }
 
     @supports (padding: env(safe-area-inset-top)) {
-      body {
-        padding:
-          env(safe-area-inset-top)
-          env(safe-area-inset-right)
-          env(safe-area-inset-bottom)
-          env(safe-area-inset-left);
-      }
+      body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
     }
 
     header{
@@ -61,18 +53,12 @@
       gap:10px;
       text-align:center;
     }
-
-    header img{
-      width:220px;
-      max-width:80%;
-    }
-
+    header img{width:220px;max-width:80%;}
     header h1{
       margin:0;
       font-size:1.2rem;
       letter-spacing:0.8px;
     }
-
     header p{
       margin:6px 0 0;
       color:var(--muted);
@@ -104,13 +90,11 @@
       grid-template-columns:1fr;
       gap:12px;
     }
-
     .label{
       color:var(--muted);
       font-size:0.9rem;
       margin-bottom:6px;
     }
-
     .input, .select, button{
       width:100%;
       border-radius:12px;
@@ -121,7 +105,6 @@
       font-size:1rem;
       outline:none;
     }
-
     .input:focus, .select:focus{
       border-color:rgba(34,255,109,0.35);
       box-shadow:0 0 0 3px rgba(34,255,109,0.10);
@@ -167,8 +150,7 @@
       overflow:hidden;
       transition:transform 0.08s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     }
-
-    .player:active{ transform:scale(0.995); }
+    .player:active{transform:scale(0.995);}
 
     .player-name{
       font-size:1.05rem;
@@ -179,7 +161,6 @@
       text-overflow:ellipsis;
       max-width:100%;
     }
-
     .tap-hint{
       position:absolute;
       top:16px;
@@ -188,7 +169,6 @@
       font-size:0.85rem;
       opacity:0.85;
     }
-
     .score{
       font-size:4.4rem;
       font-weight:900;
@@ -206,8 +186,7 @@
       background:radial-gradient(circle at center, rgba(34,255,109,0.20), rgba(34,255,109,0) 55%);
       transition:opacity 0.2s ease;
     }
-
-    .player.flash-on .flash{ opacity:1; }
+    .player.flash-on .flash{opacity:1;}
 
     .footerbar{
       width:92%;
@@ -217,7 +196,6 @@
       grid-template-columns:1fr;
       gap:10px;
     }
-
     .footerbar .panel{
       display:grid;
       grid-template-columns:1fr;
@@ -229,14 +207,11 @@
       cursor:pointer;
       transition:transform 0.08s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
     }
-
-    .btn:active{ transform:scale(0.99); }
-
+    .btn:active{transform:scale(0.99);}
     .btn-primary{
       background:#0e0e0e;
       border-color:rgba(34,255,109,0.25);
     }
-
     .btn-primary:hover{
       box-shadow:0 0 18px rgba(34,255,109,0.16);
       border-color:rgba(34,255,109,0.45);
@@ -252,16 +227,13 @@
     }
 
     @media (min-width:820px){
-      .setup{ grid-template-columns:1fr 1fr; }
-      .setup-grid-3{ grid-template-columns:1fr 1fr 1fr; }
-      .board{ grid-template-columns:1fr 1fr; }
-      .footerbar .panel{ grid-template-columns:1fr 1fr 1fr; }
+      .setup{grid-template-columns:1fr 1fr;}
+      .setup-grid-3{grid-template-columns:1fr 1fr 1fr;}
+      .board{grid-template-columns:1fr 1fr;}
+      .footerbar .panel{grid-template-columns:1fr 1fr 1fr;}
     }
 
-    /* ------------------------------------------------------------
-       Brand bars (top empty, bottom logo)
-    ------------------------------------------------------------ */
-
+    /* Banners */
     .brandbar{
       background:var(--brand-bg);
       border:1px solid var(--brand-border);
@@ -273,7 +245,6 @@
       overflow:hidden;
       pointer-events:none;
     }
-
     .brandbar img{
       display:block;
       height:28px;
@@ -281,78 +252,45 @@
       opacity:0.92;
     }
 
-    /* ------------------------------------------------------------
-       Middle match strip (hidden outside fullscreen/pseudo-fs)
-    ------------------------------------------------------------ */
-
+    /* Middle strip (only visible in fullscreen/pseudo-fs) */
     .matchstrip{
       display:none;
-      background:#0b0b0b;
-      border:1px solid #1f1f1f;
+      background:var(--brand-bg);
+      color:#fff;
+      border:1px solid var(--brand-border);
       border-radius:var(--radius);
-      overflow:hidden;
-      pointer-events:none;
-    }
-
-    .ms-inner{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      padding:12px 10px;
-      gap:10px;
-      height:100%;
+      padding:14px 10px;
       text-align:center;
+      overflow:hidden;
     }
-
-    .ms-block{
-      width:100%;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-    }
-
+    .ms-block{ margin:10px 0; }
     .ms-label{
       color:var(--muted);
-      font-size:0.95rem;
-      letter-spacing:0.3px;
+      font-size:0.92rem;
+      letter-spacing:0.4px;
+      margin-bottom:6px;
     }
-
-    .ms-value{
+    .ms-big{
       font-size:2.4rem;
       font-weight:900;
+      line-height:1;
       color:var(--accent);
-      line-height:1.0;
-      margin-top:6px;
+    }
+    .ms-value{
+      font-size:1.05rem;
+      font-weight:800;
+      line-height:1.15;
+      white-space:normal;
+      word-break:break-word;
     }
 
-    .ms-sub{
-      color:var(--muted);
-      font-size:1.0rem;
-      line-height:1.25;
-      margin-top:8px;
-      white-space:pre-line; /* allow Break:\nName */
-      max-width:100%;
-      padding:0 4px;
-    }
-
-    /* extra gap after ruleset block (requested) */
-    .ms-ruleset{
-      margin-bottom:14px; /* creates a bit more space above bottom border */
-    }
-
-    /* ------------------------------------------------------------
-       Fullscreen layout
-    ------------------------------------------------------------ */
-
+    /* Fullscreen: show only scoreboard area */
     :fullscreen header,
     :fullscreen #setupPanel,
     :fullscreen .status,
-    :fullscreen .footerbar{
+    :fullscreen .footerbar {
       display:none !important;
     }
-
     :fullscreen main{
       width:100%;
       max-width:none;
@@ -363,8 +301,8 @@
 
     :fullscreen .board{
       display:grid;
-      grid-template-columns: 1fr var(--midcol) 1fr;
-      grid-template-rows: auto 1fr auto;
+      grid-template-columns:1fr var(--midcol) 1fr;
+      grid-template-rows:auto 1fr auto;
       gap:0;
       height:100dvh;
     }
@@ -384,7 +322,6 @@
       min-height:44px;
       padding:10px 12px calc(10px + env(safe-area-inset-top));
     }
-
     :fullscreen .brandbar.top img{ display:none; }
 
     :fullscreen .brandbar.bottom{
@@ -394,7 +331,6 @@
       min-height:64px;
       padding:12px 16px calc(12px + env(safe-area-inset-bottom));
     }
-
     :fullscreen .brandbar.bottom img{
       height:42px;
       width:auto;
@@ -403,7 +339,7 @@
     :fullscreen #playerA{ grid-column:1; grid-row:2; }
     :fullscreen #playerB{ grid-column:3; grid-row:2; }
 
-    :fullscreen #matchStrip{
+    :fullscreen .matchstrip{
       display:flex;
       grid-column:2;
       grid-row:2;
@@ -412,6 +348,10 @@
       border-bottom:1px solid #1f1f1f;
       border-left:1px solid var(--brand-border);
       border-right:1px solid var(--brand-border);
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      padding:14px 10px;
     }
 
     :fullscreen .player{
@@ -420,23 +360,18 @@
       border-right:0;
       border-top:0;
       border-bottom:1px solid #1f1f1f;
-
       display:grid;
       grid-template-rows:auto 1fr;
       align-items:start;
-
       padding:18px;
     }
-
     :fullscreen .player-name{
       margin:0 0 8px;
       font-size:1.6rem;
       line-height:1.1;
       text-align:center;
     }
-
     :fullscreen .tap-hint{ display:none; }
-
     :fullscreen .score{
       display:flex;
       align-items:center;
@@ -446,10 +381,7 @@
       line-height:1;
     }
 
-    /* ------------------------------------------------------------
-       Fullscreen overlay controls (auto-hide)
-    ------------------------------------------------------------ */
-
+    /* Fullscreen overlay controls */
     .fs-overlay{
       position:fixed;
       top:12px;
@@ -461,7 +393,6 @@
       transition:opacity 0.25s ease;
       pointer-events:auto;
     }
-
     .fs-overlay button{
       width:auto;
       padding:10px 12px;
@@ -470,25 +401,19 @@
       background:#0c0c0c;
       border:1px solid rgba(34,255,109,0.25);
     }
-
     :fullscreen .fs-overlay{ display:flex; }
-
     .fs-overlay.hidden{
       opacity:0;
       pointer-events:none;
     }
 
-    /* ------------------------------------------------------------
-       Pseudo fullscreen (iOS fallback)
-    ------------------------------------------------------------ */
-
+    /* Pseudo fullscreen (iOS fallback) */
     body.pseudo-fs header,
     body.pseudo-fs #setupPanel,
     body.pseudo-fs .status,
     body.pseudo-fs .footerbar{
       display:none !important;
     }
-
     body.pseudo-fs main{
       width:100%;
       max-width:none;
@@ -499,8 +424,8 @@
 
     body.pseudo-fs .board{
       display:grid;
-      grid-template-columns: 1fr var(--midcol) 1fr;
-      grid-template-rows: auto 1fr auto;
+      grid-template-columns:1fr var(--midcol) 1fr;
+      grid-template-rows:auto 1fr auto;
       gap:0;
       height:100dvh;
     }
@@ -520,7 +445,6 @@
       min-height:44px;
       padding:10px 12px calc(10px + env(safe-area-inset-top));
     }
-
     body.pseudo-fs .brandbar.top img{ display:none; }
 
     body.pseudo-fs .brandbar.bottom{
@@ -530,7 +454,6 @@
       min-height:64px;
       padding:12px 16px calc(12px + env(safe-area-inset-bottom));
     }
-
     body.pseudo-fs .brandbar.bottom img{
       height:42px;
       width:auto;
@@ -539,7 +462,7 @@
     body.pseudo-fs #playerA{ grid-column:1; grid-row:2; }
     body.pseudo-fs #playerB{ grid-column:3; grid-row:2; }
 
-    body.pseudo-fs #matchStrip{
+    body.pseudo-fs .matchstrip{
       display:flex;
       grid-column:2;
       grid-row:2;
@@ -548,6 +471,10 @@
       border-bottom:1px solid #1f1f1f;
       border-left:1px solid var(--brand-border);
       border-right:1px solid var(--brand-border);
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      padding:14px 10px;
     }
 
     body.pseudo-fs .player{
@@ -556,23 +483,18 @@
       border-right:0;
       border-top:0;
       border-bottom:1px solid #1f1f1f;
-
       display:grid;
       grid-template-rows:auto 1fr;
       align-items:start;
-
       padding:18px;
     }
-
     body.pseudo-fs .player-name{
       margin:0 0 8px;
       font-size:1.6rem;
       line-height:1.1;
       text-align:center;
     }
-
     body.pseudo-fs .tap-hint{ display:none; }
-
     body.pseudo-fs .score{
       display:flex;
       align-items:center;
@@ -581,13 +503,9 @@
       padding:0;
       line-height:1;
     }
-
     body.pseudo-fs .fs-overlay{ display:flex; }
 
-    /* ------------------------------------------------------------
-       iOS-only tuning (gap already applied via margin-bottom)
-    ------------------------------------------------------------ */
-
+    /* iOS-only tuning, INCLUDING bigger gap */
     html.ios :fullscreen .player,
     html.ios body.pseudo-fs .player{
       padding-top: calc(18px + env(safe-area-inset-top));
@@ -596,30 +514,23 @@
 
     html.ios :fullscreen .player-name,
     html.ios body.pseudo-fs .player-name{
-      margin-bottom: 20px; /* bigger gap between name and score */
+      margin-bottom: 20px;
     }
 
-    /* ------------------------------------------------------------
-       Prevent scroll during fullscreen/pseudo-fs so Safari URL bar cannot be pulled in
-    ------------------------------------------------------------ */
-
+    /* prevent scroll during fullscreen/pseudo-fs */
     :fullscreen,
     :fullscreen body{
       overflow:hidden !important;
       overscroll-behavior:none;
       -webkit-overflow-scrolling:auto;
     }
-
     body.pseudo-fs{
       overflow:hidden !important;
       overscroll-behavior:none;
       -webkit-overflow-scrolling:auto;
     }
 
-    /* ------------------------------------------------------------
-       Rotate gate overlay (portrait blocker)
-    ------------------------------------------------------------ */
-
+    /* Rotate gate overlay */
     .rotate-overlay{
       position:fixed;
       inset:0;
@@ -631,9 +542,7 @@
       padding:24px;
       text-align:center;
     }
-
     .rotate-overlay.show{ display:flex; }
-
     .rotate-box{
       max-width:520px;
       width:100%;
@@ -642,35 +551,29 @@
       border-radius:16px;
       padding:18px 16px;
     }
-
     .rotate-title{
       font-size:1.2rem;
       font-weight:800;
       margin-bottom:8px;
     }
-
     .rotate-msg{
       color:var(--muted);
       line-height:1.4;
     }
 
-    /* ------------------------------------------------------------
-       Responsive tuning for middle column width
-    ------------------------------------------------------------ */
-
-    @media (min-width:480px){
-      :root{ --midcol: 190px; }
-    }
-
-    @media (min-width:820px){
-      :root{ --midcol: 220px; }
-      .ms-value{ font-size:2.7rem; }
+    /* a touch more breathing room on very small devices */
+    @media (max-width:420px){
+      :root{ --midcol: 150px; }
+      :fullscreen .ms-big,
+      body.pseudo-fs .ms-big{ font-size:2.1rem; }
+      :fullscreen .ms-value,
+      body.pseudo-fs .ms-value{ font-size:1.0rem; }
     }
   </style>
 </head>
 
 <body>
-  <!-- Rotate gate (blocks portrait completely) -->
+  <!-- Rotate gate -->
   <div id="rotateOverlay" class="rotate-overlay" aria-hidden="true">
     <div class="rotate-box">
       <div class="rotate-title">Rotate to landscape</div>
@@ -697,7 +600,6 @@
           <div class="label">Player A</div>
           <input id="nameA" class="input" type="text" inputmode="text" autocomplete="off" placeholder="Player A name">
         </div>
-
         <div>
           <div class="label">Player B</div>
           <input id="nameB" class="input" type="text" inputmode="text" autocomplete="off" placeholder="Player B name">
@@ -707,7 +609,6 @@
       <div class="setup-divider"></div>
 
       <div class="label" style="margin-top:10px;">Match setup</div>
-
       <div class="setup-grid-3">
         <div>
           <div class="label">Ruleset</div>
@@ -718,7 +619,6 @@
             <option value="custom">Custom</option>
           </select>
         </div>
-
         <div>
           <div class="label">Breaks first</div>
           <select id="breakFirst" class="select">
@@ -727,7 +627,6 @@
             <option value="alt">Alternate</option>
           </select>
         </div>
-
         <div>
           <div class="label">Race to</div>
           <input id="raceTo" class="input" type="number" inputmode="numeric" min="1" max="99" step="1" placeholder="e.g. 7">
@@ -737,7 +636,7 @@
     </section>
 
     <section class="board">
-      <!-- Top banner row (kept, no image) -->
+      <!-- top banner (kept empty) -->
       <div class="brandbar top" aria-hidden="true"></div>
 
       <div id="playerA" class="player" role="button" aria-label="Add point to Player A">
@@ -747,23 +646,21 @@
         <div id="scoreA" class="score">0</div>
       </div>
 
-      <!-- Middle match strip -->
+      <!-- middle strip -->
       <div id="matchStrip" class="matchstrip" aria-hidden="true">
-        <div class="ms-inner">
-          <div class="ms-block ms-ruleset">
-            <div class="ms-label" id="msRulesetLabel">Rules</div>
-            <div class="ms-sub" id="msRulesetValue">UK 8 Ball</div>
-          </div>
+        <div class="ms-block">
+          <div class="ms-label">Race to</div>
+          <div id="msRace" class="ms-big">7</div>
+        </div>
 
-          <div class="ms-block">
-            <div class="ms-label">Race to</div>
-            <div class="ms-value" id="msRaceTo">7</div>
-          </div>
+        <div class="ms-block">
+          <div class="ms-label">Break</div>
+          <div id="msBreak" class="ms-value">Player A</div>
+        </div>
 
-          <div class="ms-block">
-            <div class="ms-label">Break:</div>
-            <div class="ms-sub" id="msBreakWho">Player A</div>
-          </div>
+        <div class="ms-block">
+          <div class="ms-label">Rules</div>
+          <div id="msRules" class="ms-value">UK 8 Ball</div>
         </div>
       </div>
 
@@ -774,7 +671,7 @@
         <div id="scoreB" class="score">0</div>
       </div>
 
-      <!-- Bottom banner row (bigger logo) -->
+      <!-- bottom banner (bigger logo) -->
       <div class="brandbar bottom" aria-hidden="true">
         <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="">
       </div>
@@ -796,7 +693,6 @@
   const VERSION = "v3";
   const STORAGE_KEY = "ct_scoreboard";
 
-  // iOS detection for CSS tuning + pseudo-fullscreen fallback
   const ua = navigator.userAgent || "";
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (isIOS) document.documentElement.classList.add("ios");
@@ -810,27 +706,21 @@
     scoreB: document.getElementById("scoreB"),
     playerA: document.getElementById("playerA"),
     playerB: document.getElementById("playerB"),
-
     resetBtn: document.getElementById("resetBtn"),
     fullscreenBtn: document.getElementById("fullscreenBtn"),
     editNamesBtn: document.getElementById("editNamesBtn"),
     setupPanel: document.getElementById("setupPanel"),
     status: document.getElementById("status"),
-
     fsExitBtn: document.getElementById("fsExitBtn"),
     fsEditBtn: document.getElementById("fsEditBtn"),
     fsOverlay: document.getElementById("fsOverlay"),
-
     rotateOverlay: document.getElementById("rotateOverlay"),
-
     ruleset: document.getElementById("ruleset"),
     breakFirst: document.getElementById("breakFirst"),
     raceTo: document.getElementById("raceTo"),
-
-    matchStrip: document.getElementById("matchStrip"),
-    msRaceTo: document.getElementById("msRaceTo"),
-    msRulesetValue: document.getElementById("msRulesetValue"),
-    msBreakWho: document.getElementById("msBreakWho"),
+    msRace: document.getElementById("msRace"),
+    msBreak: document.getElementById("msBreak"),
+    msRules: document.getElementById("msRules"),
   };
 
   const state = {
@@ -838,19 +728,15 @@
     nameB: "Player B",
     scoreA: 0,
     scoreB: 0,
-
     ruleset: "uk8",
     breakFirst: "A",
     raceTo: 7,
-
-    // current break holder (toggles after every +1 or -1)
-    breakNow: "A",
   };
 
   const lastTapAt = { A: 0, B: 0 };
   const TAP_DEBOUNCE_MS = 250;
-
   const LONG_PRESS_MS = 420;
+
   let pressTimer = null;
   let longPressFired = false;
 
@@ -870,28 +756,19 @@
     return "Rules";
   }
 
-  function breakName(which) {
+  function breakerLabel(v) {
     const a = safeText(state.nameA) || "Player A";
     const b = safeText(state.nameB) || "Player B";
-    return which === "A" ? a : b;
-  }
-
-  function setBreakFromSelection() {
-    // start point for the break indicator
-    if (state.breakFirst === "B") state.breakNow = "B";
-    else state.breakNow = "A";
-  }
-
-  function toggleBreakNow() {
-    // advance break after every score change (+ or -)
-    state.breakNow = (state.breakNow === "A") ? "B" : "A";
+    if (v === "A") return a;
+    if (v === "B") return b;
+    if (v === "alt") return "Alternate";
+    return a;
   }
 
   function load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
-
       const data = JSON.parse(raw);
       if (!data || typeof data !== "object") return;
 
@@ -908,17 +785,16 @@
         const rt = Math.floor(data.raceTo);
         state.raceTo = Math.min(99, Math.max(1, rt));
       }
-
-      if (typeof data.breakNow === "string" && (data.breakNow === "A" || data.breakNow === "B")) {
-        state.breakNow = data.breakNow;
-      } else {
-        setBreakFromSelection();
-      }
     } catch (_) {}
   }
 
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+  }
+
+  function updateFullscreenButtonLabel() {
+    const active = isFullscreen() || isPseudoFullscreen();
+    els.fullscreenBtn.textContent = active ? "Exit fullscreen" : "Fullscreen";
   }
 
   function render() {
@@ -931,28 +807,24 @@
     els.scoreA.textContent = String(state.scoreA);
     els.scoreB.textContent = String(state.scoreB);
 
-    if (document.activeElement !== els.nameA) {
-      els.nameA.value = a === "Player A" && !safeText(state.nameA) ? "" : a;
-    }
-
-    if (document.activeElement !== els.nameB) {
-      els.nameB.value = b === "Player B" && !safeText(state.nameB) ? "" : b;
-    }
+    if (document.activeElement !== els.nameA) els.nameA.value = a === "Player A" && !safeText(state.nameA) ? "" : a;
+    if (document.activeElement !== els.nameB) els.nameB.value = b === "Player B" && !safeText(state.nameB) ? "" : b;
 
     els.ruleset.value = state.ruleset;
     els.breakFirst.value = state.breakFirst;
     els.raceTo.value = String(state.raceTo);
 
-    // match strip
-    els.msRaceTo.textContent = String(state.raceTo);
-    els.msRulesetValue.textContent = rulesetLabel(state.ruleset);
+    if (els.msRace) els.msRace.textContent = String(state.raceTo);
+    if (els.msRules) els.msRules.textContent = rulesetLabel(state.ruleset);
 
-    // Break: then name on a new line (requested)
-    const bn = breakName(state.breakNow);
-    els.msBreakWho.textContent = bn;
-    els.msBreakWho.style.whiteSpace = "pre-line";
+    if (els.msBreak) {
+      const breaker = breakerLabel(state.breakFirst);
+      // Break: on its own line is handled by markup. This is the value line.
+      els.msBreak.textContent = breaker;
+    }
 
     els.status.textContent = "Saved on this device. " + VERSION;
+    updateFullscreenButtonLabel();
   }
 
   function flash(el) {
@@ -968,10 +840,6 @@
       state.scoreB = Math.max(0, state.scoreB + delta);
       flash(els.playerB);
     }
-
-    // advance break after every scoring change (+ or -)
-    if (delta !== 0) toggleBreakNow();
-
     save();
     render();
     showOverlay();
@@ -981,7 +849,6 @@
     const now = Date.now();
     if (now - lastTapAt[which] < TAP_DEBOUNCE_MS) return;
     lastTapAt[which] = now;
-
     applyDelta(which, +1);
   }
 
@@ -992,15 +859,10 @@
   function resetAll() {
     const ok = window.confirm("Reset scores to 0?");
     if (!ok) return;
-
     state.scoreA = 0;
     state.scoreB = 0;
-
-    setBreakFromSelection();
-
     save();
     render();
-    showOverlay();
   }
 
   function isFullscreen() {
@@ -1019,7 +881,7 @@
   function setPseudoFullscreen(on) {
     document.body.classList.toggle("pseudo-fs", !!on);
     applyScrollLock(!!on);
-
+    updateFullscreenButtonLabel();
     if (on) showOverlay();
     else hideOverlayNow();
   }
@@ -1027,13 +889,10 @@
   function exitFullscreen() {
     if (isPseudoFullscreen()) {
       setPseudoFullscreen(false);
-      enforceLandscape();
       return;
     }
-
     const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
     if (exit) exit.call(document);
-
     hideOverlayNow();
   }
 
@@ -1053,43 +912,6 @@
       if (isIOS) setPseudoFullscreen(true);
       else els.status.textContent = "Fullscreen blocked. Try again. " + VERSION;
     });
-  }
-
-  function updateFullscreenButtonLabel() {
-    const active = isFullscreen() || isPseudoFullscreen();
-    els.fullscreenBtn.textContent = active ? "Exit fullscreen" : "Fullscreen";
-  }
-
-  function showOverlay() {
-    if (!(isFullscreen() || isPseudoFullscreen())) return;
-
-    els.fsOverlay.classList.remove("hidden");
-
-    if (overlayTimer) window.clearTimeout(overlayTimer);
-    overlayTimer = window.setTimeout(() => {
-      els.fsOverlay.classList.add("hidden");
-    }, OVERLAY_HIDE_MS);
-  }
-
-  function hideOverlayNow() {
-    els.fsOverlay.classList.add("hidden");
-    if (overlayTimer) window.clearTimeout(overlayTimer);
-    overlayTimer = null;
-  }
-
-  function bindOverlayAutoShow() {
-    ["pointerdown","pointermove","keydown","touchstart"].forEach(evt => {
-      window.addEventListener(evt, () => {
-        if (isFullscreen() || isPseudoFullscreen()) showOverlay();
-      }, { passive: true });
-    });
-  }
-
-  function bindTouchMoveBlocker() {
-    if (!isIOS) return;
-    window.addEventListener("touchmove", (e) => {
-      if (isFullscreen() || isPseudoFullscreen()) e.preventDefault();
-    }, { passive: false });
   }
 
   function showRotateGate(show) {
@@ -1117,7 +939,7 @@
   function toggleFullscreen() {
     if (isFullscreen() || isPseudoFullscreen()) {
       exitFullscreen();
-      updateFullscreenButtonLabel();
+      enforceLandscape();
       return;
     }
 
@@ -1127,107 +949,86 @@
     }
 
     requestFullscreen();
-    updateFullscreenButtonLabel();
   }
 
   function editNames() {
     if (isPseudoFullscreen()) setPseudoFullscreen(false);
-
     els.setupPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     window.setTimeout(() => { els.nameA.focus(); }, 250);
   }
 
-  function attachPlayerHandlers(el, which) {
-    el.addEventListener("pointerdown", (e) => {
-      longPressFired = false;
+  function showOverlay() {
+    if (!(isFullscreen() || isPseudoFullscreen())) return;
 
-      if (pressTimer) window.clearTimeout(pressTimer);
+    els.fsOverlay.classList.remove("hidden");
 
-      pressTimer = window.setTimeout(() => {
-        longPressFired = true;
-        subtractPoint(which);
-      }, LONG_PRESS_MS);
+    if (overlayTimer) window.clearTimeout(overlayTimer);
+    overlayTimer = window.setTimeout(() => {
+      els.fsOverlay.classList.add("hidden");
+    }, OVERLAY_HIDE_MS);
+  }
 
-      try { el.setPointerCapture(e.pointerId); } catch (_) {}
-    });
+  function hideOverlayNow() {
+    els.fsOverlay.classList.add("hidden");
+    if (overlayTimer) window.clearTimeout(overlayTimer);
+    overlayTimer = null;
+  }
 
-    el.addEventListener("pointerup", () => {
-      if (pressTimer) window.clearTimeout(pressTimer);
-      pressTimer = null;
-
-      if (!longPressFired) addPoint(which);
-    });
-
-    el.addEventListener("pointercancel", () => {
-      if (pressTimer) window.clearTimeout(pressTimer);
-      pressTimer = null;
-    });
-
-    el.addEventListener("pointerleave", () => {
-      if (pressTimer) window.clearTimeout(pressTimer);
-      pressTimer = null;
+  function bindOverlayAutoShow() {
+    ["pointerdown","pointermove","keydown","touchstart"].forEach(evt => {
+      window.addEventListener(evt, () => {
+        if (isFullscreen() || isPseudoFullscreen()) showOverlay();
+      }, { passive: true });
     });
   }
 
-  function onFsChange() {
-    updateFullscreenButtonLabel();
+  function startPress(which, pointerId, el) {
+    longPressFired = false;
+    if (pressTimer) window.clearTimeout(pressTimer);
+    pressTimer = window.setTimeout(() => {
+      longPressFired = true;
+      subtractPoint(which);
+    }, LONG_PRESS_MS);
 
-    // lock scroll while in true fullscreen too
-    applyScrollLock(isFullscreen());
+    try { el.setPointerCapture(pointerId); } catch (_) {}
+  }
 
-    if (isFullscreen() || isPseudoFullscreen()) showOverlay();
-    else hideOverlayNow();
+  function endPress() {
+    if (pressTimer) window.clearTimeout(pressTimer);
+    pressTimer = null;
+  }
 
-    enforceLandscape();
+  function attachPlayerHandlers(el, which) {
+    el.addEventListener("pointerdown", (e) => startPress(which, e.pointerId, el));
+    el.addEventListener("pointerup", () => {
+      endPress();
+      if (!longPressFired) addPoint(which);
+    });
+    el.addEventListener("pointercancel", () => endPress());
+    el.addEventListener("pointerleave", () => endPress());
   }
 
   // Init
   load();
-  setBreakFromSelection();
   render();
-  updateFullscreenButtonLabel();
-
   bindOverlayAutoShow();
-  bindTouchMoveBlocker();
   enforceLandscape();
 
   // Inputs
-  els.nameA.addEventListener("input", () => {
-    state.nameA = els.nameA.value;
-    save();
-    render();
-  });
+  els.nameA.addEventListener("input", () => { state.nameA = els.nameA.value; save(); render(); });
+  els.nameB.addEventListener("input", () => { state.nameB = els.nameB.value; save(); render(); });
 
-  els.nameB.addEventListener("input", () => {
-    state.nameB = els.nameB.value;
-    save();
-    render();
-  });
-
-  els.ruleset.addEventListener("change", () => {
-    state.ruleset = els.ruleset.value;
-    save();
-    render();
-  });
-
-  els.breakFirst.addEventListener("change", () => {
-    state.breakFirst = els.breakFirst.value;
-
-    // reset current break to selected starter when changed
-    setBreakFromSelection();
-
-    save();
-    render();
-  });
+  els.ruleset.addEventListener("change", () => { state.ruleset = els.ruleset.value; save(); render(); });
+  els.breakFirst.addEventListener("change", () => { state.breakFirst = els.breakFirst.value; save(); render(); });
 
   els.raceTo.addEventListener("input", () => {
     const v = Math.floor(Number(els.raceTo.value));
     if (!Number.isFinite(v)) return;
-
     state.raceTo = Math.min(99, Math.max(1, v));
     save();
     render();
   });
+  els.raceTo.addEventListener("blur", () => { render(); });
 
   // Players
   attachPlayerHandlers(els.playerA, "A");
@@ -1239,22 +1040,11 @@
   els.editNamesBtn.addEventListener("click", editNames);
 
   // Overlay buttons
-  els.fsExitBtn.addEventListener("click", () => {
-    exitFullscreen();
-    onFsChange();
-  });
+  els.fsExitBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); });
+  els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); editNames(); });
 
-  els.fsEditBtn.addEventListener("click", () => {
-    exitFullscreen();
-    onFsChange();
-    editNames();
-  });
-
-  // Fullscreen change listeners
-  document.addEventListener("fullscreenchange", onFsChange);
-  document.addEventListener("webkitfullscreenchange", onFsChange);
-  document.addEventListener("MSFullscreenChange", onFsChange);
-
+  // Keep rotate gate accurate
+  document.addEventListener("fullscreenchange", () => { updateFullscreenButtonLabel(); if (isFullscreen()) showOverlay(); enforceLandscape(); });
   window.addEventListener("orientationchange", () => setTimeout(enforceLandscape, 150));
   window.addEventListener("resize", enforceLandscape);
 })();
