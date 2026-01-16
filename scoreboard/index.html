@@ -1,4 +1,4 @@
-6<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -751,6 +751,9 @@
     ruleset: "uk8",
     breakFirst: "A",
     raceTo: 7,
+
+    /* NEW: current breaker (toggles on +1 and -1) */
+    currentBreak: "A",
   };
 
   const lastTapAt = { A: 0, B: 0 };
@@ -776,13 +779,23 @@
     return "Rules";
   }
 
-  function breakerLabel(v) {
+  function initCurrentBreakFromSelector() {
+    if (state.breakFirst === "A" || state.breakFirst === "B") {
+      state.currentBreak = state.breakFirst;
+      return;
+    }
+    // "alt": start from A by default
+    state.currentBreak = "A";
+  }
+
+  function toggleCurrentBreak() {
+    state.currentBreak = (state.currentBreak === "A") ? "B" : "A";
+  }
+
+  function currentBreakerName() {
     const a = safeText(state.nameA) || "Player A";
     const b = safeText(state.nameB) || "Player B";
-    if (v === "A") return a;
-    if (v === "B") return b;
-    if (v === "alt") return "Alternate";
-    return a;
+    return (state.currentBreak === "A") ? a : b;
   }
 
   function load() {
@@ -804,6 +817,13 @@
       if (Number.isFinite(data.raceTo)) {
         const rt = Math.floor(data.raceTo);
         state.raceTo = Math.min(99, Math.max(1, rt));
+      }
+
+      // NEW: load currentBreak if valid, else derive
+      if (data.currentBreak === "A" || data.currentBreak === "B") {
+        state.currentBreak = data.currentBreak;
+      } else {
+        initCurrentBreakFromSelector();
       }
     } catch (_) {}
   }
@@ -838,8 +858,7 @@
     if (els.msRules) els.msRules.textContent = rulesetLabel(state.ruleset);
 
     if (els.msBreak) {
-      const breaker = breakerLabel(state.breakFirst);
-      els.msBreak.textContent = breaker;
+      els.msBreak.textContent = currentBreakerName();
     }
 
     els.status.textContent = "Saved on this device. " + VERSION;
@@ -859,6 +878,10 @@
       state.scoreB = Math.max(0, state.scoreB + delta);
       flash(els.playerB);
     }
+
+    // NEW: any +1 or -1 changes break to the other player
+    toggleCurrentBreak();
+
     save();
     render();
     showOverlay();
@@ -880,6 +903,10 @@
     if (!ok) return;
     state.scoreA = 0;
     state.scoreB = 0;
+
+    // NEW: reset breaker back to start setting
+    initCurrentBreakFromSelector();
+
     save();
     render();
   }
@@ -1028,6 +1055,13 @@
   }
 
   load();
+
+  // NEW: ensure currentBreak is always valid after load
+  if (state.currentBreak !== "A" && state.currentBreak !== "B") {
+    initCurrentBreakFromSelector();
+    save();
+  }
+
   render();
   bindOverlayAutoShow();
   enforceLandscape();
@@ -1036,7 +1070,16 @@
   els.nameB.addEventListener("input", () => { state.nameB = els.nameB.value; save(); render(); });
 
   els.ruleset.addEventListener("change", () => { state.ruleset = els.ruleset.value; save(); render(); });
-  els.breakFirst.addEventListener("change", () => { state.breakFirst = els.breakFirst.value; save(); render(); });
+
+  els.breakFirst.addEventListener("change", () => {
+    state.breakFirst = els.breakFirst.value;
+
+    // NEW: when user changes the starting break setting, reset currentBreak accordingly
+    initCurrentBreakFromSelector();
+
+    save();
+    render();
+  });
 
   els.raceTo.addEventListener("input", () => {
     const v = Math.floor(Number(els.raceTo.value));
