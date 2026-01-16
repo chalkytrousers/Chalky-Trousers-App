@@ -181,7 +181,7 @@
     }
     .player.flash-on .flash{opacity:1;}
 
-    /* NEW: brand banner (full width) */
+    /* Brand banner (full width) */
     .brandbar{
       background:#0c0c0c;
       border:1px solid #1f1f1f;
@@ -270,7 +270,7 @@
       height:100dvh; /* dvh only */
     }
 
-    /* Fullscreen players (SHRUNK so names always fit) */
+    /* Fullscreen players: NAME PINNED, SCORE CENTRED */
     :fullscreen .player{
       border-radius:0;
       border-left:0;
@@ -279,22 +279,28 @@
       border-bottom:1px solid #1f1f1f;
       display:flex;
       flex-direction:column;
-      justify-content:center;
-      padding:18px;            /* was 26px */
+      justify-content:flex-start; /* was center */
+      padding:18px;
     }
     :fullscreen .player-name{
-      font-size:1.6rem;        /* was 2.0rem */
-      margin-bottom:10px;      /* was 18px */
+      flex:0 0 auto;
+      font-size:1.6rem;
+      margin:0 0 8px;
       line-height:1.1;
       text-align:center;
     }
     :fullscreen .tap-hint{ display:none; }
     :fullscreen .score{
-      font-size: min(9rem, 20vw); /* was min(11rem, 24vw) */
+      flex:1 1 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: min(8.5rem, 19vw);
       padding:0;
+      line-height:1;
     }
 
-    /* Fullscreen banner (SHRUNK) */
+    /* Fullscreen banner (small) */
     :fullscreen .brandbar{
       grid-column:1 / -1;
       grid-row:2;
@@ -303,11 +309,11 @@
       border-right:0;
       border-bottom:0;
       border-top:1px solid #1f1f1f;
-      padding:8px 12px calc(8px + env(safe-area-inset-bottom)); /* smaller */
+      padding:8px 12px calc(8px + env(safe-area-inset-bottom));
       background:#0b0b0b;
     }
     :fullscreen .brandbar img{
-      height:24px; /* smaller */
+      height:24px;
       opacity:0.85;
     }
 
@@ -360,7 +366,7 @@
       height:100dvh; /* dvh only */
     }
 
-    /* Pseudo-fs players (SHRUNK) */
+    /* Pseudo-fs players: NAME PINNED, SCORE CENTRED */
     body.pseudo-fs .player{
       border-radius:0;
       border-left:0;
@@ -369,22 +375,28 @@
       border-bottom:1px solid #1f1f1f;
       display:flex;
       flex-direction:column;
-      justify-content:center;
-      padding:18px;            /* was 26px */
+      justify-content:flex-start;
+      padding:18px;
     }
     body.pseudo-fs .player-name{
-      font-size:1.6rem;        /* was 2.0rem */
-      margin-bottom:10px;      /* was 18px */
+      flex:0 0 auto;
+      font-size:1.6rem;
+      margin:0 0 8px;
       line-height:1.1;
       text-align:center;
     }
     body.pseudo-fs .tap-hint{ display:none; }
     body.pseudo-fs .score{
-      font-size: min(9rem, 20vw); /* was min(11rem, 24vw) */
+      flex:1 1 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: min(8.5rem, 19vw);
       padding:0;
+      line-height:1;
     }
 
-    /* Pseudo-fs banner (SHRUNK) */
+    /* Pseudo-fs banner (small) */
     body.pseudo-fs .brandbar{
       grid-column:1 / -1;
       grid-row:2;
@@ -403,27 +415,11 @@
 
     body.pseudo-fs .fs-overlay{ display:flex; }
 
-    /* iOS-only tuning to push closer to Android look */
+    /* iOS-only tuning */
     html.ios body.pseudo-fs .player,
     html.ios :fullscreen .player{
-      padding:16px; /* smaller than before to guarantee name space */
-    }
-    html.ios body.pseudo-fs .player-name,
-    html.ios :fullscreen .player-name{
-      font-size:1.7rem;
-      margin-bottom:10px;
-      line-height:1.1;
-    }
-    html.ios body.pseudo-fs .score,
-    html.ios :fullscreen .score{
-      font-size: min(9.5rem, 22vw);
-    }
-
-    /* Extra safe-area padding without blowing the layout */
-    html.ios :fullscreen .player,
-    html.ios body.pseudo-fs .player{
-      padding-top: calc(16px + env(safe-area-inset-top));
-      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+      padding-top: calc(18px + env(safe-area-inset-top));
+      padding-bottom: calc(18px + env(safe-area-inset-bottom));
     }
 
     /* Prevent scroll during fullscreen/pseudo-fs so Safari URL bar cannot be pulled in */
@@ -487,7 +483,7 @@
     <p>Tap a player to add a point. Long-press a player to subtract. Names, scores, and match setup autosave on this device.</p>
   </header>
 
-  <!-- Fullscreen overlay (no "re-fullscreen" button) -->
+  <!-- Fullscreen overlay -->
   <div id="fsOverlay" class="fs-overlay" aria-hidden="false">
     <button id="fsEditBtn" class="btn btn-primary" type="button">Edit names</button>
     <button id="fsExitBtn" class="btn btn-primary" type="button">Exit</button>
@@ -718,7 +714,6 @@
   }
 
   function applyScrollLock(on) {
-    // Force overflow lock to reduce Safari URL bar pull-down
     document.body.style.overflow = on ? "hidden" : "";
     document.documentElement.style.overflow = on ? "hidden" : "";
   }
@@ -854,7 +849,6 @@
     el.addEventListener("pointerleave", () => endPress());
   }
 
-  // Stop touchmove scroll while fullscreen/pseudo-fs on iOS (reduces URL bar reveal)
   function bindTouchMoveBlocker() {
     if (!isIOS) return;
     window.addEventListener("touchmove", (e) => {
@@ -862,7 +856,6 @@
     }, { passive: false });
   }
 
-  // Block double-tap zoom while fullscreen/pseudo-fs (best-effort)
   function bindDoubleTapZoomBlocker() {
     if (!isIOS) return;
 
