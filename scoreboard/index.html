@@ -248,6 +248,7 @@
       opacity:0.92;
     }
 
+    /* Fullscreen: hide UI */
     :fullscreen header,
     :fullscreen #setupPanel,
     :fullscreen .status,
@@ -262,6 +263,7 @@
       gap:0;
     }
 
+    /* Fullscreen board layout: top banner, players, bottom banner */
     :fullscreen .board{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -302,15 +304,18 @@
     :fullscreen #playerA{ grid-column:1; grid-row:2; }
     :fullscreen #playerB{ grid-column:2; grid-row:2; }
 
+    /* Fullscreen player tiles: grid so name cannot be pushed off */
     :fullscreen .player{
       border-radius:0;
       border-left:0;
       border-right:0;
       border-top:0;
       border-bottom:1px solid #1f1f1f;
+
       display:grid;
       grid-template-rows:auto 1fr;
       align-items:start;
+
       padding:18px;
     }
     :fullscreen .player-name{
@@ -329,6 +334,7 @@
       line-height:1;
     }
 
+    /* Fullscreen overlay controls */
     .fs-overlay{
       position:fixed;
       top:12px;
@@ -354,6 +360,7 @@
       pointer-events:none;
     }
 
+    /* iPhone fallback: pseudo-fullscreen */
     body.pseudo-fs header,
     body.pseudo-fs #setupPanel,
     body.pseudo-fs .status,
@@ -413,9 +420,11 @@
       border-right:0;
       border-top:0;
       border-bottom:1px solid #1f1f1f;
+
       display:grid;
       grid-template-rows:auto 1fr;
       align-items:start;
+
       padding:18px;
     }
     body.pseudo-fs .player-name{
@@ -441,12 +450,12 @@
       padding-top: calc(18px + env(safe-area-inset-top));
       padding-bottom: calc(18px + env(safe-area-inset-bottom));
     }
-
     html.ios :fullscreen .player-name,
     html.ios body.pseudo-fs .player-name{
-      margin-bottom: 20px; /* <-- BIGGER GAP HERE */
+      margin-bottom: 20px;
     }
 
+    /* Prevent scroll during fullscreen/pseudo-fs so Safari URL bar cannot be pulled in */
     :fullscreen,
     :fullscreen body{
       overflow:hidden !important;
@@ -459,6 +468,7 @@
       -webkit-overflow-scrolling:auto;
     }
 
+    /* Rotate gate overlay */
     .rotate-overlay{
       position:fixed;
       inset:0;
@@ -492,6 +502,7 @@
 </head>
 
 <body>
+  <!-- Rotate gate -->
   <div id="rotateOverlay" class="rotate-overlay" aria-hidden="true">
     <div class="rotate-box">
       <div class="rotate-title">Rotate to landscape</div>
@@ -505,6 +516,7 @@
     <p>Tap a player to add a point. Long-press a player to subtract. Names, scores, and match setup autosave on this device.</p>
   </header>
 
+  <!-- Fullscreen overlay -->
   <div id="fsOverlay" class="fs-overlay" aria-hidden="false">
     <button id="fsEditBtn" class="btn btn-primary" type="button">Edit names</button>
     <button id="fsExitBtn" class="btn btn-primary" type="button">Exit</button>
@@ -590,6 +602,7 @@
   const VERSION = "v3";
   const STORAGE_KEY = "ct_scoreboard";
 
+  // Platform detection
   const ua = navigator.userAgent || "";
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (isIOS) document.documentElement.classList.add("ios");
@@ -629,9 +642,11 @@
 
   const lastTapAt = { A: 0, B: 0 };
   const TAP_DEBOUNCE_MS = 250;
+
   const LONG_PRESS_MS = 420;
   let pressTimer = null;
   let longPressFired = false;
+
   let overlayTimer = null;
   const OVERLAY_HIDE_MS = 3000;
 
@@ -677,16 +692,19 @@
     els.scoreA.textContent = String(state.scoreA);
     els.scoreB.textContent = String(state.scoreB);
 
-    if (document.activeElement !== els.nameA)
+    if (document.activeElement !== els.nameA) {
       els.nameA.value = a === "Player A" && !safeText(state.nameA) ? "" : a;
-    if (document.activeElement !== els.nameB)
+    }
+    if (document.activeElement !== els.nameB) {
       els.nameB.value = b === "Player B" && !safeText(state.nameB) ? "" : b;
+    }
 
     els.ruleset.value = state.ruleset;
     els.breakFirst.value = state.breakFirst;
     els.raceTo.value = String(state.raceTo);
 
     els.status.textContent = "Saved on this device. " + VERSION;
+    updateFullscreenButtonLabel();
   }
 
   function flash(el) {
@@ -711,10 +729,12 @@
     if (now - lastTapAt[which] < TAP_DEBOUNCE_MS) return;
     lastTapAt[which] = now;
     applyDelta(which, +1);
+    showOverlay();
   }
 
   function subtractPoint(which) {
     applyDelta(which, -1);
+    showOverlay();
   }
 
   function resetAll() {
@@ -742,6 +762,9 @@
   function setPseudoFullscreen(on) {
     document.body.classList.toggle("pseudo-fs", !!on);
     applyScrollLock(!!on);
+    updateFullscreenButtonLabel();
+    if (on) showOverlay();
+    else hideOverlayNow();
   }
 
   function exitFullscreen() {
@@ -758,8 +781,11 @@
     const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
 
     if (!req) {
-      if (isIOS) setPseudoFullscreen(true);
-      else els.status.textContent = "Fullscreen not supported in this browser. " + VERSION;
+      if (isIOS) {
+        setPseudoFullscreen(true);
+        return;
+      }
+      els.status.textContent = "Fullscreen not supported in this browser. " + VERSION;
       return;
     }
 
@@ -769,9 +795,40 @@
     });
   }
 
+  function updateFullscreenButtonLabel() {
+    const active = isFullscreen() || isPseudoFullscreen();
+    els.fullscreenBtn.textContent = active ? "Exit fullscreen" : "Fullscreen";
+  }
+
+  function showRotateGate(show) {
+    if (!els.rotateOverlay) return;
+    els.rotateOverlay.classList.toggle("show", !!show);
+    els.rotateOverlay.setAttribute("aria-hidden", show ? "false" : "true");
+  }
+
+  function isLandscape() {
+    return window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
+  }
+
+  function enforceLandscape() {
+    const portrait = window.matchMedia && window.matchMedia("(orientation: portrait)").matches;
+    const active = isFullscreen() || isPseudoFullscreen();
+
+    if (portrait) {
+      showRotateGate(true);
+      if (active) exitFullscreen();
+    } else {
+      showRotateGate(false);
+    }
+  }
+
   function toggleFullscreen() {
     if (isFullscreen() || isPseudoFullscreen()) {
       exitFullscreen();
+      return;
+    }
+    if (!isLandscape()) {
+      showRotateGate(true);
       return;
     }
     requestFullscreen();
@@ -783,35 +840,114 @@
     window.setTimeout(() => { els.nameA.focus(); }, 250);
   }
 
-  function attachPlayerHandlers(el, which) {
-    el.addEventListener("pointerdown", (e) => {
-      longPressFired = false;
-      if (pressTimer) window.clearTimeout(pressTimer);
-      pressTimer = window.setTimeout(() => {
-        longPressFired = true;
-        subtractPoint(which);
-      }, LONG_PRESS_MS);
-      try { el.setPointerCapture(e.pointerId); } catch (_) {}
-    });
+  function showOverlay() {
+    if (!(isFullscreen() || isPseudoFullscreen())) return;
+    els.fsOverlay.classList.remove("hidden");
+    if (overlayTimer) window.clearTimeout(overlayTimer);
+    overlayTimer = window.setTimeout(() => {
+      els.fsOverlay.classList.add("hidden");
+    }, OVERLAY_HIDE_MS);
+  }
 
-    el.addEventListener("pointerup", () => {
-      if (pressTimer) window.clearTimeout(pressTimer);
-      pressTimer = null;
-      if (!longPressFired) addPoint(which);
+  function hideOverlayNow() {
+    els.fsOverlay.classList.add("hidden");
+    if (overlayTimer) window.clearTimeout(overlayTimer);
+    overlayTimer = null;
+  }
+
+  function bindOverlayAutoShow() {
+    ["pointerdown","pointermove","keydown","touchstart"].forEach(evt => {
+      window.addEventListener(evt, () => {
+        if (isFullscreen() || isPseudoFullscreen()) showOverlay();
+      }, { passive: true });
     });
   }
 
+  function startPress(which, pointerId, el) {
+    longPressFired = false;
+    if (pressTimer) window.clearTimeout(pressTimer);
+    pressTimer = window.setTimeout(() => {
+      longPressFired = true;
+      subtractPoint(which);
+    }, LONG_PRESS_MS);
+
+    try { el.setPointerCapture(pointerId); } catch (_) {}
+  }
+
+  function endPress() {
+    if (pressTimer) window.clearTimeout(pressTimer);
+    pressTimer = null;
+  }
+
+  function attachPlayerHandlers(el, which) {
+    el.addEventListener("pointerdown", (e) => startPress(which, e.pointerId, el));
+    el.addEventListener("pointerup", () => {
+      endPress();
+      if (!longPressFired) addPoint(which);
+    });
+    el.addEventListener("pointercancel", () => endPress());
+    el.addEventListener("pointerleave", () => endPress());
+  }
+
+  // iOS: stop touchmove scroll while fullscreen/pseudo-fs (prevents URL bar pull-in)
+  function bindTouchMoveBlocker() {
+    if (!isIOS) return;
+    window.addEventListener("touchmove", (e) => {
+      if (isFullscreen() || isPseudoFullscreen()) e.preventDefault();
+    }, { passive: false });
+  }
+
+  function onFsChange() {
+    updateFullscreenButtonLabel();
+    applyScrollLock(isFullscreen() || isPseudoFullscreen());
+    if (isFullscreen() || isPseudoFullscreen()) showOverlay();
+    else hideOverlayNow();
+    enforceLandscape();
+  }
+
+  // Init
   load();
   render();
+  bindOverlayAutoShow();
+  bindTouchMoveBlocker();
+  enforceLandscape();
 
+  // Name inputs
+  els.nameA.addEventListener("input", () => { state.nameA = els.nameA.value; save(); render(); });
+  els.nameB.addEventListener("input", () => { state.nameB = els.nameB.value; save(); render(); });
+
+  // Match setup inputs
+  els.ruleset.addEventListener("change", () => { state.ruleset = els.ruleset.value; save(); render(); });
+  els.breakFirst.addEventListener("change", () => { state.breakFirst = els.breakFirst.value; save(); render(); });
+  els.raceTo.addEventListener("input", () => {
+    const v = Math.floor(Number(els.raceTo.value));
+    if (!Number.isFinite(v)) return;
+    state.raceTo = Math.min(99, Math.max(1, v));
+    save();
+  });
+  els.raceTo.addEventListener("blur", () => { render(); });
+
+  // Player handlers
   attachPlayerHandlers(els.playerA, "A");
   attachPlayerHandlers(els.playerB, "B");
 
+  // Buttons
   els.resetBtn.addEventListener("click", resetAll);
   els.fullscreenBtn.addEventListener("click", toggleFullscreen);
   els.editNamesBtn.addEventListener("click", editNames);
-  els.fsExitBtn.addEventListener("click", exitFullscreen);
-  els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); editNames(); });
+
+  // Fullscreen overlay buttons
+  els.fsExitBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); });
+  els.fsEditBtn.addEventListener("click", () => { exitFullscreen(); enforceLandscape(); editNames(); });
+
+  // Fullscreen change listeners
+  document.addEventListener("fullscreenchange", onFsChange);
+  document.addEventListener("webkitfullscreenchange", onFsChange);
+  document.addEventListener("MSFullscreenChange", onFsChange);
+
+  // Orientation/resize listeners for rotate gate
+  window.addEventListener("orientationchange", () => setTimeout(enforceLandscape, 150));
+  window.addEventListener("resize", enforceLandscape);
 })();
 </script>
 </body>
