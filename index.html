@@ -22,6 +22,8 @@
       --accent:#22ff6d;
       --muted:#a0a0a0;
       --radius:16px;
+      --brand-bg:#0b0b0b;
+      --brand-border:#1f1f1f;
     }
     *{box-sizing:border-box;}
     html, body { height: 100%; }
@@ -181,10 +183,10 @@
     }
     .player.flash-on .flash{opacity:1;}
 
-    /* Brand banner (full width) */
+    /* Brand banner */
     .brandbar{
-      background:#0c0c0c;
-      border:1px solid #1f1f1f;
+      background:var(--brand-bg);
+      border:1px solid var(--brand-border);
       border-radius:var(--radius);
       padding:10px 12px;
       display:flex;
@@ -195,7 +197,7 @@
       pointer-events:none;
     }
     .brandbar img{
-      height:30px;
+      height:28px;
       width:auto;
       max-width:92%;
       opacity:0.88;
@@ -262,16 +264,43 @@
       gap:0;
     }
 
-    /* FULLSCREEN LAYOUT: players row + banner row */
+    /* FULLSCREEN GRID: top brand, players, bottom brand */
     :fullscreen .board{
+      display:grid;
       grid-template-columns:1fr 1fr;
-      grid-template-rows: 1fr auto;
+      grid-template-rows:auto 1fr auto;
       gap:0;
       height:100dvh;
     }
 
-    /* FULLSCREEN PLAYERS: use GRID inside each tile so name cannot be pushed off */
+    /* Fullscreen top/bottom banners */
+    :fullscreen .brandbar{
+      grid-column:1 / -1;
+      border-radius:0;
+      border-left:0;
+      border-right:0;
+      background:var(--brand-bg);
+    }
+    :fullscreen .brandbar.top{
+      grid-row:1;
+      border-top:0;
+      border-bottom:1px solid var(--brand-border);
+      padding:8px 12px calc(8px + env(safe-area-inset-top));
+    }
+    :fullscreen .brandbar.bottom{
+      grid-row:3;
+      border-bottom:0;
+      border-top:1px solid var(--brand-border);
+      padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+    }
+    :fullscreen .brandbar img{
+      height:22px;
+      opacity:0.85;
+    }
+
+    /* FULLSCREEN PLAYERS: reserve a fixed name strip so it cannot disappear */
     :fullscreen .player{
+      grid-row:2;
       border-radius:0;
       border-left:0;
       border-right:0;
@@ -279,42 +308,29 @@
       border-bottom:1px solid #1f1f1f;
 
       display:grid;
-      grid-template-rows:auto 1fr; /* name, then score */
-      align-items:start;
+      grid-template-rows:54px 1fr; /* fixed name strip, then score */
+      align-items:stretch;
 
-      padding:18px;
+      padding:14px;
     }
     :fullscreen .player-name{
-      margin:0 0 8px;
-      font-size:1.6rem;
-      line-height:1.1;
+      margin:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.55rem;
+      line-height:1.05;
       text-align:center;
+      padding:0 10px;
     }
     :fullscreen .tap-hint{ display:none; }
     :fullscreen .score{
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:min(8.5rem, 19vw);
+      font-size:min(7.6rem, 18vw);
       padding:0;
       line-height:1;
-    }
-
-    /* Fullscreen banner (small) */
-    :fullscreen .brandbar{
-      grid-column:1 / -1;
-      grid-row:2;
-      border-radius:0;
-      border-left:0;
-      border-right:0;
-      border-bottom:0;
-      border-top:1px solid #1f1f1f;
-      padding:8px 12px calc(8px + env(safe-area-inset-bottom));
-      background:#0b0b0b;
-    }
-    :fullscreen .brandbar img{
-      height:24px;
-      opacity:0.85;
     }
 
     /* Fullscreen overlay controls */
@@ -358,16 +374,40 @@
       gap:0;
     }
 
-    /* PSEUDO-FS LAYOUT: players row + banner row */
+    /* PSEUDO-FS GRID: top brand, players, bottom brand */
     body.pseudo-fs .board{
+      display:grid;
       grid-template-columns:1fr 1fr;
-      grid-template-rows: 1fr auto;
+      grid-template-rows:auto 1fr auto;
       gap:0;
       height:100dvh;
     }
+    body.pseudo-fs .brandbar{
+      grid-column:1 / -1;
+      border-radius:0;
+      border-left:0;
+      border-right:0;
+      background:var(--brand-bg);
+    }
+    body.pseudo-fs .brandbar.top{
+      grid-row:1;
+      border-top:0;
+      border-bottom:1px solid var(--brand-border);
+      padding:8px 12px calc(8px + env(safe-area-inset-top));
+    }
+    body.pseudo-fs .brandbar.bottom{
+      grid-row:3;
+      border-bottom:0;
+      border-top:1px solid var(--brand-border);
+      padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+    }
+    body.pseudo-fs .brandbar img{
+      height:22px;
+      opacity:0.85;
+    }
 
-    /* PSEUDO-FS PLAYERS: same grid behaviour */
     body.pseudo-fs .player{
+      grid-row:2;
       border-radius:0;
       border-left:0;
       border-right:0;
@@ -375,51 +415,32 @@
       border-bottom:1px solid #1f1f1f;
 
       display:grid;
-      grid-template-rows:auto 1fr;
-      align-items:start;
+      grid-template-rows:54px 1fr;
+      align-items:stretch;
 
-      padding:18px;
+      padding:14px;
     }
     body.pseudo-fs .player-name{
-      margin:0 0 8px;
-      font-size:1.6rem;
-      line-height:1.1;
+      margin:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.55rem;
+      line-height:1.05;
       text-align:center;
+      padding:0 10px;
     }
     body.pseudo-fs .tap-hint{ display:none; }
     body.pseudo-fs .score{
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:min(8.5rem, 19vw);
+      font-size:min(7.6rem, 18vw);
       padding:0;
       line-height:1;
     }
 
-    /* Pseudo-fs banner (small) */
-    body.pseudo-fs .brandbar{
-      grid-column:1 / -1;
-      grid-row:2;
-      border-radius:0;
-      border-left:0;
-      border-right:0;
-      border-bottom:0;
-      border-top:1px solid #1f1f1f;
-      padding:8px 12px calc(8px + env(safe-area-inset-bottom));
-      background:#0b0b0b;
-    }
-    body.pseudo-fs .brandbar img{
-      height:24px;
-      opacity:0.85;
-    }
-
     body.pseudo-fs .fs-overlay{ display:flex; }
-
-    /* iOS-only: safe-area top padding so name is not under notch/URL bar */
-    html.ios :fullscreen .player,
-    html.ios body.pseudo-fs .player{
-      padding-top: calc(18px + env(safe-area-inset-top));
-    }
 
     /* Prevent scroll during fullscreen/pseudo-fs so Safari URL bar cannot be pulled in */
     :fullscreen,
@@ -531,6 +552,11 @@
     </section>
 
     <section class="board">
+      <!-- TOP banner row -->
+      <div class="brandbar top" aria-hidden="true">
+        <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="">
+      </div>
+
       <div id="playerA" class="player" role="button" aria-label="Add point to Player A">
         <div class="flash"></div>
         <div id="displayNameA" class="player-name">Player A</div>
@@ -545,8 +571,8 @@
         <div id="scoreB" class="score">0</div>
       </div>
 
-      <!-- Banner row -->
-      <div class="brandbar" aria-hidden="true">
+      <!-- BOTTOM banner row -->
+      <div class="brandbar bottom" aria-hidden="true">
         <img src="../assets/Chalky Trousers Logo (Text) 800x500 HR_20250927_180240_0001.png" alt="">
       </div>
     </section>
@@ -566,7 +592,6 @@
 (function () {
   const STORAGE_KEY = "ct_scoreboard";
 
-  // iOS detection for CSS tuning + pseudo-fullscreen fallback
   const ua = navigator.userAgent || "";
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   if (isIOS) document.documentElement.classList.add("ios");
